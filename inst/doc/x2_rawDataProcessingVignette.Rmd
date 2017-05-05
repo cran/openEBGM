@@ -1,0 +1,103 @@
+---
+title: "Processing Raw Data with openEBGM"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Processing Raw Data with openEBGM}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+-------
+
+# Initial Calculations
+
+##Using `processRaw()`
+
+The `processRaw()` function calculates actual counts $(N)$ of each
+product-symptom combination, expected counts $(E)$ under the row/column
+independence assumption, relative reporting ratio $(RR)$, and proportional
+reporting ratio $(PRR)$. `processRaw()` has various parameters, some of which
+are shown below.
+
+```{r, echo = FALSE}
+library(openEBGM)
+set.seed(5629404)
+dat <- data.frame(var1 = c(sample(c("product_A", "product_B"), 16,
+                                  replace = TRUE), "product_C"),
+                  var2 = c(sample(c("event_1", "event_2"), 16, replace = TRUE), "event_1"))
+                  #strat1 = sample(c("M", "F"), 17, replace = TRUE),
+                  #strat2 = sample(c("age_cat1", "age_cat2"), 17, replace = TRUE))
+dat$id <- 1:nrow(dat)
+```
+
+Suppose the data look as so:
+```{r}
+dat
+```
+
+We can calculate $N$, $E$, $RR$, and $PRR$ for the product-symptom pairs:
+```{r}
+processRaw(data = dat, stratify = FALSE, zeroes = FALSE)
+```
+
+##Using stratification
+
+Stratification can help control for confounding variables. For instance, food,
+cosmetics, and dietary supplements are often consumed at different rates by
+different genders and age groups. Similarly, adverse events associated with
+these products occur with varying rates. Therefore, we might wish to control for
+these variables when we examine the CAERS data.
+
+```{r, echo = FALSE}
+set.seed(5629404)
+dat <- data.frame(var1 = c(sample(c("product_A", "product_B"), 16,
+                                  replace = TRUE), "product_C"),
+                  var2 = c(sample(c("event_1", "event_2"), 16, replace = TRUE), "event_1"),
+                  strat1 = sample(c("M", "F"), 17, replace = TRUE),
+                  strat2 = sample(c("age_cat1", "age_cat2"), 17, replace = TRUE))
+dat$id <- 1:nrow(dat)
+```
+
+Now assume the data look as so:
+
+```{r}
+dat
+```
+
+Notice that now we have stratifications variables (*'strat'* substring) present.
+We can use these stratification variables to get adjusted estimates for the
+$EBGM$ scores. Stratification will affect $E$ and $RR$, but not $PRR$. The $E$s
+are calculated by summing the expected counts from every stratum. Ideally, each
+stratum should contain several unique CAERS reports to insure good estimates of
+$E$.
+
+```{r}
+processRaw(data = dat, stratify = TRUE, zeroes = FALSE)
+```
+
+Notice that we use `stratify = TRUE` to accomodate the new stratification 
+variables. The calculations for $E$ and $RR$ are adjusted.
+
+Finally, in some cases one may wish to calculate the $E$s for product-symptom 
+combinations that do not occur in the data. These can be calculated by using the
+`zeroes = TRUE` argument in the `processRaw()` function. It is typically not
+required to perform such calculations for zero counts, and doing so can lead to
+much longer execution times when estimating hyperparameters. For this reason,
+zero counts are only recommended for hyperparameter estimation when convergence
+of optimization routines cannot be reached otherwise. If zero counts are used,
+data squashing should typically follow. Even if zero counts are used for
+hyperparameter estimation, $EBGM$ scores for zero counts never add value to an
+analysis. For this reason, rows with zero counts should be removed after 
+estimating hyperparameters but before calculating $EBGM$ and quantile scores.
+
+```{r}
+processRaw(data = dat, stratify = FALSE, zeroes = TRUE)
+```
+
+Next, the *Hyperparameter Estimation with openEBGM* vignette will demonstrate
+how to estimate the hyperparameters of the prior distribution.

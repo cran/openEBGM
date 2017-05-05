@@ -1,0 +1,190 @@
+---
+title: "Introduction to openEBGM"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to openEBGM}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+## Background
+
+William DuMouchel created an empirical Bayes (EB) data mining approach (1999, 
+2001) for finding "interestingly large" counts in contingency tables, where rows
+and columns represent levels of two different variables such as food products 
+and adverse events. The approach works well even when most of the counts are 
+zero or one (i.e., a sparse table). The EB metrics ($EBGM$ and quantile scores) 
+are similar to the relative reporting ratio $(RR)$. The benefit of DuMouchel's
+model is that Bayesian shrinkage corrects for the high variability in $RR$ that
+results with small counts.
+
+The relative reporting ratio is calculated as $RR=\frac{N}{E}$, where $N$ is the 
+actual count for a cell in the table and $E$ is the expected count under the 
+assumption of independence between rows and columns. When $RR = 1$, you observe 
+exactly the number of events you would expect to observe if no association 
+exists between the two variables. When $RR > 1$, you observe more events than
+expected. This approach works well for large counts; however, small counts cause
+$RR$ to become quite unstable. For instance, an actual count of $N = 1$ with an
+expected count of $E = 0.01$ gives us $RR = 100$ --which seems large-- but a
+single event could easily occur simply by chance. The EB approach shrinks large
+$RR$s that result from small counts to a value much closer to the "null
+hypothesis" value of 1. The shrinkage is smaller for larger counts and 
+negligible for very large counts. Shrinkage gives results that are more stable 
+than the simple $RR$ measurement.
+
+DuMouchel's model uses a Poisson likelihood for the cell counts and a mixture of
+two gamma distributions as the prior, resulting in a posterior distribution 
+which is a mixture of two gamma distributions. For this reason, the model is 
+sometimes referred to as the **Gamma-Poisson Shrinkage (GPS)** model. The 
+posterior distribution can be thought of as a Bayesian representation of $RR$. 
+Each cell in the contingency table will have its own posterior distribution
+determined both by that cell's actual and expected counts and by the
+distribution of actual and expected counts in the entire table. Often the
+Empirical Bayes Geometric Mean $(EBGM)$ of the posterior distribution is used in
+place of $RR$. Alternatively, the more conservative percentiles (5th, 10th,
+etc.) can be used. The percentiles can also be used to construct credibility
+intervals.
+
+An extension of the GPS model, the Multi-Item Gamma-Poisson Shrinker (MGPS) 
+model (2001), is currently being used by the U.S. Food and Drug Administration 
+(FDA) to find higher-than-expected reporting of adverse events associated with 
+food, drugs, etc. For instance, FDA's Center for Food Safety and Applied 
+Nutrition (CFSAN) uses the MGPS model to mine data from the CFSAN adverse events
+reporting system (CAERS): <https://www.fda.gov/Food/ComplianceEnforcement>. (The 
+variables forming the rows and columns of the contingency table are *product*
+and *adverse event*.) MGPS allows for product interactions, unlike the GPS model
+implemented in *openEBGM*, which can only use individual product-event pairs.
+
+## Purpose
+
+The *openEBGM* package implements DuMouchel's approach with some small 
+differences. For example, the expected counts are calculated by counting unique
+"events of interest" in each row and column, not actual marginal totals. In some
+applications, a single "event of interest" could occur in several cells. For
+instance, a single CAERS report ("event of interest") might mention multiple 
+products and/or adverse events. Using simple marginal totals would then count a 
+single report multiple times.
+
+This document teaches you how to prepare your data for use by *openEBGM*'s 
+functions. Other vignettes give explanations and examples of more advanced 
+topics:
+
+* **Raw data processing:** Process your data to find counts and simple
+disproportionality measures.
+
+* **Hyperparameter estimation:** Estimate the hyperparameters of the prior 
+distribution.
+
+* **Empirical Bayes metrics:** This is the ultimate goal. Calculate Empirical
+Bayes metrics ($EBGM$ and quantile scores) based on the posterior distribution.
+
+* **Object-oriented features:** Create objects of a special class (*openEBGM*)
+to use with generic functions such as `plot()`.
+
+### References
+
+1. DuMouchel W (1999). "Bayesian Data Mining in Large Frequency
+Tables, With an Application to the FDA Spontaneous Reporting System."
+*The American Statistician*, 53(3), 177-190.
+
+1. DuMouchel W, Pregibon D (2001). "Empirical Bayes Screening for
+Multi-item Associations." In *Proceedings of the Seventh ACM SIGKDD
+International Conference on Knowledge Discovery and Data Mining*, KDD '01,
+pp. 67-76. ACM, New York, NY, USA. ISBN 1-58113-391-X.
+
+---------
+
+# Preparing Your Data
+
+*openEBGM* requires the input data to be a data frame of a particular form.
+
+## Data form
+
+Data must be in tidy format (one column per variable and one observation per
+row). The columns can be of type factor, character, integer, or numeric. Missing
+values are not allowed - either replace NAs and empty strings with appropriate
+values or remove them from the data.
+
+## Column names
+
+The input data frame must contain certain column names: *var1*, *var2*, and 
+*id*.  *var1* and *var2* are simply the row and column variables of the 
+contingency table. The identifier (*id*) column allows *openEBGM* to properly 
+handle marginal totals (for instance, this would be the report identifier 
+variable in the aformentioned CAERS data). If the cells of the table actually
+represent mutually exclusive "events of interest", the user can create a column
+of unique sequential identifiers with `df$id <- 1:nrow(df)`.
+
+Stratification can help reduce the effects of confounding variables. If
+stratification is used, any column whose name contains the substring *'strat'*
+(case sensitive) will be treated as a stratification variable. If a continuous
+variable such as age is used for stratification, remember to categorize the
+variable.
+
+Other columns are allowed, but will be ignored.
+
+## CAERS example
+
+Here is a small subset of raw data from the publicly available [CAERS data](https://www.fda.gov/Food/ComplianceEnforcement) described above:
+
+```{r Load data}
+library(openEBGM)
+data(caers_raw)
+head(caers_raw, 4)
+```
+
+Only one product name is given per row, but we need to separate the adverse 
+events into different rows:
+
+```{r One adverse event per row}
+dat <- tidyr::separate_rows(caers_raw, SYM_One.Row.Coded.Symptoms, sep = ", ")
+dat[1:4, c("RA_Report..", "PRI_Reported.Brand.Product.Name", 
+           "SYM_One.Row.Coded.Symptoms")]
+```
+
+Next we need to change column names:
+
+```{r Rename columns}
+dat$id   <- dat$RA_Report..
+dat$var1 <- dat$PRI_Reported.Brand.Product.Name
+dat$var2 <- dat$SYM_One.Row.Coded.Symptoms
+```
+
+Suppose we want to use gender and age as stratification variables:
+
+```{r Rename gender column}
+dat$strat_gender <- dat$CI_Gender
+table(dat$strat_gender, useNA = "always")
+```
+
+*Age* is a continuous variable, so we need to create categories:
+
+```{r Categorize continuous variables}
+dat$age_yrs <-
+  ifelse(dat$CI_Age.Unit == "Day(s)", dat$CI_Age.at.Adverse.Event / 365,
+  ifelse(dat$CI_Age.Unit == "Decade(s)", dat$CI_Age.at.Adverse.Event * 10,
+  ifelse(dat$CI_Age.Unit == "Month(s)", dat$CI_Age.at.Adverse.Event / 12,
+  ifelse(dat$CI_Age.Unit == "Week(s)", dat$CI_Age.at.Adverse.Event / 52,
+  ifelse(dat$CI_Age.Unit == "Year(s)", dat$CI_Age.at.Adverse.Event,
+         NA)))))
+dat$strat_age <- ifelse(is.na(dat$age_yrs), "unknown",
+                 ifelse(dat$age_yrs < 18, "under_18",
+                        "18_plus"))
+table(dat$strat_age, useNA = "always")
+```
+
+Now we have the data in the proper form:
+
+```{r Display prepared data}
+vars <- c("id", "var1", "var2", "strat_gender", "strat_age")
+dat[1:5, vars]
+```
+
+Next, the *Processing Raw Data with openEBGM* vignette will demonstrate how to
+use data in this general form to find counts and simple disproportionality
+measures--$RR$ and $PRR$ (proportional reporting ratio).

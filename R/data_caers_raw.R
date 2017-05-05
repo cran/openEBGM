@@ -1,0 +1,35 @@
+#' Raw CAERS data
+#'
+#' A small subset of raw, publicly available CAERS data used to demonstrate how
+#' to prepare data for use by \pkg{openEBGM}'s functions.
+#'
+#' @format A data frame with 117 rows and 6 variables:
+#' \describe{
+#'   \item{\code{RA_Report..}}{CAERS report identification number.}
+#'   \item{\code{PRI_Reported.Brand.Product.Name}}{The verbatim brands and/or
+#'     product names indicated to have been used by the consumer reported
+#'     to have experienced the adverse event.}
+#'   \item{\code{CI_Age.at.Adverse.Event}}{The age of the consumer reported to
+#'     have experienced the adverse event, in units specified by
+#'     \code{CI_Age.Unit}.}
+#'   \item{\code{CI_Age.Unit}}{The time unit (day, week, month, year) of the
+#'     age provided in the \code{CI_Age.at.Adverse.Event} data field for the
+#'     consumer reported to have experienced the adverse event.}
+#'   \item{\code{CI_Gender}}{The sex of the individual reported to have
+#'     experienced the adverse event.}
+#'   \item{\code{SYM_One.Row.Coded.Symptoms}}{The symptom(s) experienced by the
+#'     injured consumer as specified by the reporter and coded by FDA according
+#'     to the Medical Data Dictionary for Regulatory Activities (MedDRA).}
+#' }
+#'
+#' @details The column names appear exactly as they would if you had used
+#'   \code{read.csv()} to pull the data directly from the website below.
+#'
+#' @details Further details about the data can be found using the links below.
+#'
+#' @source CFSAN Adverse Event Reporting System (FDA Center for Food Safety and
+#'   Nutrition)
+#' @source \url{https://www.fda.gov/Food/ComplianceEnforcement}
+#' @source
+#'   \url{https://www.fda.gov/downloads/Food/ComplianceEnforcement/UCM494019.pdf}
+"caers_raw"

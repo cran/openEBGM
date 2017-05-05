@@ -1,0 +1,151 @@
+---
+title: "openEBGM Objects and Class Functions"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{openEBGM Objects, Class Functions and Individual Calculations}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+# Creating the Object
+
+As mentioned in the other vignettes, the *openEBGM* package is capable of 
+calculating $EBGM$ and quantile scores from the posterior distribution. 
+*openEBGM* makes it easy to calculate such quantities using a class and object 
+system. While creation of objects of class openEBGM is not necessary (see
+previous vignette), it provides access to methods for some common generic
+functions and reduces the number of function calls needed.
+
+To create the object, we first need to calculate the hyperparameter estimates.
+
+```{r, warning = FALSE}
+library(openEBGM)
+data(caers)
+proc <- processRaw(data = caers, stratify = FALSE, zeroes = FALSE)
+squashed <- squashData(data = proc)
+theta_init <- data.frame(alpha1 = c(0.2, 0.1, 0.3, 0.5, 0.2),
+                         beta1  = c(0.1, 0.1, 0.5, 0.3, 0.2),
+                         alpha2 = c(2,   10,  6,   12,  5),
+                         beta2  = c(4,   10,  6,   12,  5),
+                         p      = c(1/3, 0.2, 0.5, 0.8, 0.4))
+hyper_estimate <- autoHyper(data = squashed, theta_init = theta_init, 
+                            zeroes = FALSE, squashed = TRUE, N_star = 1)
+```
+
+Once we have the hyperparameter estimates and the processed data, we can
+calculate the $EBGM$ scores and any desired quantile(s) from the posterior
+distribution.
+
+```{r}
+ebout <- ebScores(processed = proc, hyper_estimate = hyper_estimate,
+                  quantiles = c(5, 95)) #For the 5th and 95th percentiles
+ebout_noquant <- ebScores(processed = proc, hyper_estimate = hyper_estimate,
+                          quantiles = NULL) #For no quantiles
+```
+
+As seen above, we can calculate the $EBGM$ scores with or without adding 
+quantiles. If using quantiles, we can specifying any number of quantiles.
+
+---------
+
+# Using the Generic Functions
+
+Once the object has been created, we can use class-specific methods for some of
+R's generic functions (namely, `print()`, `summary()`, and `plot()`).
+
+```{r}
+#We can print an openEBGM object to get a quick look at the contents
+ebout
+ebout_noquant
+```
+
+When quantiles are present, simply printing the object shows, by default, how
+many *var1-var2* pairs exist that have $x>2$, where $x$ is the minimum quantile
+calculated for the data. In the absence of quantiles, it simply outputs the
+number of *var1-var2* pairs that have an $EBGM$ score greater than 2. In both
+cases, it also shows a quick look at the *var1-var2* pairs with the highest $x$
+or $EBGM$, depending on whether quantiles were calculated or not.
+
+One can also use the `summary()` function on an openEBM object to get further
+information about the calculations.
+
+```{r}
+summary(ebout)
+```
+
+As seen above, by default the `summary()` function, when called on an openEBGM 
+object, outputs some descriptive statistics on the $EBGM$ and quantile scores, 
+the correlation between the scores, and a histogram of the $EBGM$ scores. There
+are options to disable plot output, or to calculate the log~2~ transform of the
+scores, which provides a Bayesian information statistic (when applied to the
+$EBGM$ score).
+
+```{r}
+summary(ebout, plot.out = FALSE, log.trans = TRUE)
+```
+
+Finally, *openEBGM* provides a method for the `plot()` function that can produce
+a variety of different plots. These are shown below.
+
+```{r, fig.height=6, fig.width = 7}
+plot(ebout)
+```
+
+As seen, by default, the `plot()` function shows the top $EBGM$ scores by 
+*var1-var2* combinations (only *var1* is shown for space preservation) and 
+"error bars" using the lowest and highest quantiles calculated. The sample
+size for each *var1-var2* combination is also plotted.
+
+A specific event from *var2* may also be selected, and only the *var1-var2*
+combinations that include this particular event will be shown. An example is
+shown below.
+
+```{r, fig.height = 6, fig.width = 7}
+plot(ebout, event = "CHOKING")
+```
+
+In addition to the bar chart, the `plot()` function can also create a histogram
+of the $EBGM$ scores.
+
+```{r, fig.height = 6, fig.width = 7}
+plot(ebout, plot.type = "histogram")
+```
+
+Again, one may choose an event from *var2* by which to subset the data when
+plotting.
+
+```{r, fig.height = 6, fig.width = 7}
+plot(ebout, plot.type = "histogram", event = "CHOKING")
+```
+
+Finally, the last type of plot included with the `plot()` function shows the
+shrinkage performed by the algorithm. It is called the "Chirtel Squid Plot",
+titled after its creator, Stuart Chirtel.
+
+```{r, fig.height = 6, fig.width = 7}
+plot(ebout, plot.type = "shrinkage")
+```
+
+While a specific event may be selected by which to subset the data, it can lead
+to a less informative plot due to smaller sample size.
+
+```{r, fig.height = 6, fig.width = 7}
+plot(ebout, plot.type = "shrinkage", event = "CHOKING")
+```
+
+--------
+
+# Conclusion
+
+*openEBGM* was designed to give the user a high level of control over data 
+analysis choices (stratification, data squashing, etc.) using DuMouchel's 
+Gamma-Poisson Shrinkage (GPS) method (1999, 2001). The GPS method applies to any 
+large contingency table, so *openEBGM* can be used to mine a variety of 
+databases in which the rate of co-occurrence of two variables or items is of
+interest (sometimes known as the "market basket problem"). U.S. FDA products and
+adverse events is just one of many possible applications.

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+<meta name="date" content="2017-05-04" />
+
+<title>Hyperparameter Estimation with openEBGM</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Hyperparameter Estimation with openEBGM</h1>
+<h4 class="date"><em>2017-05-04</em></h4>
+
+
+
+<div id="background" class="section level2">
+<h2>Background</h2>
+<p>The basis of DuMouchel’s method lies in the fact that it is an “Empirical Bayes” (EB) method. That is, the data are a driving force behind the choice of the prior distribution (in contrast to typical Bayesian methods, where the prior is chosen without regard to the actual data). One outcome of this is a known posterior distribution that relies on a set of hyperparameters derived from the prior distribution. These hyperparameters are estimated by their most likely value in the context of Empirical Bayesian methods. One process by which this can occur involves maximizing the likelihood function of the marginal distributions of the counts (or in our case, minimizing the negative log-likelihood function).</p>
+<div id="optimization" class="section level3">
+<h3>Optimization</h3>
+<p>Global optimization is a broad field. There are many existing R packages with minimization routines which may be used in the estimation of these hyperparameters. The hyperparameter estimation functions offered by <em>openEBGM</em> utilize the following:</p>
+<ul>
+<li>Optimization using PORT routines</li>
+<li>Newton-type algorithm</li>
+<li>A quasi-Newton method (also known as a variable metric method)</li>
+</ul>
+<p><em>openEBGM</em>’s functions actually use local optimization algorithms implemented in R’s <em>stats</em> package, except with multiple starting points. The user is encouraged to explore a variety of optimization approaches because the accuracy of a global optimization result is extremely difficult (if not impossible) to verify and other approaches might work just as well (or better).</p>
+</div>
+<div id="additional-notes" class="section level3">
+<h3>Additional notes</h3>
+<p>In his 2001 paper, DuMouchel mentions a methodology he calls “data squashing”, which “compacts” the dataset to reduce the amount of computation needed to estimate the hyperparameters. <em>openEBGM</em> provides an implementation for data squashing.</p>
+</div>
+<div id="references" class="section level3">
+<h3>References</h3>
+<p>Please see the <em>Introduction to openEBGM</em> vignette.</p>
+<hr />
+</div>
+</div>
+<div id="estimating-the-hyperparameters" class="section level1">
+<h1>Estimating the Hyperparameters</h1>
+<div id="data-squashing" class="section level2">
+<h2>Data Squashing</h2>
+<p>The actual counts (<span class="math inline">\(N\)</span>) and expected counts (<span class="math inline">\(E\)</span>) are used to estimate the hyperparameters of the prior distribution. A large contingency table will have many cells, resulting in computational difficulties for the optimization routines needed for estimation. Data squashing (DuMouchel et al., 2001) transforms a set of 2-dimensional points to a smaller number of 3-dimensional points. The idea is to reduce a large number of points <span class="math inline">\((N, E)\)</span> to a smaller number of points <span class="math inline">\((N_k, E_k, W_k)\)</span>, where <span class="math inline">\(k = 1,...,M\)</span> and <span class="math inline">\(W_k\)</span> is the weight of the <span class="math inline">\(k^{th}\)</span> “superpoint”. To minimize information loss, only points close to each other should be squashed.</p>
+<p>For a given <span class="math inline">\(N\)</span>, <code>squashData()</code> combines points with similar <span class="math inline">\(E\)</span>s into bins using a specified bin size and uses the average <span class="math inline">\(E\)</span> within each bin as the <span class="math inline">\(E\)</span> for that bin’s “superpoint”. The new superpoints are weighted by bin size. For example, the points (1, 1.1) and (1, 1.3) could be squashed to the superpoint (1, 1.2, 2).</p>
+<p>An example is given below using unstratified expected counts:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(openEBGM)
+<span class="kw">data</span>(caers)
+
+processed &lt;-<span class="st"> </span><span class="kw">processRaw</span>(<span class="dt">data =</span> caers)
+processed[<span class="dv">1</span>:<span class="dv">4</span>, <span class="dv">1</span>:<span class="dv">4</span>]
+<span class="co">#&gt;                      var1                  var2 N            E</span>
+<span class="co">#&gt; 1         1-PHENYLALANINE  HEART RATE INCREASED 1 0.0360548272</span>
+<span class="co">#&gt; 2 11 UNSPECIFIED VITAMINS                ASTHMA 1 0.0038736591</span>
+<span class="co">#&gt; 3 11 UNSPECIFIED VITAMINS CARDIAC FUNCTION TEST 1 0.0002979738</span>
+<span class="co">#&gt; 4 11 UNSPECIFIED VITAMINS            CHEST PAIN 1 0.0360548272</span>
+
+squashed &lt;-<span class="st"> </span><span class="kw">squashData</span>(<span class="dt">data =</span> processed) <span class="co">#Using defaults</span>
+<span class="kw">head</span>(squashed)
+<span class="co">#&gt;   N            E weight</span>
+<span class="co">#&gt; 1 1 0.0002979738     50</span>
+<span class="co">#&gt; 2 1 0.0002979738     50</span>
+<span class="co">#&gt; 3 1 0.0002979738     50</span>
+<span class="co">#&gt; 4 1 0.0002979738     50</span>
+<span class="co">#&gt; 5 1 0.0002979738     50</span>
+<span class="co">#&gt; 6 1 0.0002979738     50</span>
+
+<span class="kw">nrow</span>(processed)
+<span class="co">#&gt; [1] 17189</span>
+<span class="kw">nrow</span>(squashed)
+<span class="co">#&gt; [1] 1568</span></code></pre></div>
+<p>As shown above, the squashed data set has 9.12% of the observations as the full dataset. Using this squashed data, we can then estimate the hyperparameters in a far more efficient manner.</p>
+</div>
+<div id="likelihood-functions" class="section level2">
+<h2>Likelihood Functions</h2>
+<p>As previously mentioned, the hyperparameters are estimated by minimizing the negative log-likelihood function. There are actually 4 different functions, depending on the use of data squashing and zero counts. All 4 functions, however, are based on the marginal distribution of the counts, which are mixtures of two negative binomial distributions. The hyperparameters are denoted by the vector <span class="math inline">\(\theta=(\alpha_1,\beta_1,\alpha_2,\beta_2,P)\)</span>, where <span class="math inline">\(P\)</span> is the mixture fraction.</p>
+<p>The most commonly used likelihood function is <code>negLLsquash()</code>, which is used when squashing data and not using zero counts. <code>negLLsquash()</code> is not called directly, but rather by some optimization function:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">theta_init &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">alpha1 =</span> <span class="fl">0.2</span>, <span class="dt">beta1 =</span> <span class="fl">0.1</span>, <span class="dt">alpha2 =</span> <span class="dv">2</span>, <span class="dt">beta2 =</span> <span class="dv">4</span>, <span class="dt">p =</span> <span class="dv">1</span>/<span class="dv">3</span>)
+stats::<span class="kw">nlm</span>(negLLsquash, <span class="dt">p =</span> theta_init,
+           <span class="dt">ni =</span> squashed$N, <span class="dt">ei =</span> squashed$E, <span class="dt">wi =</span> squashed$weight, <span class="dt">N_star =</span> <span class="dv">1</span>)
+<span class="co">#&gt; $minimum</span>
+<span class="co">#&gt; [1] 4162.496</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; $estimate</span>
+<span class="co">#&gt; [1] 3.25164477 0.39974616 2.02567548 1.90789320 0.06537599</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; $gradient</span>
+<span class="co">#&gt; [1]  3.915842e-05 -3.374225e-04 -2.200019e-04  3.270169e-04 -1.196895e-03</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; $code</span>
+<span class="co">#&gt; [1] 1</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; $iterations</span>
+<span class="co">#&gt; [1] 71</span></code></pre></div>
+<p>The <code>N_star</code> argument allows the user to choose the smallest value of <span class="math inline">\(N\)</span> used for hyperparameter estimation. The user must be careful to match <code>N_star</code> with the actual minimum count in <code>ni</code>. If the user wishes to use a larger value for <code>N_star</code>, the vectors supplied to arguments <code>ni</code>, <code>ei</code>, and <code>wi</code> must be filtered. Here, we are using all counts except zeroes, so no filtering is needed. In general, <code>N_star = 1</code> should be used whenever practical.</p>
+<p>Note that you will likely receive warning messages from the optimization function–use your own judgment to determine whether or not they would likely indicate real problems.</p>
+<p>The other likelihood functions are <code>negLL()</code>, <code>negLLzero()</code>, and <code>negLLzeroSquash()</code>. Make sure to use the appropriate function for your choice of data squashing and use of zero counts.</p>
+</div>
+<div id="hyperparameter-estimation-functions" class="section level2">
+<h2>Hyperparameter Estimation Functions</h2>
+<p>Hyperparameters can be calculated by exploring the parameter space of the likelihood function using either the full data set of <span class="math inline">\(N\)</span>s and <span class="math inline">\(E\)</span>s or the squashed set. The methodology implemented by this package essentially maximizes the likelihood function (or more specifically, minimizes the negative log-likelihood function). Starting points must be chosen to begin the exploration. DuMouchel (1999, 2001) provides a “lightly justified” set of initial hyperparameters. However, <em>openEBGM</em>’s functions support a large set of starting choices to help reach convergence and reduce the chance of false convergence. We begin by defining some starting points:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">theta_init &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">alpha1 =</span> <span class="kw">c</span>(<span class="fl">0.2</span>, <span class="fl">0.1</span>, <span class="fl">0.3</span>),
+                         <span class="dt">beta1  =</span> <span class="kw">c</span>(<span class="fl">0.1</span>, <span class="fl">0.2</span>, <span class="fl">0.5</span>),
+                         <span class="dt">alpha2 =</span> <span class="kw">c</span>(<span class="dv">2</span>,   <span class="dv">10</span>,  <span class="dv">6</span>),
+                         <span class="dt">beta2  =</span> <span class="kw">c</span>(<span class="dv">4</span>,   <span class="dv">10</span>,  <span class="dv">6</span>),
+                         <span class="dt">p      =</span> <span class="kw">c</span>(<span class="dv">1</span>/<span class="dv">3</span>, <span class="fl">0.2</span>, <span class="fl">0.5</span>)
+                         )</code></pre></div>
+<div id="autohyper" class="section level3">
+<h3><code>autoHyper()</code></h3>
+<p>Now that the initial guesses for the hyperparameters have been defined, the function <code>autoHyper()</code> can be used to determine the actual hyperparameter estimates. <code>autoHyper()</code> performs a “verification check” by requiring the optimization routine to converge at least twice within the bounds of the parameter space. The estimate corresponding to the smallest negative log-likelihood is chosen as a tentative result. By default, this estimate must be similar to at least one other convergent solution. If the algorithm fails to consistently converge, an error message is returned.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">system.time</span>(
+hyper_estimates_full &lt;-<span class="st"> </span><span class="kw">autoHyper</span>(<span class="dt">data =</span> processed, <span class="dt">theta_init =</span> theta_init, 
+                                  <span class="dt">squashed =</span> <span class="ot">FALSE</span>)
+)
+<span class="co">#&gt;    user  system elapsed </span>
+<span class="co">#&gt;   37.90    0.00   37.89</span>
+
+squashed2 &lt;-<span class="st"> </span><span class="kw">squashData</span>(squashed, <span class="dt">count =</span> <span class="dv">2</span>, <span class="dt">bin_size =</span> <span class="dv">10</span>, <span class="dt">keep_bins =</span> <span class="dv">5</span>)
+<span class="kw">system.time</span>(
+hyper_estimates_squashed &lt;-<span class="st"> </span><span class="kw">autoHyper</span>(<span class="dt">data =</span> squashed2, <span class="dt">theta_init =</span> theta_init)
+)
+<span class="co">#&gt;    user  system elapsed </span>
+<span class="co">#&gt;    1.95    0.00    1.95</span>
+
+hyper_estimates_full
+<span class="co">#&gt; $method</span>
+<span class="co">#&gt; [1] &quot;nlminb&quot;</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; $estimates</span>
+<span class="co">#&gt;     alpha1      beta1     alpha2      beta2          P </span>
+<span class="co">#&gt; 3.25596617 0.39998845 2.02374464 1.90612821 0.06530723 </span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; $num_close</span>
+<span class="co">#&gt; [1] 2</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; $theta_hats</span>
+<span class="co">#&gt;   guess_num   a1_hat    b1_hat   a2_hat   b2_hat      p_hat code converge</span>
+<span class="co">#&gt; 1         1 3.256048 0.3999935 2.023745 1.906121 0.06530615    0     TRUE</span>
+<span class="co">#&gt; 2         2 3.256318 0.4000082 2.023726 1.906092 0.06530197    0     TRUE</span>
+<span class="co">#&gt; 3         3 3.255966 0.3999884 2.023745 1.906128 0.06530723    0     TRUE</span>
+<span class="co">#&gt;   in_bounds  minimum</span>
+<span class="co">#&gt; 1      TRUE 4162.456</span>
+<span class="co">#&gt; 2      TRUE 4162.456</span>
+<span class="co">#&gt; 3      TRUE 4162.456</span>
+
+hyper_estimates_squashed
+<span class="co">#&gt; $method</span>
+<span class="co">#&gt; [1] &quot;nlminb&quot;</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; $estimates</span>
+<span class="co">#&gt;     alpha1      beta1     alpha2      beta2          P </span>
+<span class="co">#&gt; 3.25374326 0.39988617 2.02613782 1.90809094 0.06534647 </span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; $num_close</span>
+<span class="co">#&gt; [1] 2</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; $theta_hats</span>
+<span class="co">#&gt;   guess_num   a1_hat    b1_hat   a2_hat   b2_hat      p_hat code converge</span>
+<span class="co">#&gt; 1         1 3.251937 0.3997614 2.026192 1.908226 0.06536607    0     TRUE</span>
+<span class="co">#&gt; 2         2 3.253743 0.3998862 2.026138 1.908091 0.06534647    0     TRUE</span>
+<span class="co">#&gt; 3         3 3.253796 0.3998902 2.026169 1.908116 0.06534669    0     TRUE</span>
+<span class="co">#&gt;   in_bounds minimum</span>
+<span class="co">#&gt; 1      TRUE 4161.93</span>
+<span class="co">#&gt; 2      TRUE 4161.93</span>
+<span class="co">#&gt; 3      TRUE 4161.93</span></code></pre></div>
+<p>As seen above, the process is much faster when utilizing the squashed data, with estimates that are nearly identical. Of course, the amount of efficiency increase depends on the parameter values used in the call to <code>squashData()</code> and the size of the original data set. Another factor affecting run time is the number of starting points used. In general, you should use five or fewer starting points and limit the number of data points to a maximum of about 20,000 if possible. Notice that we squashed the same data again, which is allowed if we use a different value for <code>count</code> each time.</p>
+<p><code>autoHyper()</code> utilizes multiple minimization techniques to verify convergence. It first attempts the <code>stats::nlminb()</code> function, which implements a quasi-Newton unconstrained optimization technique using PORT routines. If <code>nlminb()</code> fails to consistently converge, <code>autoHyper()</code> next attempts <code>stats::nlm()</code>, which is a non-linear maximization algorithm based on the Newton method. Finally, if the first two approaches fail, a quasi-Newton method (also known as a variable metric algorithm) is used, which “…uses function values and gradients to build up a picture of the surface to be optimized.” (source: R documentation for stats::optim) This routine is implemented by the <code>stats::optim()</code> function with the <code>method = BFGS</code> argument.</p>
+</div>
+<div id="explorehypers" class="section level3">
+<h3><code>exploreHypers()</code></h3>
+<p><code>autoHyper()</code> is a semi-automated (but imperfect) approach to hyperparameter estimation. The user is encouraged to explore various optimization approaches as no single approach will always work (the functions in <em>openEBGM</em> are not the only optimization functions available in R). One way to explore is with <em>openEBGM</em>’s <code>exploreHypers()</code> function, which is actually called by <code>autoHyper()</code> behind-the-scenes:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">exploreHypers</span>(<span class="dt">data =</span> squashed2, <span class="dt">theta_init =</span> theta_init)
+<span class="co">#&gt;   guess_num   a1_hat    b1_hat   a2_hat   b2_hat      p_hat code converge</span>
+<span class="co">#&gt; 1         1 3.251937 0.3997614 2.026192 1.908226 0.06536607    0     TRUE</span>
+<span class="co">#&gt; 2         2 3.253743 0.3998862 2.026138 1.908091 0.06534647    0     TRUE</span>
+<span class="co">#&gt; 3         3 3.253796 0.3998902 2.026169 1.908116 0.06534669    0     TRUE</span>
+<span class="co">#&gt;   in_bounds minimum</span>
+<span class="co">#&gt; 1      TRUE 4161.93</span>
+<span class="co">#&gt; 2      TRUE 4161.93</span>
+<span class="co">#&gt; 3      TRUE 4161.93</span></code></pre></div>
+<p><code>exploreHypers()</code> offers three gradient-based optimization methods and is basically just a wrapper around commonly used functions from the <em>stats</em> package mentioned earlier: <code>nlminb()</code> (the default), <code>nlm()</code>, &amp; <code>optim()</code>.</p>
+<p>Although the user is encouraged to explore various approaches for maximum likelihood hyperparameter estimation, <code>autoHyper()</code> will often give reasonable results with minimal effort. Once the hyperparameters have been estimated, they can be used in the calculation of the <span class="math inline">\(EBGM\)</span> and quantile scores by applying them to the posterior distribution. This process can be found in the <em>Empirical Bayes Metrics with openEBGM</em> vignette.</p>
+</div>
+</div>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

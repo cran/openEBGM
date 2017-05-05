@@ -1,0 +1,224 @@
+---
+title: "Hyperparameter Estimation with openEBGM"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Hyperparamter Estimation with openEBGM}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+## Background
+
+The basis of DuMouchel's method lies in the fact that it is an "Empirical Bayes"
+(EB) method. That is, the data are a driving force behind the choice of the 
+prior distribution (in contrast to typical Bayesian methods, where the prior is 
+chosen without regard to the actual data). One outcome of this is a known 
+posterior distribution that relies on a set of hyperparameters derived from the 
+prior distribution. These hyperparameters are estimated by their most likely 
+value in the context of Empirical Bayesian methods. One process by which this 
+can occur involves maximizing the likelihood function of the marginal 
+distributions of the counts (or in our case, minimizing the negative 
+log-likelihood function).
+
+### Optimization
+
+Global optimization is a broad field. There are many existing R packages with
+minimization routines which may be used in the estimation of these 
+hyperparameters. The hyperparameter estimation functions offered by *openEBGM*
+utilize the following:
+
+* Optimization using PORT routines
+* Newton-type algorithm
+* A quasi-Newton method (also known as a variable metric method)
+
+*openEBGM*'s functions actually use local optimization algorithms implemented in
+R's *stats* package, except with multiple starting points. The user is 
+encouraged to explore a variety of optimization approaches because the accuracy 
+of a global optimization result is extremely difficult (if not impossible) to
+verify and other approaches might work just as well (or better).
+
+### Additional notes
+
+In his 2001 paper, DuMouchel mentions a methodology he calls "data squashing", 
+which "compacts" the dataset to reduce the amount of computation needed to
+estimate the hyperparameters. *openEBGM* provides an implementation for data 
+squashing.
+
+### References
+
+Please see the *Introduction to openEBGM* vignette.
+
+--------
+
+# Estimating the Hyperparameters
+
+## Data Squashing
+
+The actual counts ($N$) and expected counts ($E$) are used to estimate the 
+hyperparameters of the prior distribution. A large contingency table will have 
+many cells, resulting in computational difficulties for the optimization 
+routines needed for estimation. Data squashing (DuMouchel et al., 2001) 
+transforms a set of 2-dimensional points to a smaller number of 3-dimensional 
+points. The idea is to reduce a large number of points $(N, E)$ to a smaller 
+number of points $(N_k, E_k, W_k)$, where $k = 1,...,M$ and $W_k$ is the weight
+of the $k^{th}$ "superpoint". To minimize information loss, only points close to
+each other should be squashed.
+
+For a given $N$, `squashData()` combines points with similar $E$s into bins
+using a specified bin size and uses the average $E$ within each bin as the $E$
+for that bin's "superpoint". The new superpoints are weighted by bin size. For
+example, the points (1, 1.1) and (1, 1.3) could be squashed to the superpoint
+(1, 1.2, 2).
+
+An example is given below using unstratified expected counts:
+
+```{r dataSquash example}
+library(openEBGM)
+data(caers)
+
+processed <- processRaw(data = caers)
+processed[1:4, 1:4]
+
+squashed <- squashData(data = processed) #Using defaults
+head(squashed)
+
+nrow(processed)
+nrow(squashed)
+```
+
+As shown above, the squashed data set has
+`r round(nrow(squashed)/nrow(processed)*100, 2)`% of the observations as the
+full dataset. Using this squashed data, we can then estimate the hyperparameters
+in a far more efficient manner.
+
+## Likelihood Functions
+
+As previously mentioned, the hyperparameters are estimated by minimizing the
+negative log-likelihood function. There are actually 4 different functions, 
+depending on the use of data squashing and zero counts. All 4 functions, 
+however, are based on the marginal distribution of the counts, which are 
+mixtures of two negative binomial distributions. The hyperparameters are denoted
+by the vector $\theta=(\alpha_1,\beta_1,\alpha_2,\beta_2,P)$, where $P$ is 
+the mixture fraction.
+
+The most commonly used likelihood function is `negLLsquash()`, which is used 
+when squashing data and not using zero counts. `negLLsquash()` is not called 
+directly, but rather by some optimization function:
+
+```{r negLLsquash example, warning = FALSE}
+theta_init <- c(alpha1 = 0.2, beta1 = 0.1, alpha2 = 2, beta2 = 4, p = 1/3)
+stats::nlm(negLLsquash, p = theta_init,
+           ni = squashed$N, ei = squashed$E, wi = squashed$weight, N_star = 1)
+```
+
+The `N_star` argument allows the user to choose the smallest value of $N$ used 
+for hyperparameter estimation. The user must be careful to match `N_star` with 
+the actual minimum count in `ni`. If the user wishes to use a larger value for 
+`N_star`, the vectors supplied to arguments `ni`, `ei`, and `wi` must be
+filtered. Here, we are using all counts except zeroes, so no filtering is 
+needed. In general, `N_star = 1` should be used whenever practical.
+
+Note that you will likely receive warning messages from the optimization 
+function--use your own judgment to determine whether or not they would likely
+indicate real problems.
+
+The other likelihood functions are `negLL()`, `negLLzero()`, and
+`negLLzeroSquash()`. Make sure to use the appropriate function for your choice
+of data squashing and use of zero counts.
+
+## Hyperparameter Estimation Functions
+
+Hyperparameters can be calculated by exploring the parameter space of the 
+likelihood function using either the full data set of $N$s and $E$s or the 
+squashed set. The methodology implemented by this package essentially maximizes 
+the likelihood function (or more specifically, minimizes the negative 
+log-likelihood function). Starting points must be chosen to begin the 
+exploration. DuMouchel (1999, 2001) provides a "lightly justified" set of 
+initial hyperparameters. However, *openEBGM*'s functions support a large set of
+starting choices to help reach convergence and reduce the chance of false
+convergence. We begin by defining some starting points:
+
+```{r}
+theta_init <- data.frame(alpha1 = c(0.2, 0.1, 0.3),
+                         beta1  = c(0.1, 0.2, 0.5),
+                         alpha2 = c(2,   10,  6),
+                         beta2  = c(4,   10,  6),
+                         p      = c(1/3, 0.2, 0.5)
+                         )
+```
+
+###`autoHyper()`
+
+Now that the initial guesses for the hyperparameters have been defined, the 
+function `autoHyper()` can be used to determine the actual hyperparameter 
+estimates. `autoHyper()` performs a "verification check" by requiring the 
+optimization routine to converge at least twice within the bounds of the 
+parameter space. The estimate corresponding to the smallest negative 
+log-likelihood is chosen as a tentative result. By default, this estimate must 
+be similar to at least one other convergent solution. If the algorithm fails to
+consistently converge, an error message is returned.
+
+```{r autoHyper example, warning = FALSE}
+system.time(
+hyper_estimates_full <- autoHyper(data = processed, theta_init = theta_init, 
+                                  squashed = FALSE)
+)
+
+squashed2 <- squashData(squashed, count = 2, bin_size = 10, keep_bins = 5)
+system.time(
+hyper_estimates_squashed <- autoHyper(data = squashed2, theta_init = theta_init)
+)
+
+hyper_estimates_full
+
+hyper_estimates_squashed
+```
+
+As seen above, the process is much faster when utilizing the squashed data, with
+estimates that are nearly identical. Of course, the amount of efficiency
+increase depends on the parameter values used in the call to `squashData()` and
+the size of the original data set. Another factor affecting run time is the
+number of starting points used. In general, you should use five or fewer
+starting points and limit the number of data points to a maximum of about 20,000
+if possible. Notice that we squashed the same data again, which is allowed if we
+use a different value for `count` each time.
+
+`autoHyper()` utilizes multiple minimization techniques to verify convergence. 
+It first attempts the `stats::nlminb()` function, which implements a 
+quasi-Newton unconstrained optimization technique using PORT routines. If 
+`nlminb()` fails to consistently converge, `autoHyper()` next attempts 
+`stats::nlm()`, which is a non-linear maximization algorithm based on the Newton
+method. Finally, if the first two approaches fail, a quasi-Newton method (also 
+known as a variable metric algorithm) is used, which "...uses function values 
+and gradients to build up a picture of the surface to be optimized." (source: R
+documentation for stats::optim) This routine is implemented by the 
+`stats::optim()` function with the `method = BFGS` argument.
+
+###`exploreHypers()`
+
+`autoHyper()` is a semi-automated (but imperfect) approach to hyperparameter 
+estimation. The user is encouraged to explore various optimization approaches as
+no single approach will always work (the functions in *openEBGM* are not the
+only optimization functions available in R). One way to explore is with
+*openEBGM*'s `exploreHypers()` function, which is actually called by
+`autoHyper()` behind-the-scenes:
+
+```{r hyperparameter estimation example, warning = FALSE}
+exploreHypers(data = squashed2, theta_init = theta_init)
+```
+
+`exploreHypers()` offers three gradient-based optimization methods and is 
+basically just a wrapper around commonly used functions from the *stats* package
+mentioned earlier: `nlminb()` (the default), `nlm()`, & `optim()`.
+
+Although the user is encouraged to explore various approaches for maximum 
+likelihood hyperparameter estimation, `autoHyper()` will often give
+reasonable results with minimal effort. Once the hyperparameters have been
+estimated, they can be used in the calculation of the $EBGM$ and quantile scores
+by applying them to the posterior distribution. This process can be found in the
+*Empirical Bayes Metrics with openEBGM* vignette.

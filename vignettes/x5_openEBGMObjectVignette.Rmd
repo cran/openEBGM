@@ -60,16 +60,17 @@ R's generic functions (namely, `print()`, `summary()`, and `plot()`).
 
 ```{r}
 #We can print an openEBGM object to get a quick look at the contents
-ebout
-ebout_noquant
+print(ebout)
+print(ebout_noquant, threshold = 3)
 ```
 
-When quantiles are present, simply printing the object shows, by default, how
-many *var1-var2* pairs exist that have $x>2$, where $x$ is the minimum quantile
-calculated for the data. In the absence of quantiles, it simply outputs the
-number of *var1-var2* pairs that have an $EBGM$ score greater than 2. In both
-cases, it also shows a quick look at the *var1-var2* pairs with the highest $x$
-or $EBGM$, depending on whether quantiles were calculated or not.
+When quantiles are present, simply printing the object shows, by default, how 
+many *var1-var2* pairs exist that have QUANT$>x$, where $x$ is the minimum
+quantile threshold used for the data (default 2). In the absence of quantiles,
+it simply outputs the number of *var1-var2* pairs that have an $EBGM$ score
+greater than the specified threshold. In both cases, it also shows a quick look
+at the *var1-var2* pairs with the highest $x$ or $EBGM$, depending on whether
+quantiles were calculated or not.
 
 One can also use the `summary()` function on an openEBM object to get further
 information about the calculations.
@@ -80,10 +81,9 @@ summary(ebout)
 
 As seen above, by default the `summary()` function, when called on an openEBGM 
 object, outputs some descriptive statistics on the $EBGM$ and quantile scores, 
-the correlation between the scores, and a histogram of the $EBGM$ scores. There
-are options to disable plot output, or to calculate the log~2~ transform of the
-scores, which provides a Bayesian information statistic (when applied to the
-$EBGM$ score).
+and a histogram of the $EBGM$ scores. There are options to disable plot output,
+or to calculate the log~2~ transform of the scores, which provides a Bayesian
+information statistic (when applied to the $EBGM$ score).
 
 ```{r}
 summary(ebout, plot.out = FALSE, log.trans = TRUE)

@@ -1,0 +1,8 @@
+openEBGM v0.2.0
+============
+
+Changes:
+
+* Minor aesthetic changes to plot(), summary(), and print() methods.
+* Relaxed convergence requirements for exploreHypers() and autoHyper().
+

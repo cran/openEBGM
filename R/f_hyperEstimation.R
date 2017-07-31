@@ -133,7 +133,10 @@ exploreHypers <- function(data, theta_init, squashed = TRUE, zeroes = FALSE,
   for (i in 1:nrow(theta_init)) {
     try({
       if (method == "nlminb") {
-        argum <- paste0("start = ", arg_theta, "objective = ", lik_fun, arg_pts)
+        ctl_args <- paste0(", control = list(eval.max = 500, iter.max = 500, ",
+                           "abs.tol = 1e-20, xf.tol = 5e-14)")
+        argum <- paste0("start = ", arg_theta, "objective = ", lik_fun, arg_pts,
+                        ctl_args)
         guess_i <- eval(parse(text = paste0("nlminb(", argum, ")")))
         results[i, "minimum"] <- guess_i$objective
       } else if (method == "nlm") {
@@ -143,7 +146,7 @@ exploreHypers <- function(data, theta_init, squashed = TRUE, zeroes = FALSE,
         results[i, 2:6]        <- guess_i$estimate
         results[i, "minimum"]  <- guess_i$minimum
         results[i, "code"]     <- guess_i$code
-        results[i, "converge"] <- guess_i$code == 1
+        results[i, "converge"] <- guess_i$code == 1 || guess_i$code == 2
         #Check if within low & high bounds
         ab_low <- all(guess_i$estimate[1:4] > 0)
         ab_hi  <- all(guess_i$par[1:4] < param_limit)
@@ -158,9 +161,9 @@ exploreHypers <- function(data, theta_init, squashed = TRUE, zeroes = FALSE,
       }
 
       if (method %in% c("nlminb", "bfgs")) {
-        results[i, 2:6]         <- guess_i$par
-        results[i, "code"]      <- guess_i$convergence
-        results[i, "converge"]  <- guess_i$convergence == 0
+        results[i, 2:6]        <- guess_i$par
+        results[i, "code"]     <- guess_i$convergence
+        results[i, "converge"] <- guess_i$convergence == 0
         ab_low <- all(guess_i$par[1:4] > 0)
         ab_hi  <- all(guess_i$par[1:4] < param_limit)
         p_low  <- guess_i$par[5] > 0
@@ -171,7 +174,6 @@ exploreHypers <- function(data, theta_init, squashed = TRUE, zeroes = FALSE,
   }
   results
 }
-
 
 #' Semi-automated hyperparameter estimation
 #'

@@ -5,7 +5,7 @@ proc_dat_ustrat <- processRaw(data = caers, stratify = FALSE)
 N <- proc_dat_ustrat$N
 E <- proc_dat_ustrat$E
 
-#Theta values from previous run on included caers dataset (as of 12/30/2016)
+#Theta values from previous run
 theta <- c(3.25280367, 0.39983376,
            2.02490400, 1.90726819,
            0.06536416)

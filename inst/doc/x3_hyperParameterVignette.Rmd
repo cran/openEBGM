@@ -3,7 +3,7 @@ title: "Hyperparameter Estimation with openEBGM"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Hyperparamter Estimation with openEBGM}
+  %\VignetteIndexEntry{Hyperparameter Estimation with openEBGM}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

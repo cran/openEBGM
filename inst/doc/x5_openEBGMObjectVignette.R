@@ -22,8 +22,8 @@ ebout_noquant <- ebScores(processed = proc, hyper_estimate = hyper_estimate,
 
 ## ------------------------------------------------------------------------
 #We can print an openEBGM object to get a quick look at the contents
-ebout
-ebout_noquant
+print(ebout)
+print(ebout_noquant, threshold = 3)
 
 ## ------------------------------------------------------------------------
 summary(ebout)

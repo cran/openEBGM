@@ -51,28 +51,32 @@
 ebScores <- function(processed, hyper_estimate, quantiles = c(5, 95),
                      digits = 2) {
 
-  if(!is.null(quantiles) & !is.numeric(quantiles)) {
-    stop("'quantiles' must be NULL or a numeric vector of quantiles")
-  }
-  if(!is.list(hyper_estimate)) {
-    stop("'hyper_estimate' must be the list output by autoHyper()")
-  }
-  if(!any(grepl("estimates", names(hyper_estimate)))) {
-    stop("'hyper_estimate' must be a list containing an element of hyperparameter
-         estimates. Was it actually calculated by autoHyper()?")
-  }
-  if(!is.data.frame(processed)) {
-    stop("'processed' must be a data frame from processRaw()")
-  }
-  if(!any(grepl("var", names(processed)))) {
-    stop("'processed' dataframe does not have 'var' varialbes. Was this dataframe
-         actually created by processRaw()?")
-  }
+  .checkInputs_ebScores(processed, hyper_estimate, quantiles, digits)
+
   theta <- hyper_estimate$estimates
   N <- processed$N
   E <- processed$E
   q_n <- Qn(theta_hat = theta, N = N, E = E)
   EBGM <- ebgm(theta_hat = theta, N = N, E = E, qn = q_n, digits = digits)
+  #Check to see if EBGM is already in the data, if so, don't duplicate column
+  EBGM_sort <- EBGM[order(EBGM, decreasing = TRUE)]
+  compare_func <- function(num_vec, EBGM_sort) {
+    if(class(num_vec) == "numeric") {
+      num_vec <- num_vec[order(num_vec, decreasing = TRUE)]
+      if(identical(EBGM_sort, num_vec)) {
+        return(TRUE)
+      } else {
+        return(FALSE)
+      }
+    } else {
+      return(FALSE)
+    }
+  }
+  compare_vars <- unlist(lapply(processed, compare_func, EBGM_sort = EBGM))
+  if(any(compare_vars)) {
+    names(processed)[compare_vars] <- "EBGM"
+  }
+  ##End check
   if(!is.null(quantiles)) {
     quant_calcs <- lapply(quantiles, quantBisect, theta_hat = theta,
                           N = N, E = E, qn = q_n, digits = digits)
@@ -83,15 +87,18 @@ ebScores <- function(processed, hyper_estimate, quantiles = c(5, 95),
   }
   ebout <- list()
   class(ebout) <- "openEBGM"
-  data_df <- processed
-  #Allow for nonspecification of quantiles - the generic functions that can be
-  #applied to an openEBGM object also are adjusted to behave differently depending
-  #on whether or not quantiles are specified and calculated in the constructor
-  #function.
-  if(!is.null(quantiles)) {
-    data_df <- cbind(processed, EBGM, quant_df)
+  if(any(grepl("EBGM", names(processed)))) {
+    if(!is.null(quantiles)) {
+      data_df <- cbind(processed, quant_df)
+    } else {
+      data_df <- processed
+    }
   } else {
-    data_df <- cbind(processed, EBGM)
+    if(!is.null(quantiles)) {
+      data_df <- cbind(processed, EBGM, quant_df)
+    } else {
+      data_df <- cbind(processed, EBGM)
+    }
   }
   ebout$data <- data_df
   ebout$hyper_parameters <- hyper_estimate

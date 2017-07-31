@@ -24,8 +24,7 @@ Summarize an openEBGM object
 This function provides a brief summary of the results of the
          calculations performed in the \code{\link{ebScores}} function. In
          particular, it provides the numerical summary of the EBGM and
-         QUANT_* vectors, and also provides the spearman correlation between
-         the EBGM and QUANT_* vectors, when quantiles have been calculated.
+         QUANT_* vectors.
 
 Additionally, calling \code{\link[base]{summary}} on an openEBGM
          object will produce a histogram of the EBGM scores. By setting the

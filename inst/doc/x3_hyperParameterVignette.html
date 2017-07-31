@@ -11,7 +11,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
-<meta name="date" content="2017-05-04" />
+<meta name="date" content="2017-07-31" />
 
 <title>Hyperparameter Estimation with openEBGM</title>
 
@@ -68,7 +68,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 <h1 class="title toc-ignore">Hyperparameter Estimation with openEBGM</h1>
-<h4 class="date"><em>2017-05-04</em></h4>
+<h4 class="date"><em>2017-07-31</em></h4>
 
 
 
@@ -171,14 +171,14 @@ hyper_estimates_full &lt;-<span class="st"> </span><span class="kw">autoHyper</s
                                   <span class="dt">squashed =</span> <span class="ot">FALSE</span>)
 )
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;   37.90    0.00   37.89</span>
+<span class="co">#&gt;   36.78    0.00   36.78</span>
 
 squashed2 &lt;-<span class="st"> </span><span class="kw">squashData</span>(squashed, <span class="dt">count =</span> <span class="dv">2</span>, <span class="dt">bin_size =</span> <span class="dv">10</span>, <span class="dt">keep_bins =</span> <span class="dv">5</span>)
 <span class="kw">system.time</span>(
 hyper_estimates_squashed &lt;-<span class="st"> </span><span class="kw">autoHyper</span>(<span class="dt">data =</span> squashed2, <span class="dt">theta_init =</span> theta_init)
 )
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;    1.95    0.00    1.95</span>
+<span class="co">#&gt;    2.08    0.00    2.08</span>
 
 hyper_estimates_full
 <span class="co">#&gt; $method</span>

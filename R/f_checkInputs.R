@@ -293,3 +293,26 @@
     stop("missing or infinite values for 'N', 'E', and 'qn' are not allowed")
   }
 }
+
+#ebScores() --------------------------------------------------------------------
+.checkInputs_ebScores <- function(processed = processed,
+                                  hyper_estimate = hyper_estimate,
+                                  quantiles = quantiles, digits = digits) {
+  if(!is.null(quantiles) & !is.numeric(quantiles)) {
+    stop("'quantiles' must be NULL or a numeric vector of quantiles")
+  }
+  if(!is.list(hyper_estimate)) {
+    stop("'hyper_estimate' must be the list output by autoHyper()")
+  }
+  if(!any(grepl("estimates", names(hyper_estimate)))) {
+    stop("'hyper_estimate' must be a list containing an element of hyperparameter
+         estimates. Was it actually calculated by autoHyper()?")
+  }
+  if(!is.data.frame(processed)) {
+    stop("'processed' must be a data frame from processRaw()")
+  }
+  if(!any(grepl("var", names(processed)))) {
+    stop("'processed' dataframe does not have 'var' variables. Was this dataframe
+         actually created by processRaw()?")
+  }
+}

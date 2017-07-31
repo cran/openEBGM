@@ -1,6 +1,14 @@
-#No need for documentation?
+#' Print an openEBGM object
+#'
+#' @param x An openEBGM object constructed by \code{ebScores()}
+#' @param threshold A numeric value indicating the minimum threshold
+#'   for QUANT or EBGM values to display.
+#' @param ... Arguments to be passed to other methods
 #' @export
-print.openEBGM <- function(x, ...) {
+print.openEBGM <- function(x, threshold = 2, ...) {
+  if(!is.numeric(threshold)) {
+    stop("argument 'threshold' must be numeric")
+  }
   if(any(grepl("QUANT", names(x$data)))) {
     quant_nums <- grep("QUANT", names(x$data), value = TRUE)
     quant_nums <- substring(quant_nums, first = 7, last = 1000000L)
@@ -10,10 +18,12 @@ print.openEBGM <- function(x, ...) {
     }
     quant_sub <- x$data[,grep(quant_min, names(x$data))]
     cat("\n")
-    cat("There were "); cat(length(quant_sub[quant_sub > 2]))
-    cat(" product-symptom pairs with a ")
+    cat("There were "); cat(length(quant_sub[quant_sub > threshold]))
+    cat(" var1-var2 pairs with a ")
     cat(paste("QUANT", quant_min, sep = "_"))
-    cat(" greater than 2\n")
+    cat(" greater than ")
+    cat(as.character(threshold))
+    cat("\n")
     cat("\nTop 5 Highest ")
     cat(paste("QUANT", quant_min, sep = "_"))
     cat(" Scores\n")
@@ -27,8 +37,10 @@ print.openEBGM <- function(x, ...) {
     cat("\n")
   } else {
     cat("\n")
-    cat("There were "); cat(length(x$data$EBGM[x$data$EBGM > 2]))
-    cat(" product-symptom pairs with an EBGM score greater than 2\n")
+    cat("There were "); cat(length(x$data$EBGM[x$data$EBGM > threshold]))
+    cat(" var1-var2 pairs with an EBGM score greater than ")
+    cat(as.character(threshold))
+    cat("\n")
     cat("\nTop 5 Highest EBGM Scores\n")
     tmp <- x$data
     tmp <- head(tmp[order(tmp$EBGM, decreasing = TRUE),], 5)
@@ -126,8 +138,8 @@ plot.openEBGM <- function(x, y = NULL, event = NULL, plot.type = "bar", ...) {
                           name = "EBGM") +
         theme_bw() +
         ylab(paste(quant_min_name, quant_max_name, sep = " - EBGM - ")) +
-        xlab("Product") +
-        ggtitle(ifelse(is.null(event), "", paste("Event=", event, sep = ""))) +
+        xlab("var1 observation") +
+        ggtitle(ifelse(is.null(event), "EBGM Barplot", paste("EBGM Barplot with Event=", event, sep = ""))) +
         #Note that themes are applied *after* the coord_flip()
         theme(axis.title.x = element_text(face = "bold"),
               axis.title.y = element_text(face = "bold"),
@@ -151,8 +163,8 @@ plot.openEBGM <- function(x, y = NULL, event = NULL, plot.type = "bar", ...) {
                                      "<1"= "yellow"),
                           name = "EBGM") +
         theme_bw() +
-        ylab("EBGM") + xlab("Product") +
-        ggtitle(ifelse(is.null(event), "", paste("Event=", event, sep = ""))) +
+        ylab("EBGM") + xlab("var1 observation") +
+        ggtitle(ifelse(is.null(event), "EBGM Barplot", paste("EBGM Barplot with Event=", event, sep = ""))) +
         #Note that themes are applied *after* the coord_flip()
         theme(axis.title.x = element_text(face = "bold"),
               axis.title.y = element_text(face = "bold"),
@@ -218,8 +230,7 @@ plot.openEBGM <- function(x, y = NULL, event = NULL, plot.type = "bar", ...) {
 #' @details This function provides a brief summary of the results of the
 #'          calculations performed in the \code{\link{ebScores}} function. In
 #'          particular, it provides the numerical summary of the EBGM and
-#'          QUANT_* vectors, and also provides the spearman correlation between
-#'          the EBGM and QUANT_* vectors, when quantiles have been calculated.
+#'          QUANT_* vectors.
 #'
 #' @details Additionally, calling \code{\link[base]{summary}} on an openEBGM
 #'          object will produce a histogram of the EBGM scores. By setting the
@@ -254,7 +265,6 @@ plot.openEBGM <- function(x, y = NULL, event = NULL, plot.type = "bar", ...) {
 summary.openEBGM <- function(object, plot.out = TRUE, log.trans = FALSE, ...) {
   if(any(grepl("QUANT", names(object$data)))) {
     tmp <- object$data[,grep("EB|QUANT", names(object$data))]
-    cormat <- cor(tmp, method = "spearman")
   } else {
     tmp <- as.data.frame(object$data$EBGM)
     names(tmp) <- "EBGM"
@@ -264,15 +274,10 @@ summary.openEBGM <- function(object, plot.out = TRUE, log.trans = FALSE, ...) {
   }
   ebsummary <- summary(tmp)
   if(plot.out == TRUE) {
-    #hist(object$data$EBGM, xlab = "EBGM", main = "Histogram of Raw EBGM Scores")
     hist(tmp$EBGM, xlab = "EBGM", main = "Histogram of Raw EBGM Scores")
   }
   cat("\nSummary of the EB-Metrics\n")
   print(ebsummary)
-  if(any(grepl("QUANT", names(object$data)))) {
-    cat("\nSpearman Correlation Matriobject of the EB-Metrics\n")
-    print(cormat)
-  }
 }
 
 #Hack to trick 'R CMD check'

@@ -6,7 +6,8 @@
 \usage{
 autoHyper(data, theta_init, squashed = TRUE, zeroes = FALSE, N_star = 1,
   tol = c(0.05, 0.05, 0.2, 0.2, 0.025), min_conv = 1, param_limit = 100,
-  max_pts = 20000)
+  max_pts = 20000, conf_ints = FALSE, conf_level = c("95", "80", "90",
+  "99"))
 }
 \arguments{
 \item{data}{A data frame containing columns named \emph{N}, \emph{E},
@@ -41,6 +42,12 @@ against unreasonable/erroneous estimates.}
 
 \item{max_pts}{A scalar whole number for the largest number of data points
 allowed. Used to help prevent extremely long run times.}
+
+\item{conf_ints}{A scalar logical indicating if confidence intervals and
+standard errors should be returned.}
+
+\item{conf_level}{A scalar string for the confidence level used if confidence
+intervals are requested.}
 }
 \value{
 A list containing the following elements:
@@ -51,6 +58,8 @@ A list containing the following elements:
       \dQuote{\code{bfgs}}).}
     \item{\emph{estimates}: }{A named numeric vector of length 5 for the
       hyperparameter estimate corresponding to the smallest log-likelihood.}
+    \item{\emph{conf_int}: }{A data frame including the standard errors and
+      confidence limits. Only included if \code{conf_ints = TRUE}.}
     \item{\emph{num_close}: }{A scalar integer for the number of other
       convergent solutions that were close (within tolerance) to the chosen
       estimate.}
@@ -84,8 +93,12 @@ This function should not be used with very large data sets since
   be used first to reduce the size of the data.
 
 It is recommended to use \code{N_star = 1} when practical. Data
-  squashing (see \code{\link{squashData}}) can be used to reduce the number
-  of data points.
+  squashing (see \code{\link{squashData}}) can be used to further reduce the
+  number of data points.
+
+Asymptotic normal confidence intervals, if requested, use standard
+  errors calculated from the observed Fisher information matrix as discussed
+  in DuMouchel (1999).
 }
 \examples{
 #Start with 2 or more guesses
@@ -104,6 +117,11 @@ suppressWarnings(
   autoHyper(squashed, theta_init = theta_init)
 )
 
+}
+\references{
+DuMouchel W (1999). "Bayesian Data Mining in Large Frequency
+  Tables, With an Application to the FDA Spontaneous Reporting System."
+  \emph{The American Statistician}, 53(3), 177-190.
 }
 \seealso{
 \code{\link[stats]{nlminb}}, \code{\link[stats]{nlm}}, and

@@ -11,7 +11,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
-<meta name="date" content="2017-07-31" />
+<meta name="date" content="2017-11-15" />
 
 <title>Introduction to openEBGM</title>
 
@@ -68,7 +68,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 <h1 class="title toc-ignore">Introduction to openEBGM</h1>
-<h4 class="date"><em>2017-07-31</em></h4>
+<h4 class="date"><em>2017-11-15</em></h4>
 
 
 
@@ -128,8 +128,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="co">#&gt; 3264 Not Available      Male                            VOMITING</span>
 <span class="co">#&gt; 3382 Not Available    Female ABDOMINAL PAIN, DIARRHOEA, VOMITING</span></code></pre></div>
 <p>Only one product name is given per row, but we need to separate the adverse events into different rows:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dat &lt;-<span class="st"> </span>tidyr::<span class="kw">separate_rows</span>(caers_raw, SYM_One.Row.Coded.Symptoms, <span class="dt">sep =</span> <span class="st">&quot;, &quot;</span>)
-dat[<span class="dv">1</span>:<span class="dv">4</span>, <span class="kw">c</span>(<span class="st">&quot;RA_Report..&quot;</span>, <span class="st">&quot;PRI_Reported.Brand.Product.Name&quot;</span>, 
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dat &lt;-<span class="st"> </span>tidyr<span class="op">::</span><span class="kw">separate_rows</span>(caers_raw, SYM_One.Row.Coded.Symptoms, <span class="dt">sep =</span> <span class="st">&quot;, &quot;</span>)
+dat[<span class="dv">1</span><span class="op">:</span><span class="dv">4</span>, <span class="kw">c</span>(<span class="st">&quot;RA_Report..&quot;</span>, <span class="st">&quot;PRI_Reported.Brand.Product.Name&quot;</span>, 
            <span class="st">&quot;SYM_One.Row.Coded.Symptoms&quot;</span>)]
 <span class="co">#&gt;   RA_Report.. PRI_Reported.Brand.Product.Name SYM_One.Row.Coded.Symptoms</span>
 <span class="co">#&gt; 1       75091      GREAT VALUE VANILLA WAFERS                   VOMITING</span>
@@ -137,33 +137,33 @@ dat[<span class="dv">1</span>:<span class="dv">4</span>, <span class="kw">c</spa
 <span class="co">#&gt; 3       75205  UNCLE WALLY'S BLUEBERRY MUFFIN                  DIARRHOEA</span>
 <span class="co">#&gt; 4       75205  UNCLE WALLY'S BLUEBERRY MUFFIN                   HEADACHE</span></code></pre></div>
 <p>Next we need to change column names:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dat$id   &lt;-<span class="st"> </span>dat$RA_Report..
-dat$var1 &lt;-<span class="st"> </span>dat$PRI_Reported.Brand.Product.Name
-dat$var2 &lt;-<span class="st"> </span>dat$SYM_One.Row.Coded.Symptoms</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dat<span class="op">$</span>id   &lt;-<span class="st"> </span>dat<span class="op">$</span>RA_Report..
+dat<span class="op">$</span>var1 &lt;-<span class="st"> </span>dat<span class="op">$</span>PRI_Reported.Brand.Product.Name
+dat<span class="op">$</span>var2 &lt;-<span class="st"> </span>dat<span class="op">$</span>SYM_One.Row.Coded.Symptoms</code></pre></div>
 <p>Suppose we want to use gender and age as stratification variables:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dat$strat_gender &lt;-<span class="st"> </span>dat$CI_Gender
-<span class="kw">table</span>(dat$strat_gender, <span class="dt">useNA =</span> <span class="st">&quot;always&quot;</span>)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dat<span class="op">$</span>strat_gender &lt;-<span class="st"> </span>dat<span class="op">$</span>CI_Gender
+<span class="kw">table</span>(dat<span class="op">$</span>strat_gender, <span class="dt">useNA =</span> <span class="st">&quot;always&quot;</span>)
 <span class="co">#&gt; </span>
 <span class="co">#&gt;        Female          Male Not Available          &lt;NA&gt; </span>
 <span class="co">#&gt;           177           119            12             0</span></code></pre></div>
 <p><em>Age</em> is a continuous variable, so we need to create categories:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dat$age_yrs &lt;-
-<span class="st">  </span><span class="kw">ifelse</span>(dat$CI_Age.Unit ==<span class="st"> &quot;Day(s)&quot;</span>, dat$CI_Age.at.Adverse.Event /<span class="st"> </span><span class="dv">365</span>,
-  <span class="kw">ifelse</span>(dat$CI_Age.Unit ==<span class="st"> &quot;Decade(s)&quot;</span>, dat$CI_Age.at.Adverse.Event *<span class="st"> </span><span class="dv">10</span>,
-  <span class="kw">ifelse</span>(dat$CI_Age.Unit ==<span class="st"> &quot;Month(s)&quot;</span>, dat$CI_Age.at.Adverse.Event /<span class="st"> </span><span class="dv">12</span>,
-  <span class="kw">ifelse</span>(dat$CI_Age.Unit ==<span class="st"> &quot;Week(s)&quot;</span>, dat$CI_Age.at.Adverse.Event /<span class="st"> </span><span class="dv">52</span>,
-  <span class="kw">ifelse</span>(dat$CI_Age.Unit ==<span class="st"> &quot;Year(s)&quot;</span>, dat$CI_Age.at.Adverse.Event,
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dat<span class="op">$</span>age_yrs &lt;-
+<span class="st">  </span><span class="kw">ifelse</span>(dat<span class="op">$</span>CI_Age.Unit <span class="op">==</span><span class="st"> &quot;Day(s)&quot;</span>, dat<span class="op">$</span>CI_Age.at.Adverse.Event <span class="op">/</span><span class="st"> </span><span class="dv">365</span>,
+  <span class="kw">ifelse</span>(dat<span class="op">$</span>CI_Age.Unit <span class="op">==</span><span class="st"> &quot;Decade(s)&quot;</span>, dat<span class="op">$</span>CI_Age.at.Adverse.Event <span class="op">*</span><span class="st"> </span><span class="dv">10</span>,
+  <span class="kw">ifelse</span>(dat<span class="op">$</span>CI_Age.Unit <span class="op">==</span><span class="st"> &quot;Month(s)&quot;</span>, dat<span class="op">$</span>CI_Age.at.Adverse.Event <span class="op">/</span><span class="st"> </span><span class="dv">12</span>,
+  <span class="kw">ifelse</span>(dat<span class="op">$</span>CI_Age.Unit <span class="op">==</span><span class="st"> &quot;Week(s)&quot;</span>, dat<span class="op">$</span>CI_Age.at.Adverse.Event <span class="op">/</span><span class="st"> </span><span class="dv">52</span>,
+  <span class="kw">ifelse</span>(dat<span class="op">$</span>CI_Age.Unit <span class="op">==</span><span class="st"> &quot;Year(s)&quot;</span>, dat<span class="op">$</span>CI_Age.at.Adverse.Event,
          <span class="ot">NA</span>)))))
-dat$strat_age &lt;-<span class="st"> </span><span class="kw">ifelse</span>(<span class="kw">is.na</span>(dat$age_yrs), <span class="st">&quot;unknown&quot;</span>,
-                 <span class="kw">ifelse</span>(dat$age_yrs &lt;<span class="st"> </span><span class="dv">18</span>, <span class="st">&quot;under_18&quot;</span>,
+dat<span class="op">$</span>strat_age &lt;-<span class="st"> </span><span class="kw">ifelse</span>(<span class="kw">is.na</span>(dat<span class="op">$</span>age_yrs), <span class="st">&quot;unknown&quot;</span>,
+                 <span class="kw">ifelse</span>(dat<span class="op">$</span>age_yrs <span class="op">&lt;</span><span class="st"> </span><span class="dv">18</span>, <span class="st">&quot;under_18&quot;</span>,
                         <span class="st">&quot;18_plus&quot;</span>))
-<span class="kw">table</span>(dat$strat_age, <span class="dt">useNA =</span> <span class="st">&quot;always&quot;</span>)
+<span class="kw">table</span>(dat<span class="op">$</span>strat_age, <span class="dt">useNA =</span> <span class="st">&quot;always&quot;</span>)
 <span class="co">#&gt; </span>
 <span class="co">#&gt;  18_plus under_18  unknown     &lt;NA&gt; </span>
 <span class="co">#&gt;       30       65      213        0</span></code></pre></div>
 <p>Now we have the data in the proper form:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">vars &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;id&quot;</span>, <span class="st">&quot;var1&quot;</span>, <span class="st">&quot;var2&quot;</span>, <span class="st">&quot;strat_gender&quot;</span>, <span class="st">&quot;strat_age&quot;</span>)
-dat[<span class="dv">1</span>:<span class="dv">5</span>, vars]
+dat[<span class="dv">1</span><span class="op">:</span><span class="dv">5</span>, vars]
 <span class="co">#&gt;      id                           var1      var2 strat_gender strat_age</span>
 <span class="co">#&gt; 1 75091     GREAT VALUE VANILLA WAFERS  VOMITING         Male   unknown</span>
 <span class="co">#&gt; 2 75091     GREAT VALUE VANILLA WAFERS GASTRITIS         Male   unknown</span>

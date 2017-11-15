@@ -26,14 +26,14 @@ To create the object, we first need to calculate the hyperparameter estimates.
 ```{r, warning = FALSE}
 library(openEBGM)
 data(caers)
-proc <- processRaw(data = caers, stratify = FALSE, zeroes = FALSE)
-squashed <- squashData(data = proc)
+proc <- processRaw(caers, stratify = FALSE, zeroes = FALSE)
+squashed <- squashData(proc)
 theta_init <- data.frame(alpha1 = c(0.2, 0.1, 0.3, 0.5, 0.2),
                          beta1  = c(0.1, 0.1, 0.5, 0.3, 0.2),
                          alpha2 = c(2,   10,  6,   12,  5),
                          beta2  = c(4,   10,  6,   12,  5),
                          p      = c(1/3, 0.2, 0.5, 0.8, 0.4))
-hyper_estimate <- autoHyper(data = squashed, theta_init = theta_init, 
+hyper_estimate <- autoHyper(squashed, theta_init = theta_init, 
                             zeroes = FALSE, squashed = TRUE, N_star = 1)
 ```
 
@@ -42,9 +42,9 @@ calculate the $EBGM$ scores and any desired quantile(s) from the posterior
 distribution.
 
 ```{r}
-ebout <- ebScores(processed = proc, hyper_estimate = hyper_estimate,
+ebout <- ebScores(proc, hyper_estimate = hyper_estimate,
                   quantiles = c(5, 95)) #For the 5th and 95th percentiles
-ebout_noquant <- ebScores(processed = proc, hyper_estimate = hyper_estimate,
+ebout_noquant <- ebScores(proc, hyper_estimate = hyper_estimate,
                           quantiles = NULL) #For no quantiles
 ```
 
@@ -75,7 +75,7 @@ quantiles were calculated or not.
 One can also use the `summary()` function on an openEBM object to get further
 information about the calculations.
 
-```{r}
+```{r, fig.height=6, fig.width = 7}
 summary(ebout)
 ```
 

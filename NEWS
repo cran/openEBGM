@@ -1,3 +1,15 @@
+openEBGM v0.3.0
+============
+
+Changes:
+
+* Added confidence intervals to autoHyper() and standard errors to autoHyper()
+    and exploreHypers().
+* processRaw() now returns Inf instead of 99999 when PRR results in division by
+    zero.
+* Fixed minor bug in exploreHypers().
+
+
 openEBGM v0.2.0
 ============
 

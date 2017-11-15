@@ -53,11 +53,6 @@ testthat::test_that("correct column names from processRaw", {
 })
 
 testthat::test_that("values returned from processRaw make sense", {
-  expect_true(max(processRaw(dat)$PRR) < Inf)
-  expect_true(max(suppressWarnings(processRaw(dat, stratify = TRUE))$PRR) < Inf)
-  expect_true(max(processRaw(dat, zeroes = TRUE)$PRR) < Inf)
-  expect_true(max(suppressWarnings(processRaw(dat, zeroes = TRUE, stratify = TRUE))$PRR) < Inf)
-
   expect_equal(max(processRaw(dat)$N), 7)
   expect_equal(max(suppressWarnings(processRaw(dat, stratify = TRUE))$N), 7)
   expect_equal(max(processRaw(dat, zeroes = TRUE)$N), 7)
@@ -158,7 +153,6 @@ for (i in var1s) {
 }
 dat_man$RR   <- round(dat_man$N / dat_man$E, 3)
 dat_man$RR   <- ifelse(is.nan(dat_man$RR), 0, dat_man$RR)
-dat_man$PRR  <- ifelse(is.infinite(dat_man$PRR), 99999, dat_man$PRR)
 dat_man$var1 <- as.factor(dat_man$var1)
 dat_man$var2 <- as.factor(dat_man$var2)
 

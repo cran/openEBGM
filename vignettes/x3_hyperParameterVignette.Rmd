@@ -199,6 +199,13 @@ and gradients to build up a picture of the surface to be optimized." (source: R
 documentation for stats::optim) This routine is implemented by the 
 `stats::optim()` function with the `method = BFGS` argument.
 
+`autoHyper()` can now return standard errors and confidence intervals for the
+hyperparameter estimates:
+
+```{r autoHyper example with CIs, warning = FALSE}
+autoHyper(squashed2, theta_init = theta_init, conf_ints = TRUE)$conf_int
+```
+
 ###`exploreHypers()`
 
 `autoHyper()` is a semi-automated (but imperfect) approach to hyperparameter 
@@ -206,10 +213,11 @@ estimation. The user is encouraged to explore various optimization approaches as
 no single approach will always work (the functions in *openEBGM* are not the
 only optimization functions available in R). One way to explore is with
 *openEBGM*'s `exploreHypers()` function, which is actually called by
-`autoHyper()` behind-the-scenes:
+`autoHyper()` behind-the-scenes. `exploreHypers()` can now also return standard
+errors for the hyperparameter estimates:
 
 ```{r hyperparameter estimation example, warning = FALSE}
-exploreHypers(data = squashed2, theta_init = theta_init)
+exploreHypers(data = squashed2, theta_init = theta_init, std_errors = TRUE)
 ```
 
 `exploreHypers()` offers three gradient-based optimization methods and is 

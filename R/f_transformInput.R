@@ -38,8 +38,8 @@
 #'   calculations ignore stratification, but \emph{E} and \emph{RR} calculations
 #'   are affected. A warning will be displayed if any stratum contains less than
 #'   50 unique IDs.
-#' @details If a \emph{PRR} calculation results in division by zero, a default
-#'   value of 99,999 is returned.
+#' @details If a \emph{PRR} calculation results in division by zero, \code{Inf}
+#'   is returned.
 #' @section Warnings:
 #'   Use of the \code{zeroes = TRUE} option will result in a considerable
 #'   increase in runtime. Using zero counts is not recommended if the contingency
@@ -139,8 +139,7 @@ processRaw <- function(data, stratify = FALSE, zeroes = FALSE, digits = 2,
   PRR_num    <- counts$N / counts$N_v1
   PRR_den    <- (counts$N_v2 - counts$N) / (counts$N_tot - counts$N_v1)
   counts$PRR <- round(PRR_num / PRR_den, digits)
-  counts$PRR <- ifelse(is.infinite(counts$PRR) | is.nan(counts$PRR), 99999,
-                       counts$PRR)
+  counts$PRR <- ifelse(is.nan(counts$PRR), Inf, counts$PRR)
   vars        <- c("var1", "var2", "N", "E", "RR", "PRR")
   counts$var1 <- as.factor(counts$var1)
   counts$var2 <- as.factor(counts$var2)

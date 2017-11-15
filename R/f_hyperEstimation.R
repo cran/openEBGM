@@ -21,9 +21,12 @@
 #'   against unreasonable/erroneous estimates.
 #' @param max_pts A scalar whole number for the largest number of data points
 #'   allowed. Used to help prevent extremely long run times.
+#' @param std_errors A scalar logical indicating if standard errors should be
+#'   returned for the hyperparameter estimates.
 #'
-#' @return A data frame of hyperparameter estimates corresponding to the initial
-#'   guesses from \code{theta_init}. Also includes various convergence results:
+#' @return A list including the data frame \code{estimates} of hyperparameter
+#'   estimates corresponding to the initial guesses from \code{theta_init} (plus
+#'   convergence results):
 #'   \itemize{
 #'     \item{\emph{code}: }{The convergence code returned by the chosen
 #'       optimization function (see \code{\link[stats]{nlminb}},
@@ -37,6 +40,8 @@
 #'     \item{\emph{minimum}: }{The negative log-likelihood value corresponding
 #'       to the estimated optimal value of the hyperparameter.}
 #'   }
+#'   Also returns the data frame \code{std_errs} if standard errors are
+#'   requested.
 #'
 #' @section Warning: Make sure to properly specify the \code{squashed},
 #'   \code{zeroes}, and \code{N_star} arguments for your data set, since these
@@ -68,6 +73,8 @@
 #'   determination of \emph{converge} was intended to be conservative (leaning
 #'   towards FALSE when questionable). See the documentation for the chosen
 #'   method for details about \emph{code}.
+#' @details Standard errors, if requested, are calculated using the observed
+#'   Fisher information matrix as discussed in DuMouchel (1999).
 #'
 #' @examples
 #' #Start with 2 or more guesses
@@ -86,6 +93,9 @@
 #'   exploreHypers(squashed, theta_init = theta_init)
 #' )
 #'
+#' @references DuMouchel W (1999). "Bayesian Data Mining in Large Frequency
+#'   Tables, With an Application to the FDA Spontaneous Reporting System."
+#'   \emph{The American Statistician}, 53(3), 177-190.
 #' @family hyperparameter estimation functions
 #' @keywords openEBGM
 #' @seealso \code{\link[stats]{nlminb}}, \code{\link[stats]{nlm}}, and
@@ -94,18 +104,24 @@
 #' @importFrom stats nlm
 #' @importFrom stats nlminb
 #' @importFrom stats optim
+#' @importFrom stats optimHess
 #' @export
-exploreHypers <- function(data, theta_init, squashed = TRUE, zeroes = FALSE,
-                          N_star = 1, method = c("nlminb", "nlm", "bfgs"),
-                          param_limit = 100, max_pts = 20000) {
+exploreHypers <-
+  function(data, theta_init, squashed = TRUE, zeroes = FALSE, N_star = 1,
+           method = c("nlminb", "nlm", "bfgs"), param_limit = 100,
+           max_pts = 20000, std_errors = FALSE) {
 
   .checkInputs_exploreHypers(data, theta_init, squashed, zeroes, N_star,
-                             method, param_limit, max_pts)
+                             method, param_limit, max_pts, std_errors)
   method <- match.arg(method)
 
   results <- data.frame(guess_num = 1:nrow(theta_init), a1_hat = NA,
                         b1_hat = NA, a2_hat = NA, b2_hat = NA, p_hat = NA,
                         code = NA, converge = NA, in_bounds = NA, minimum = NA)
+  if (std_errors) {
+    std_errs <- data.frame(guess_num = 1:nrow(theta_init), a1_se = NA,
+                           b1_se = NA, a2_se = NA, b2_se = NA, p_se = NA)
+  }
 
   #Choose the proper arguments for the optimization function
   arg_theta     <- "as.numeric(theta_init[i, ]), "
@@ -149,7 +165,7 @@ exploreHypers <- function(data, theta_init, squashed = TRUE, zeroes = FALSE,
         results[i, "converge"] <- guess_i$code == 1 || guess_i$code == 2
         #Check if within low & high bounds
         ab_low <- all(guess_i$estimate[1:4] > 0)
-        ab_hi  <- all(guess_i$par[1:4] < param_limit)
+        ab_hi  <- all(guess_i$estimate[1:4] < param_limit)
         p_low  <- guess_i$estimate[5] > 0
         p_hi   <- guess_i$estimate[5] < 1
         results[i, "in_bounds"] <- ab_low && ab_hi && p_low && p_hi
@@ -170,9 +186,40 @@ exploreHypers <- function(data, theta_init, squashed = TRUE, zeroes = FALSE,
         p_hi   <- guess_i$par[5] < 1
         results[i, "in_bounds"] <- ab_low && ab_hi && p_low && p_hi
       }
+
+      if (std_errors) {
+        theta_hat_i <- results[i, 2:6]
+        N <- data$N
+        E <- data$E
+        if (zeroes) {
+          if (squashed) {
+            hess_i <- optimHess(theta_hat_i, fn = negLLzeroSquash,
+                                ni = N, ei = E, wi = data$weight)
+          } else {
+            hess_i <- optimHess(theta_hat_i, fn = negLLzero,
+                                N = N, E = E)
+          }
+        } else {
+          if (squashed) {
+            hess_i <- optimHess(theta_hat_i, fn = negLLsquash,
+                                ni = N, ei = E, wi = data$weight,
+                                N_star = N_star)
+          } else {
+            hess_i <- optimHess(theta_hat_i, fn = negLL,
+                                N = N, E = E, N_star = N_star)
+          }
+        }
+        std_errs[i, 2:6] <- sqrt(diag(solve(hess_i)))
+      }
+
     }, silent = TRUE)
   }
-  results
+
+  if (std_errors) {
+    return(list(estimates = results, std_errs = std_errs))
+  } else {
+    return(list(estimates = results))
+  }
 }
 
 #' Semi-automated hyperparameter estimation
@@ -193,6 +240,10 @@ exploreHypers <- function(data, theta_init, squashed = TRUE, zeroes = FALSE,
 #'   number of convergent solutions that must be close to the convergent
 #'   solution with the smallest negative log-likelihood. Must be at least one
 #'   and at most one less than the number of rows in \code{theta_init}.
+#' @param conf_ints A scalar logical indicating if confidence intervals and
+#'   standard errors should be returned.
+#' @param conf_level A scalar string for the confidence level used if confidence
+#'   intervals are requested.
 #' @return A list containing the following elements:
 #'   \itemize{
 #'     \item{\emph{method}: }{A scalar character string for the method used to
@@ -201,6 +252,8 @@ exploreHypers <- function(data, theta_init, squashed = TRUE, zeroes = FALSE,
 #'       \dQuote{\code{bfgs}}).}
 #'     \item{\emph{estimates}: }{A named numeric vector of length 5 for the
 #'       hyperparameter estimate corresponding to the smallest log-likelihood.}
+#'     \item{\emph{conf_int}: }{A data frame including the standard errors and
+#'       confidence limits. Only included if \code{conf_ints = TRUE}.}
 #'     \item{\emph{num_close}: }{A scalar integer for the number of other
 #'       convergent solutions that were close (within tolerance) to the chosen
 #'       estimate.}
@@ -222,8 +275,11 @@ exploreHypers <- function(data, theta_init, squashed = TRUE, zeroes = FALSE,
 #'   each optimization call will take a long time. \code{\link{squashData}} can
 #'   be used first to reduce the size of the data.
 #' @details It is recommended to use \code{N_star = 1} when practical. Data
-#'   squashing (see \code{\link{squashData}}) can be used to reduce the number
-#'   of data points.
+#'   squashing (see \code{\link{squashData}}) can be used to further reduce the
+#'   number of data points.
+#' @details Asymptotic normal confidence intervals, if requested, use standard
+#'   errors calculated from the observed Fisher information matrix as discussed
+#'   in DuMouchel (1999).
 #'
 #' @examples
 #' #Start with 2 or more guesses
@@ -242,26 +298,51 @@ exploreHypers <- function(data, theta_init, squashed = TRUE, zeroes = FALSE,
 #'   autoHyper(squashed, theta_init = theta_init)
 #' )
 #'
+#' @references DuMouchel W (1999). "Bayesian Data Mining in Large Frequency
+#'   Tables, With an Application to the FDA Spontaneous Reporting System."
+#'   \emph{The American Statistician}, 53(3), 177-190.
 #' @family hyperparameter estimation functions
 #' @keywords openEBGM
 #' @seealso \code{\link[stats]{nlminb}}, \code{\link[stats]{nlm}}, and
 #'   \code{\link[stats]{optim}} for optimization details
 #' @seealso \code{\link{squashData}} for data preparation
+#' @importFrom stats optimHess
+#' @importFrom stats qnorm
 #' @export
-autoHyper <- function(data, theta_init, squashed = TRUE, zeroes = FALSE,
-                      N_star = 1, tol = c(0.05, 0.05, 0.2, 0.2, 0.025),
-                      min_conv = 1, param_limit = 100, max_pts = 20000) {
+autoHyper <-
+  function(data, theta_init, squashed = TRUE, zeroes = FALSE, N_star = 1,
+           tol = c(0.05, 0.05, 0.2, 0.2, 0.025), min_conv = 1,
+           param_limit = 100, max_pts = 20000, conf_ints = FALSE,
+           conf_level = c("95", "80", "90", "99")) {
 
   .checkInputs_autoHyper(data, theta_init, squashed, zeroes, N_star, tol,
-                         min_conv, param_limit, max_pts)
+                         min_conv, param_limit, max_pts, conf_ints, conf_level)
 
+  conf_level <- match.arg(conf_level)
   estimate_names <- c("a1_hat", "b1_hat", "a2_hat", "b2_hat", "p_hat")
 
+  if (conf_ints) {
+    if (conf_level == "95") {
+      crit_val <- qnorm(.975)
+    } else if (conf_level == "80") {
+      crit_val <- qnorm(.90)
+    } else if (conf_level == "90") {
+      crit_val <- qnorm(.95)
+    } else {
+      crit_val <- qnorm(.995)
+    }
+    conf_int <- matrix(NA, nrow = 5, ncol = 4)
+    conf_int <- as.data.frame(conf_int, row.names = estimate_names)
+    LL_name <- paste0("LL_", conf_level)
+    UL_name <- paste0("UL_", conf_level)
+    colnames(conf_int) <-  c("pt_est", "SE", LL_name, UL_name)
+  }
+
   for (i in c("nlminb", "nlm", "bfgs")) {
-    theta_hats <- exploreHypers(data = data, theta_init = theta_init,
-                                squashed = squashed, zeroes = zeroes,
-                                N_star = N_star, method = i,
-                                param_limit = param_limit, max_pts = max_pts)
+    theta_hats <-
+      exploreHypers(data = data, theta_init = theta_init, squashed = squashed,
+                    zeroes = zeroes, N_star = N_star, method = i,
+                    param_limit = param_limit, max_pts = max_pts)$estimates
 
     #Only care about convergent results within parameter space
     conv          <- theta_hats$converge == TRUE & !is.na(theta_hats$converge)
@@ -283,8 +364,38 @@ autoHyper <- function(data, theta_init, squashed = TRUE, zeroes = FALSE,
       if (num_close >= min_conv) {
         theta_hat <- as.numeric(candidate[, estimate_names])
         names(theta_hat) <- c("alpha1", "beta1", "alpha2", "beta2", "P")
-        return(list(method = i, estimates = theta_hat, num_close = num_close,
-                    theta_hats = theta_hats))
+        if (conf_ints) {
+          N <- data$N
+          E <- data$E
+          if (zeroes) {
+            if (squashed) {
+              hess <- optimHess(theta_hat, fn = negLLzeroSquash,
+                                ni = N, ei = E, wi = data$weight)
+            } else {
+              hess <- optimHess(theta_hat, fn = negLLzero,
+                                N = N, E = E)
+            }
+          } else {
+            if (squashed) {
+              hess <- optimHess(theta_hat, fn = negLLsquash,
+                                ni = N, ei = E, wi = data$weight,
+                                N_star = N_star)
+            } else {
+              hess <- optimHess(theta_hat, fn = negLL,
+                                N = N, E = E, N_star = N_star)
+            }
+          }
+          std_errs <- sqrt(diag(solve(hess)))
+          conf_int$pt_est <- theta_hat
+          conf_int$SE <- std_errs
+          conf_int[LL_name] <- theta_hat - crit_val * std_errs
+          conf_int[UL_name] <- theta_hat + crit_val * std_errs
+          conf_int <- round(conf_int, 4)
+          return(list(method = i, estimates = theta_hat, conf_int = conf_int,
+                      num_close = num_close, theta_hats = theta_hats))
+        }
+        return(list(method = i, estimates = theta_hat,
+                    num_close = num_close, theta_hats = theta_hats))
       }
     }
   }

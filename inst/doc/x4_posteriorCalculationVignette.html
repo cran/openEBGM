@@ -11,7 +11,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
-<meta name="date" content="2017-07-31" />
+<meta name="date" content="2017-11-15" />
 
 <title>Empirical Bayes Metrics with openEBGM</title>
 
@@ -68,7 +68,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 <h1 class="title toc-ignore">Empirical Bayes Metrics with openEBGM</h1>
-<h4 class="date"><em>2017-07-31</em></h4>
+<h4 class="date"><em>2017-11-15</em></h4>
 
 
 
@@ -89,26 +89,22 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(openEBGM)
 <span class="kw">data</span>(caers)  <span class="co">#subset of publicly available CAERS data</span>
 
-processed &lt;-<span class="st"> </span><span class="kw">processRaw</span>(<span class="dt">data =</span> caers, <span class="dt">stratify =</span> <span class="ot">FALSE</span>, <span class="dt">zeroes =</span> <span class="ot">FALSE</span>)
-squashed &lt;-<span class="st"> </span><span class="kw">squashData</span>(<span class="dt">data =</span> processed)
+processed &lt;-<span class="st"> </span><span class="kw">processRaw</span>(caers, <span class="dt">stratify =</span> <span class="ot">FALSE</span>, <span class="dt">zeroes =</span> <span class="ot">FALSE</span>)
+squashed &lt;-<span class="st"> </span><span class="kw">squashData</span>(processed)
 squashed2 &lt;-<span class="st"> </span><span class="kw">squashData</span>(squashed, <span class="dt">count =</span> <span class="dv">2</span>, <span class="dt">bin_size =</span> <span class="dv">10</span>, <span class="dt">keep_bins =</span> <span class="dv">5</span>)
 theta_init &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">alpha1 =</span> <span class="kw">c</span>(<span class="fl">0.2</span>, <span class="fl">0.1</span>, <span class="fl">0.3</span>, <span class="fl">0.5</span>, <span class="fl">0.2</span>),
                          <span class="dt">beta1  =</span> <span class="kw">c</span>(<span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.3</span>, <span class="fl">0.2</span>),
                          <span class="dt">alpha2 =</span> <span class="kw">c</span>(<span class="dv">2</span>,   <span class="dv">10</span>,  <span class="dv">6</span>,   <span class="dv">12</span>,  <span class="dv">5</span>),
                          <span class="dt">beta2  =</span> <span class="kw">c</span>(<span class="dv">4</span>,   <span class="dv">10</span>,  <span class="dv">6</span>,   <span class="dv">12</span>,  <span class="dv">5</span>),
-                         <span class="dt">p      =</span> <span class="kw">c</span>(<span class="dv">1</span>/<span class="dv">3</span>, <span class="fl">0.2</span>, <span class="fl">0.5</span>, <span class="fl">0.8</span>, <span class="fl">0.4</span>))
-hyper_estimates &lt;-<span class="st"> </span><span class="kw">autoHyper</span>(<span class="dt">data =</span> squashed2,
-                             <span class="dt">theta_init =</span> theta_init,
-                             <span class="dt">squashed =</span> <span class="ot">TRUE</span>,
-                             <span class="dt">zeroes =</span> <span class="ot">FALSE</span>,
-                             <span class="dt">N_star =</span> <span class="dv">1</span>)
-(theta_hat &lt;-<span class="st"> </span>hyper_estimates$estimates)
+                         <span class="dt">p      =</span> <span class="kw">c</span>(<span class="dv">1</span><span class="op">/</span><span class="dv">3</span>, <span class="fl">0.2</span>, <span class="fl">0.5</span>, <span class="fl">0.8</span>, <span class="fl">0.4</span>))
+hyper_estimates &lt;-<span class="st"> </span><span class="kw">autoHyper</span>(squashed2, <span class="dt">theta_init =</span> theta_init)
+(theta_hat &lt;-<span class="st"> </span>hyper_estimates<span class="op">$</span>estimates)
 <span class="co">#&gt;     alpha1      beta1     alpha2      beta2          P </span>
 <span class="co">#&gt; 3.25379064 0.39988801 2.02613219 1.90808279 0.06534557</span></code></pre></div>
 <div id="qn" class="section level3">
 <h3><code>Qn()</code></h3>
 <p>The <code>Qn()</code> function calculates the mixture fractions for the posterior distributions. The values returned by <code>Qn()</code> correspond to the probability that <span class="math inline">\(\lambda\)</span> came from the first component of the posterior mixture distribution, given <span class="math inline">\(N=n\)</span> (recall there is a <span class="math inline">\(\lambda|N=n\)</span> for each cell in the table, but that each <span class="math inline">\(\lambda\)</span> comes from a common distribution). Thus, the output from <code>Qn()</code> returns a numeric vector of length equal to the total number of product-symptom combinations, which is also the number of rows in the data frame returned by <code>processRaw()</code>. When calculating the <span class="math inline">\(Q_n\)</span>s, be sure to use the full data set from <code>processRaw()</code> – not the squashed data set or the raw data.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">qn &lt;-<span class="st"> </span><span class="kw">Qn</span>(<span class="dt">theta_hat =</span> theta_hat, <span class="dt">N =</span> processed$N, <span class="dt">E =</span> processed$E)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">qn &lt;-<span class="st"> </span><span class="kw">Qn</span>(theta_hat, <span class="dt">N =</span> processed<span class="op">$</span>N, <span class="dt">E =</span> processed<span class="op">$</span>E)
 <span class="kw">head</span>(qn)
 <span class="co">#&gt; [1] 0.2819736 0.3409652 0.3482316 0.2819736 0.2226354 0.2556668</span>
 <span class="kw">identical</span>(<span class="kw">length</span>(qn), <span class="kw">nrow</span>(processed))
@@ -120,59 +116,58 @@ hyper_estimates &lt;-<span class="st"> </span><span class="kw">autoHyper</span>(
 <div id="ebgm" class="section level3">
 <h3><code>ebgm()</code></h3>
 <p>The <code>ebgm()</code> function calculates the Empirical Bayes Geometric Mean <span class="math inline">\((EBGM)\)</span> scores. <span class="math inline">\(EBGM\)</span> is a measure of central tendency of the posterior distributions, <span class="math inline">\(\lambda_{ij}|N=n\)</span>. Scores much larger than one indicate product/adverse event pairs that are reported at an unusually high rate.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">processed$ebgm &lt;-<span class="st"> </span><span class="kw">ebgm</span>(<span class="dt">theta_hat =</span> theta_hat, <span class="dt">N =</span> processed$N, <span class="dt">E =</span> processed$E,
-                       <span class="dt">qn  =</span> qn)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">processed<span class="op">$</span>ebgm &lt;-<span class="st"> </span><span class="kw">ebgm</span>(theta_hat, <span class="dt">N =</span> processed<span class="op">$</span>N, <span class="dt">E =</span> processed<span class="op">$</span>E, <span class="dt">qn  =</span> qn)
 <span class="kw">head</span>(processed)
 <span class="co">#&gt;                      var1                  var2 N            E      RR</span>
 <span class="co">#&gt; 1         1-PHENYLALANINE  HEART RATE INCREASED 1 0.0360548272   27.74</span>
 <span class="co">#&gt; 2 11 UNSPECIFIED VITAMINS                ASTHMA 1 0.0038736591  258.15</span>
-<span class="co">#&gt; 3 11 UNSPECIFIED VITAMINS CARDIAC FUNCTION TEST 1 0.0002979738 3356.00</span>
+<span class="co">#&gt; 3 11 UNSPECIFIED VITAMINS CARDIAC FUNCTION </span><span class="al">TEST</span><span class="co"> 1 0.0002979738 3356.00</span>
 <span class="co">#&gt; 4 11 UNSPECIFIED VITAMINS            CHEST PAIN 1 0.0360548272   27.74</span>
 <span class="co">#&gt; 5 11 UNSPECIFIED VITAMINS              DYSPNOEA 1 0.0765792610   13.06</span>
 <span class="co">#&gt; 6 11 UNSPECIFIED VITAMINS      HYPERSENSITIVITY 1 0.0527413588   18.96</span>
-<span class="co">#&gt;        PRR ebgm</span>
-<span class="co">#&gt; 1    27.96 2.23</span>
-<span class="co">#&gt; 2   279.58 2.58</span>
-<span class="co">#&gt; 3 99999.00 2.63</span>
-<span class="co">#&gt; 4    27.96 2.23</span>
-<span class="co">#&gt; 5    13.11 1.92</span>
-<span class="co">#&gt; 6    19.06 2.09</span></code></pre></div>
+<span class="co">#&gt;      PRR ebgm</span>
+<span class="co">#&gt; 1  27.96 2.23</span>
+<span class="co">#&gt; 2 279.58 2.58</span>
+<span class="co">#&gt; 3    Inf 2.63</span>
+<span class="co">#&gt; 4  27.96 2.23</span>
+<span class="co">#&gt; 5  13.11 1.92</span>
+<span class="co">#&gt; 6  19.06 2.09</span></code></pre></div>
 </div>
 <div id="quantbisect" class="section level3">
 <h3><code>quantBisect()</code></h3>
 <p>The <code>quantBisect()</code> function calculates quantiles of the posterior distribution using the bisection method. <code>quantBisect()</code> can calculate any quantile of the posterior distribution between 1 and 99%, and these quantiles can be used as limits for credibility intervals. Below, <em>QUANT_05</em> is the 5<sup>th</sup> percentile; <em>QUANT_95</em> is the 95<sup>th</sup> percentile. These form the lower and upper bounds of 90% credibility intervals for the Empirical Bayes (EB) scores.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">processed$QUANT_05 &lt;-<span class="st"> </span><span class="kw">quantBisect</span>(<span class="dt">percent =</span> <span class="dv">5</span>, <span class="dt">theta_hat =</span> theta_hat,
-                                  <span class="dt">N =</span> processed$N, <span class="dt">E =</span> processed$E, <span class="dt">qn =</span> qn)
-processed$QUANT_95 &lt;-<span class="st"> </span><span class="kw">quantBisect</span>(<span class="dt">percent =</span> <span class="dv">95</span>, <span class="dt">theta_hat =</span> theta_hat,
-                                  <span class="dt">N =</span> processed$N, <span class="dt">E =</span> processed$E, <span class="dt">qn =</span> qn)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">processed<span class="op">$</span>QUANT_<span class="dv">05</span> &lt;-<span class="st"> </span><span class="kw">quantBisect</span>(<span class="dv">5</span>, <span class="dt">theta_hat =</span> theta_hat,
+                                  <span class="dt">N =</span> processed<span class="op">$</span>N, <span class="dt">E =</span> processed<span class="op">$</span>E, <span class="dt">qn =</span> qn)
+processed<span class="op">$</span>QUANT_<span class="dv">95</span> &lt;-<span class="st"> </span><span class="kw">quantBisect</span>(<span class="dv">95</span>, <span class="dt">theta_hat =</span> theta_hat,
+                                  <span class="dt">N =</span> processed<span class="op">$</span>N, <span class="dt">E =</span> processed<span class="op">$</span>E, <span class="dt">qn =</span> qn)
 <span class="kw">head</span>(processed)
 <span class="co">#&gt;                      var1                  var2 N            E      RR</span>
 <span class="co">#&gt; 1         1-PHENYLALANINE  HEART RATE INCREASED 1 0.0360548272   27.74</span>
 <span class="co">#&gt; 2 11 UNSPECIFIED VITAMINS                ASTHMA 1 0.0038736591  258.15</span>
-<span class="co">#&gt; 3 11 UNSPECIFIED VITAMINS CARDIAC FUNCTION TEST 1 0.0002979738 3356.00</span>
+<span class="co">#&gt; 3 11 UNSPECIFIED VITAMINS CARDIAC FUNCTION </span><span class="al">TEST</span><span class="co"> 1 0.0002979738 3356.00</span>
 <span class="co">#&gt; 4 11 UNSPECIFIED VITAMINS            CHEST PAIN 1 0.0360548272   27.74</span>
 <span class="co">#&gt; 5 11 UNSPECIFIED VITAMINS              DYSPNOEA 1 0.0765792610   13.06</span>
 <span class="co">#&gt; 6 11 UNSPECIFIED VITAMINS      HYPERSENSITIVITY 1 0.0527413588   18.96</span>
-<span class="co">#&gt;        PRR ebgm QUANT_05 QUANT_95</span>
-<span class="co">#&gt; 1    27.96 2.23     0.49    13.85</span>
-<span class="co">#&gt; 2   279.58 2.58     0.52    15.78</span>
-<span class="co">#&gt; 3 99999.00 2.63     0.52    16.02</span>
-<span class="co">#&gt; 4    27.96 2.23     0.49    13.85</span>
-<span class="co">#&gt; 5    13.11 1.92     0.47    11.77</span>
-<span class="co">#&gt; 6    19.06 2.09     0.48    12.95</span></code></pre></div>
+<span class="co">#&gt;      PRR ebgm QUANT_05 QUANT_95</span>
+<span class="co">#&gt; 1  27.96 2.23     0.49    13.85</span>
+<span class="co">#&gt; 2 279.58 2.58     0.52    15.78</span>
+<span class="co">#&gt; 3    Inf 2.63     0.52    16.02</span>
+<span class="co">#&gt; 4  27.96 2.23     0.49    13.85</span>
+<span class="co">#&gt; 5  13.11 1.92     0.47    11.77</span>
+<span class="co">#&gt; 6  19.06 2.09     0.48    12.95</span></code></pre></div>
 <hr />
 </div>
 </div>
 <div id="analysis-of-eb-scores" class="section level1">
 <h1>Analysis of EB-Scores</h1>
 <p>The EB-scores (<span class="math inline">\(EBGM\)</span> and quantile scores) can be used to look for “signals” in the data. As stated in the <strong>Background</strong> section of the <em>Introduction to openEBGM</em> vignette, Bayesian shrinkage causes the EB-scores to be far more stable than their <span class="math inline">\(RR\)</span> counterparts, which allows for better separation between signal and noise. One could, for example, look at all product-symptom combinations where <em>QUANT_05</em> (the lower part of the 90% two-sided credibility interval) is 2 or greater. This is often used as a conservative alternative to <span class="math inline">\(EBGM\)</span> since <em>QUANT_05</em> scores are naturally smaller than <span class="math inline">\(EBGM\)</span> scores. We can say with high confidence that the “true relative reporting ratios” of product/adverse event combinations above this threshold are much greater than 1, so those combinations are truly reported more than expected. The value of 2 is arbitrarily chosen, and depends on the context. Below is an example of how one may identify product-symptom combinations that require further investigation based on the EB-scores.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">suspicious &lt;-<span class="st"> </span>processed[processed$QUANT_05 &gt;=<span class="st"> </span><span class="dv">2</span>, ]
-<span class="kw">nrow</span>(suspicious); <span class="kw">nrow</span>(processed); <span class="kw">nrow</span>(suspicious)/<span class="kw">nrow</span>(processed)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">suspicious &lt;-<span class="st"> </span>processed[processed<span class="op">$</span>QUANT_<span class="dv">05</span> <span class="op">&gt;=</span><span class="st"> </span><span class="dv">2</span>, ]
+<span class="kw">nrow</span>(suspicious); <span class="kw">nrow</span>(processed); <span class="kw">nrow</span>(suspicious)<span class="op">/</span><span class="kw">nrow</span>(processed)
 <span class="co">#&gt; [1] 131</span>
 <span class="co">#&gt; [1] 17189</span>
 <span class="co">#&gt; [1] 0.007621153</span></code></pre></div>
 <p>From above we see that less than 1% of product-symptom pairs are suspect based on the <em>QUANT_05</em> score. One may look more closely at these product-symptom combinations to ascertain which products may need further investigation. Subject matter knowledge is required to determine which signals might identify a possible causal relationship. The EB-scores find statistical associations – not necessarily causal relationships.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">suspicious &lt;-<span class="st"> </span>suspicious[<span class="kw">order</span>(suspicious$QUANT_05, <span class="dt">decreasing =</span> <span class="ot">TRUE</span>),
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">suspicious &lt;-<span class="st"> </span>suspicious[<span class="kw">order</span>(suspicious<span class="op">$</span>QUANT_<span class="dv">05</span>, <span class="dt">decreasing =</span> <span class="ot">TRUE</span>),
                          <span class="kw">c</span>(<span class="st">&quot;var1&quot;</span>, <span class="st">&quot;var2&quot;</span>, <span class="st">&quot;N&quot;</span>, <span class="st">&quot;E&quot;</span>, <span class="st">&quot;QUANT_05&quot;</span>, <span class="st">&quot;ebgm&quot;</span>, 
                            <span class="st">&quot;QUANT_95&quot;</span>)]
 <span class="kw">head</span>(suspicious, <span class="dv">5</span>)
@@ -189,7 +184,7 @@ processed$QUANT_95 &lt;-<span class="st"> </span><span class="kw">quantBisect</s
 <span class="co">#&gt; 7793   8 0.30482718     9.00 15.25    24.52</span>
 <span class="co">#&gt; 8220  11 0.56317044     8.98 14.28    21.78</span>
 
-tabbed &lt;-<span class="st"> </span><span class="kw">table</span>(suspicious$var1)
+tabbed &lt;-<span class="st"> </span><span class="kw">table</span>(suspicious<span class="op">$</span>var1)
 <span class="kw">head</span>(tabbed[<span class="kw">order</span>(tabbed, <span class="dt">decreasing =</span> <span class="ot">TRUE</span>)])
 <span class="co">#&gt; </span>
 <span class="co">#&gt; HYDROXYCUT REGULAR RAPID RELEASE CAPLETS </span>

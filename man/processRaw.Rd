@@ -56,8 +56,8 @@ Stratification variables are identified by searching for the
   are affected. A warning will be displayed if any stratum contains less than
   50 unique IDs.
 
-If a \emph{PRR} calculation results in division by zero, a default
-  value of 99,999 is returned.
+If a \emph{PRR} calculation results in division by zero, \code{Inf}
+  is returned.
 }
 \section{Warnings}{
 

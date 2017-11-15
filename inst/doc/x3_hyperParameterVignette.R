@@ -42,6 +42,9 @@ hyper_estimates_full
 
 hyper_estimates_squashed
 
+## ----autoHyper example with CIs, warning = FALSE-------------------------
+autoHyper(squashed2, theta_init = theta_init, conf_ints = TRUE)$conf_int
+
 ## ----hyperparameter estimation example, warning = FALSE------------------
-exploreHypers(data = squashed2, theta_init = theta_init)
+exploreHypers(data = squashed2, theta_init = theta_init, std_errors = TRUE)
 

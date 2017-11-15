@@ -6,7 +6,7 @@
 \usage{
 exploreHypers(data, theta_init, squashed = TRUE, zeroes = FALSE,
   N_star = 1, method = c("nlminb", "nlm", "bfgs"), param_limit = 100,
-  max_pts = 20000)
+  max_pts = 20000, std_errors = FALSE)
 }
 \arguments{
 \item{data}{A data frame containing columns named \emph{N}, \emph{E},
@@ -34,10 +34,14 @@ against unreasonable/erroneous estimates.}
 
 \item{max_pts}{A scalar whole number for the largest number of data points
 allowed. Used to help prevent extremely long run times.}
+
+\item{std_errors}{A scalar logical indicating if standard errors should be
+returned for the hyperparameter estimates.}
 }
 \value{
-A data frame of hyperparameter estimates corresponding to the initial
-  guesses from \code{theta_init}. Also includes various convergence results:
+A list including the data frame \code{estimates} of hyperparameter
+  estimates corresponding to the initial guesses from \code{theta_init} (plus
+  convergence results):
   \itemize{
     \item{\emph{code}: }{The convergence code returned by the chosen
       optimization function (see \code{\link[stats]{nlminb}},
@@ -51,6 +55,8 @@ A data frame of hyperparameter estimates corresponding to the initial
     \item{\emph{minimum}: }{The negative log-likelihood value corresponding
       to the estimated optimal value of the hyperparameter.}
   }
+  Also returns the data frame \code{std_errs} if standard errors are
+  requested.
 }
 \description{
 \code{exploreHypers} finds hyperparameter estimates using a variety of
@@ -85,6 +91,9 @@ The \emph{converge} column in the resulting data frame was
   determination of \emph{converge} was intended to be conservative (leaning
   towards FALSE when questionable). See the documentation for the chosen
   method for details about \emph{code}.
+
+Standard errors, if requested, are calculated using the observed
+  Fisher information matrix as discussed in DuMouchel (1999).
 }
 \section{Warning}{
  Make sure to properly specify the \code{squashed},
@@ -112,6 +121,11 @@ suppressWarnings(
   exploreHypers(squashed, theta_init = theta_init)
 )
 
+}
+\references{
+DuMouchel W (1999). "Bayesian Data Mining in Large Frequency
+  Tables, With an Application to the FDA Spontaneous Reporting System."
+  \emph{The American Statistician}, 53(3), 177-190.
 }
 \seealso{
 \code{\link[stats]{nlminb}}, \code{\link[stats]{nlm}}, and

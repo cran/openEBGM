@@ -18,10 +18,10 @@ dat_miss <- dat_processed
 dat_miss[2, "E"] <- NA
 
 theta_init <- data.frame(alpha1 = c(0.2, 0.1, 0.3),
-                         beta1 = c(0.1, 0.1, 0.5),
+                         beta1  = c(0.1, 0.1, 0.5),
                          alpha2 = c(2, 10, 6),
-                         beta2 = c(4, 10, 6),
-                         p = c(1/3, 0.2, 0.5))
+                         beta2  = c(4, 10, 6),
+                         p      = c(1/3, 0.2, 0.5))
 
 theta_init_neg <- theta_init
 theta_init_neg[1, 3] <- -0.5
@@ -31,7 +31,7 @@ theta_init_too_big[1, 5] <- 1.1
 proc_zeroes <- processRaw(dat, zeroes = TRUE)
 
 data(caers)
-proc_dat_ustrat <- processRaw(data = caers, stratify = FALSE)
+proc_dat_ustrat <- processRaw(caers, stratify = FALSE)
 proc_dat_ustrat_squash <- squashData(proc_dat_ustrat, bin_size = 80,
                                      keep_bins = 1)
 proc_dat_ustrat_squash <- squashData(proc_dat_ustrat_squash, count = 2,
@@ -51,7 +51,11 @@ testthat::test_that("see if exploreHypers() errors are correctly printed", {
                fixed = TRUE)
   expect_error(exploreHypers(data = proc_dat_ustrat, theta_init = theta_init,
                              squashed = 0, zeroes = FALSE, N_star = 1),
-               "'squashed' and 'zeroes' must be logical values",
+               "'squashed', 'zeroes', and 'std_errors' must be logical values",
+               fixed = TRUE)
+  expect_error(exploreHypers(data = proc_dat_ustrat, theta_init = theta_init,
+                             std_errors = 1),
+               "'squashed', 'zeroes', and 'std_errors' must be logical values",
                fixed = TRUE)
   expect_error(exploreHypers(data = proc_dat_ustrat, theta_init = theta_init,
                              squashed = FALSE, zeroes = TRUE, N_star = 1),
@@ -145,6 +149,11 @@ testthat::test_that("see if autoHyper() errors are correctly printed", {
                       "\n  if that fails, try using zeroes with data squashing --",
                       "\n  or, try using neither zeroes nor data squashing"),
                fixed = TRUE))
+  expect_error(suppressWarnings(
+               autoHyper(data = dat_processed, theta_init = theta_init,
+                         squashed = FALSE, conf_ints = 1),
+               "'conf_ints' must be a logical value"
+  ))
   #Common to exploreHypers...
   #Make sure arguments "line up"
   expect_error(autoHyper(data = proc_dat_ustrat[, c("E", "RR", "PRR")],
@@ -158,7 +167,7 @@ testthat::test_that("see if autoHyper() errors are correctly printed", {
                fixed = TRUE)
   expect_error(autoHyper(data = proc_dat_ustrat, theta_init = theta_init,
                          squashed = 0),
-               "'squashed' and 'zeroes' must be logical values",
+               "'squashed', 'zeroes', and 'std_errors' must be logical values",
                fixed = TRUE)
   expect_error(autoHyper(data = proc_dat_ustrat, theta_init = theta_init,
                          squashed = FALSE, zeroes = TRUE),
@@ -226,11 +235,11 @@ testthat::test_that("see if autoHyper() errors are correctly printed", {
 
 #Begin sanity checks -----------------------------------------------------------
 hyper_no_squash <- suppressWarnings(
-  autoHyper(data = proc_dat_ustrat[1:10000, ], theta_init = theta_init,
+  autoHyper(proc_dat_ustrat[1:10000, ], theta_init = theta_init,
             squashed = FALSE, max_pts = nrow(proc_dat_ustrat))
 )
 hyper_squash <- suppressWarnings(
-  autoHyper(data = proc_dat_ustrat_squash, theta_init = theta_init,
+  autoHyper(proc_dat_ustrat_squash, theta_init = theta_init,
             max_pts = nrow(proc_dat_ustrat_squash))
 )
 
@@ -257,17 +266,15 @@ testthat::test_that("check that estimates make sense", {
 df_method <- squashData(proc_dat_ustrat)
 df_method <- squashData(df_method, count = 2, bin_size = 12)
 hypers_nlminb <- suppressWarnings(
-  exploreHypers(df_method, theta_init = theta_init)
+  exploreHypers(df_method, theta_init = theta_init)$estimates
 )
 
 hypers_nlm <- suppressWarnings(
-  exploreHypers(df_method, theta_init = theta_init,
-                method = "nlm")
+  exploreHypers(df_method, theta_init = theta_init, method = "nlm")$estimates
 )
 
 hypers_bfgs <- suppressWarnings(
-  exploreHypers(df_method, theta_init = theta_init,
-                method = "bfgs")
+  exploreHypers(df_method, theta_init = theta_init, method = "bfgs")$estimates
 )
 
 testthat::test_that("check if 'nlminb' method works", {

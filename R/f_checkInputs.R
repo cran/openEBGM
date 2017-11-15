@@ -149,11 +149,12 @@
 }
 
 #exploreHypers() ---------------------------------------------------------------
-.checkInputs_exploreHypers <- function(data = data, theta_init = theta_init,
-                                       squashed = squashed, zeroes = zeroes,
-                                       N_star = N_star, method = method,
-                                       param_limit = param_limit,
-                                       max_pts = max_pts) {
+.checkInputs_exploreHypers <-
+  function(data = data, theta_init = theta_init, squashed = squashed,
+           zeroes = zeroes, N_star = N_star, method = method,
+           param_limit = param_limit, max_pts = max_pts,
+           std_errors = std_errors) {
+
   #Sanity checks for actual arguments
   if (!all(c("N", "E") %in% colnames(data))) {
     stop("missing the appropriate column names (need 'N' and 'E')")
@@ -161,8 +162,8 @@
   if (.isMissing_num(data$N) || .isMissing_num(data$E)){
     stop("missing or infinite values for 'N' and 'E' are not allowed")
   }
-  if (!is.logical(squashed) || !is.logical(zeroes)) {
-    stop("'squashed' and 'zeroes' must be logical values")
+  if (!is.logical(squashed) || !is.logical(zeroes) || !is.logical(std_errors)) {
+    stop("'squashed', 'zeroes', and 'std_errors' must be logical values")
   }
   if (zeroes && !is.null(N_star)) {
     stop("if zeroes are used, 'N_star' should be NULL")
@@ -209,12 +210,12 @@
 }
 
 #autoHyper() -------------------------------------------------------------------
-.checkInputs_autoHyper <- function(data = data, theta_init = theta_init,
-                                   squashed = squashed, zeroes = zeroes,
-                                   N_star = N_star, tol = tol,
-                                   min_conv = min_conv,
-                                   param_limit = param_limit,
-                                   max_pts = max_pts) {
+.checkInputs_autoHyper <-
+  function(data = data, theta_init = theta_init, squashed = squashed,
+           zeroes = zeroes, N_star = N_star, tol = tol, min_conv = min_conv,
+           param_limit = param_limit, max_pts = max_pts, conf_ints = conf_ints,
+           conf_level = conf_level) {
+
   #Sanity checks for actual arguments
   if (length(tol) != 5) {
     stop("'tol' must have a length of 5")
@@ -225,6 +226,9 @@
   if (min_conv < 1 || min_conv > nrow(theta_init) - 1) {
     stop(paste0("'min_conv' must be a positive number not more than one ",
                 "\n  less than the number of rows in 'theta_init'"))
+  }
+  if (!is.logical(conf_ints)) {
+    stop("'conf_ints' must be a logical value")
   }
 }
 

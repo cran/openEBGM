@@ -5,36 +5,31 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(openEBGM)
 data(caers)  #subset of publicly available CAERS data
 
-processed <- processRaw(data = caers, stratify = FALSE, zeroes = FALSE)
-squashed <- squashData(data = processed)
+processed <- processRaw(caers, stratify = FALSE, zeroes = FALSE)
+squashed <- squashData(processed)
 squashed2 <- squashData(squashed, count = 2, bin_size = 10, keep_bins = 5)
 theta_init <- data.frame(alpha1 = c(0.2, 0.1, 0.3, 0.5, 0.2),
                          beta1  = c(0.1, 0.1, 0.5, 0.3, 0.2),
                          alpha2 = c(2,   10,  6,   12,  5),
                          beta2  = c(4,   10,  6,   12,  5),
                          p      = c(1/3, 0.2, 0.5, 0.8, 0.4))
-hyper_estimates <- autoHyper(data = squashed2,
-                             theta_init = theta_init,
-                             squashed = TRUE,
-                             zeroes = FALSE,
-                             N_star = 1)
+hyper_estimates <- autoHyper(squashed2, theta_init = theta_init)
 (theta_hat <- hyper_estimates$estimates)
 
 ## ------------------------------------------------------------------------
-qn <- Qn(theta_hat = theta_hat, N = processed$N, E = processed$E)
+qn <- Qn(theta_hat, N = processed$N, E = processed$E)
 head(qn)
 identical(length(qn), nrow(processed))
 summary(qn)
 
 ## ------------------------------------------------------------------------
-processed$ebgm <- ebgm(theta_hat = theta_hat, N = processed$N, E = processed$E,
-                       qn  = qn)
+processed$ebgm <- ebgm(theta_hat, N = processed$N, E = processed$E, qn  = qn)
 head(processed)
 
 ## ------------------------------------------------------------------------
-processed$QUANT_05 <- quantBisect(percent = 5, theta_hat = theta_hat,
+processed$QUANT_05 <- quantBisect(5, theta_hat = theta_hat,
                                   N = processed$N, E = processed$E, qn = qn)
-processed$QUANT_95 <- quantBisect(percent = 95, theta_hat = theta_hat,
+processed$QUANT_95 <- quantBisect(95, theta_hat = theta_hat,
                                   N = processed$N, E = processed$E, qn = qn)
 head(processed)
 

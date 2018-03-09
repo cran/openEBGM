@@ -48,10 +48,6 @@ Due to Bayesian shrinkage (please see the **Background** section of the
 *Introduction to openEBGM* vignette), the EB scores are much more stable than
 $RR$ for small counts.
 
-### References
-
-Please see the *Introduction to openEBGM* vignette.
-
 -----
 
 # Calculating the EB-Scores

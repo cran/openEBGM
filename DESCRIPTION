@@ -1,7 +1,6 @@
 Package: openEBGM
-Type: Package
 Title: EBGM Scores for Mining Large Contingency Tables
-Version: 0.3.0
+Version: 0.4.0
 Authors@R: c(
 	person("John", "Ihrie", email = "John.Ihrie@fda.hhs.gov",
 	       role = c("cre", "aut")),
@@ -9,7 +8,9 @@ Authors@R: c(
 	person("Ismaïl", "Ahmed", role = "ctb",
 	       comment = "author of 'PhViD' package (derived code)"),
 	person("Antoine", "Poncet", role = "ctb",
-	       comment = "author of 'PhViD' package (derived code)"))
+	       comment = "author of 'PhViD' package"),
+	person("Sergio", "Venturini", role = "ctb",
+	       comment = "author of 'mederrRank' package (derived code)"))
 Maintainer: John Ihrie <John.Ihrie@fda.hhs.gov>
 Description: An implementation of DuMouchel's (1999) 
   <doi:10.1080/00031305.1999.10474456> Bayesian data mining method for the
@@ -22,9 +23,12 @@ Description: An implementation of DuMouchel's (1999)
   Also calculates relative and proportional reporting ratios. Builds on the work
   of the 'PhViD' package, from which much of the code is derived. Some of the
   added features include stratification to adjust for confounding variables and
-  data squashing to improve computational efficiency.
+  data squashing to improve computational efficiency. Now includes an
+  implementation of the EM algorithm for hyperparameter estimation loosely
+  derived from the 'mederrRank' package.
 Depends: R (>= 3.2.3)
 License: GPL-2 | GPL-3
+URL: https://journal.r-project.org/archive/2017/RJ-2017-063/index.html
 LazyData: TRUE
 RoxygenNote: 6.0.1
 Imports: data.table (>= 1.10.0), ggplot2 (>= 2.2.1), stats (>= 3.2.3)
@@ -33,10 +37,11 @@ Suggests: dplyr (>= 0.5.0), knitr (>= 1.15.1), rmarkdown (>= 1.2),
 VignetteBuilder: knitr
 Encoding: UTF-8
 NeedsCompilation: no
-Packaged: 2017-11-15 18:38:01 UTC; John.Ihrie
+Packaged: 2018-03-09 14:30:31 UTC; John.Ihrie
 Author: John Ihrie [cre, aut],
   Travis Canida [aut],
   Ismaïl Ahmed [ctb] (author of 'PhViD' package (derived code)),
-  Antoine Poncet [ctb] (author of 'PhViD' package (derived code))
+  Antoine Poncet [ctb] (author of 'PhViD' package),
+  Sergio Venturini [ctb] (author of 'mederrRank' package (derived code))
 Repository: CRAN
-Date/Publication: 2017-11-15 22:26:13 UTC
+Date/Publication: 2018-03-09 16:48:18 UTC

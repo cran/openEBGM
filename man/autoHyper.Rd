@@ -10,8 +10,8 @@ autoHyper(data, theta_init, squashed = TRUE, zeroes = FALSE, N_star = 1,
   "99"))
 }
 \arguments{
-\item{data}{A data frame containing columns named \emph{N}, \emph{E},
-and (if squashed) \emph{weight}.}
+\item{data}{A data frame from \code{\link{processRaw}} containing columns
+named \emph{N}, \emph{E}, and (if squashed) \emph{weight}.}
 
 \item{theta_init}{A data frame of initial hyperparameter guesses with
 columns ordered as:
@@ -129,6 +129,7 @@ DuMouchel W (1999). "Bayesian Data Mining in Large Frequency
 
 \code{\link{squashData}} for data preparation
 
-Other hyperparameter estimation functions: \code{\link{exploreHypers}}
+Other hyperparameter estimation functions: \code{\link{exploreHypers}},
+  \code{\link{hyperEM}}
 }
 \keyword{openEBGM}

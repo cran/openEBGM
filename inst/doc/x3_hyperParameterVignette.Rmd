@@ -14,16 +14,15 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 
 ## Background
 
-The basis of DuMouchel's method lies in the fact that it is an "Empirical Bayes"
-(EB) method. That is, the data are a driving force behind the choice of the 
-prior distribution (in contrast to typical Bayesian methods, where the prior is 
-chosen without regard to the actual data). One outcome of this is a known 
-posterior distribution that relies on a set of hyperparameters derived from the 
-prior distribution. These hyperparameters are estimated by their most likely 
-value in the context of Empirical Bayesian methods. One process by which this 
-can occur involves maximizing the likelihood function of the marginal 
-distributions of the counts (or in our case, minimizing the negative 
-log-likelihood function).
+DuMouchel used an "Empirical Bayes" (EB) method. That is, the data are a driving
+force behind the choice of the prior distribution (in contrast to typical
+Bayesian methods, where the prior is chosen without regard to the actual data).
+One outcome of this is a known posterior distribution that relies on a set of
+hyperparameters derived from the prior distribution. These hyperparameters are
+estimated by their most likely value in the context of Empirical Bayesian
+methods. One process by which this can occur involves maximizing the likelihood
+function of the marginal distributions of the counts (or in our case, minimizing
+the negative log-likelihood function).
 
 ### Optimization
 
@@ -35,29 +34,40 @@ utilize the following:
 * Optimization using PORT routines
 * Newton-type algorithm
 * A quasi-Newton method (also known as a variable metric method)
+* *new in v0.4.0*: A version of the Expectation-Maximization (EM) Algorithm
+known as the Expectation/Conditional Maximization (ECM) Algorithm (*1*)
 
-*openEBGM*'s functions actually use local optimization algorithms implemented in
-R's *stats* package, except with multiple starting points. The user is 
-encouraged to explore a variety of optimization approaches because the accuracy 
-of a global optimization result is extremely difficult (if not impossible) to
-verify and other approaches might work just as well (or better).
-
-### Additional notes
-
-In his 2001 paper, DuMouchel mentions a methodology he calls "data squashing", 
-which "compacts" the dataset to reduce the amount of computation needed to
-estimate the hyperparameters. *openEBGM* provides an implementation for data 
-squashing.
+*openEBGM*'s functions (prior to v0.4.0) use multiple starting points and local
+optimization algorithms implemented in R's *stats* package. The user is
+encouraged to explore a variety of optimization approaches because the accuracy
+of a global optimization result is extremely difficult to verify and other
+approaches might work better in some cases.
 
 ### References
 
-Please see the *Introduction to openEBGM* vignette.
+1. Meng X-L, Rubin D (1993). "Maximum likelihood estimation via the ECM
+algorithm: A general framework." *Biometrika*, 80(2), 267-278.
+https://doi.org/10.1093/biomet/80.2.267
+
+1. DuMouchel W, Pregibon D (2001). "Empirical Bayes Screening for
+Multi-item Associations." In *Proceedings of the Seventh ACM SIGKDD
+International Conference on Knowledge Discovery and Data Mining*, KDD '01,
+pp. 67-76. ACM, New York, NY, USA. ISBN 1-58113-391-X.
+https://doi.org/10.1145/502512.502526
+
+1. Millar, Russell B (2011). "Maximum Likelihood Estimation and Inference."
+*John Wiley & Sons, Ltd*, 111-112. https://doi.org/10.1002/9780470094846
 
 --------
 
 # Estimating the Hyperparameters
 
 ## Data Squashing
+
+DuMouchel & Pregibon (*2*) discuss a methodology they call "data squashing", 
+which "compacts" the dataset to reduce the amount of computation needed to
+estimate the hyperparameters. *openEBGM* provides an implementation for data 
+squashing.
 
 The actual counts ($N$) and expected counts ($E$) are used to estimate the 
 hyperparameters of the prior distribution. A large contingency table will have 
@@ -81,10 +91,10 @@ An example is given below using unstratified expected counts:
 library(openEBGM)
 data(caers)
 
-processed <- processRaw(data = caers)
+processed <- processRaw(caers)
 processed[1:4, 1:4]
 
-squashed <- squashData(data = processed) #Using defaults
+squashed <- squashData(processed) #Using defaults
 head(squashed)
 
 nrow(processed)
@@ -223,6 +233,45 @@ exploreHypers(data = squashed2, theta_init = theta_init, std_errors = TRUE)
 `exploreHypers()` offers three gradient-based optimization methods and is 
 basically just a wrapper around commonly used functions from the *stats* package
 mentioned earlier: `nlminb()` (the default), `nlm()`, & `optim()`.
+
+###`hyperEM()` (*new in v0.4.0*)
+
+`hyperEM()` implements a version of the EM algorithm referred to by Meng & Rubin
+(*1*) as the Expectation/Conditional Maximization (ECM) algorithm. `hyperEM()`
+uses a single starting point to find a local maximum likelihood estimate for
+$\theta$ either by finding roots of the score functions (partial derivatives of
+the log-likelihood function) or by using `stats::nlminb()` to directly minimize
+the negative log-likelihood function. The method described by Millar (*3*) is
+used to accelerate the estimate of $\theta$ every 100 iterations of the
+algorithm.
+
+```{r hyperEM example, warning = FALSE}
+data(caers)
+proc <- processRaw(caers)
+squashed <- squashData(proc, bin_size = 100, keep_bins = 0)
+squashed <- squashData(squashed, count = 2, bin_size = 12)
+hyperEM_ests <- hyperEM(squashed, theta_init_vec = c(1, 1, 2, 2, .3),
+                        conf_int = TRUE, track = TRUE)
+str(hyperEM_ests)
+```
+
+Setting `track = TRUE` tracks the log-likelihood and hyperparameter estimates at
+each iteration, which we can plot to study the behavior of the algorithm:
+
+```{r hyperEM plotting example, warning = FALSE, fig.width = 7, fig.height = 10}
+library(ggplot2)
+library(tidyr)
+pdat <- gather(hyperEM_ests$tracking, key = "metric", value = "value", logL:P)
+pdat$metric <- factor(pdat$metric, levels = unique(pdat$metric), ordered = TRUE)
+ggplot(pdat, aes(x = iter, y = value)) +
+  geom_line(size = 1.1, col = "blue") +
+  facet_grid(metric ~ ., scales = "free") +
+  ggtitle("Convergence Assessment",
+          sub = "Dashed red line indicates accelerated estimate") +
+  labs(x = "Iteration Count", y = "Estimate") +
+  geom_vline(xintercept = c(100, 200), size = 1, linetype = 2, col = "red")
+```
+
 
 Although the user is encouraged to explore various approaches for maximum 
 likelihood hyperparameter estimation, `autoHyper()` will often give

@@ -11,7 +11,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
-<meta name="date" content="2017-11-15" />
+<meta name="date" content="2018-03-09" />
 
 <title>Empirical Bayes Metrics with openEBGM</title>
 
@@ -68,7 +68,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 <h1 class="title toc-ignore">Empirical Bayes Metrics with openEBGM</h1>
-<h4 class="date"><em>2017-11-15</em></h4>
+<h4 class="date"><em>2018-03-09</em></h4>
 
 
 
@@ -77,11 +77,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>In Bayesian statistics, the gamma distribution is the conjugate prior distribution for a Poisson likelihood. ‘<em>Conjugate</em>’ means that the posterior distribution will follow the same general form as the prior distribution. DuMouchel (1999) used a model with a Poisson(<span class="math inline">\(\mu_{ij}\)</span>) likelihood for the counts (for row <em>i</em> and column <em>j</em> of the contingency table). We are interested in the ratio <span class="math inline">\(\lambda_{ij}=\frac{\mu_{ij}}{E_{ij}}\)</span>, where <span class="math inline">\(E_{ij}\)</span> are the expected counts. The <span class="math inline">\(\lambda_{ij}\)</span>s are considered random draws from a mixture of two gamma distributions (our prior) with hyperparameter <span class="math inline">\(\theta=(\alpha_1,\beta_1,\alpha_2,\beta_2,P)\)</span>, where <span class="math inline">\(P\)</span> is the prior probability that <span class="math inline">\(\lambda\)</span> came from the first component of the prior mixture (i.e., the mixture fraction). The prior is a single distribution that models all the cells in the table; however, there is a separate posterior distribution for each cell in the table. The posterior distribution of <span class="math inline">\(\lambda\)</span>, given count <span class="math inline">\(N=n\)</span>, is a mixture of two gamma distributions with parameters <span class="math inline">\(\theta=(\alpha_1+n,\beta_1+E,\alpha_2+n,\beta_2+E,Q_n)\)</span> (subscripts suppressed for clarity), where <span class="math inline">\(Q_n\)</span> is the probability that <span class="math inline">\(\lambda\)</span> came from the first component of the posterior, given <span class="math inline">\(N=n\)</span> (i.e., the mixture fraction).</p>
 <p>The posterior distribution, in a sense, is a Bayesian representation of the relative reporting ratio, <span class="math inline">\(RR\)</span> (note the similarity in the equations <span class="math inline">\(RR_{ij}=\frac{N_{ij}}{E_{ij}}\)</span> and <span class="math inline">\(\lambda_{ij}=\frac{\mu_{ij}}{E_{ij}}\)</span>). The Empirical Bayes (EB) metrics are taken from the posterior distribution. The Empirical Bayes Geometric Mean <span class="math inline">\((EBGM)\)</span> is the antilog of the mean of the log<sub>2</sub>-transformed posterior distribution. The <span class="math inline">\(EBGM\)</span> is therefore a measure of central tendency of the posterior distribution. The 5% and 95% quantiles of the posterior distributions can be used to create two-sided 90% credibility intervals for <span class="math inline">\(\lambda_{ij}\)</span>, given <span class="math inline">\(N_{ij}\)</span> (i.e, our “sort of” RR). Alternatively, since we are most interested in the lower bound, we could ignore the upper bound and create a one-sided 95% credibility interval.</p>
 <p>Due to Bayesian shrinkage (please see the <strong>Background</strong> section of the <em>Introduction to openEBGM</em> vignette), the EB scores are much more stable than <span class="math inline">\(RR\)</span> for small counts.</p>
-<div id="references" class="section level3">
-<h3>References</h3>
-<p>Please see the <em>Introduction to openEBGM</em> vignette.</p>
 <hr />
-</div>
 </div>
 <div id="calculating-the-eb-scores" class="section level1">
 <h1>Calculating the EB-Scores</h1>

@@ -1,9 +1,171 @@
 #Helper functions to check if actual argument values make sense
 
+#*******************************************************************************
+#************************  General Functions  **********************************
+#*******************************************************************************
+
+.checkInputs_processed_data <- function(data) {
+
+  if (!is.data.frame(data)) {
+    stop("'data' must be a data frame")
+  }
+  if (!all(c("N", "E") %in% colnames(data))) {
+    stop("missing the appropriate column names (need 'N' and 'E')")
+  }
+  if (.isMissing_num(data$N) || .isMissing_num(data$E)){
+    stop("missing or infinite values for 'N' and 'E' are not allowed")
+  }
+}
+
+.checkInputs_squashed_zeroes <- function(data, squashed, zeroes) {
+
+  if (!is.logical(squashed) || !is.logical(zeroes)) {
+    stop("'squashed' and 'zeroes' must be logical values")
+  }
+  if (squashed && !"weight" %in% colnames(data)) {
+    stop("'weight' column is missing -- are these data really squashed?")
+  }
+  if (!squashed && "weight" %in% colnames(data)) {
+    stop("'weight' column was found -- were these data squashed?")
+  }
+  if (zeroes && min(data$N) != 0) {
+    stop("no zero counts found")
+  }
+  if (!zeroes && min(data$N) == 0) {
+    stop("zero counts found")
+  }
+}
+
+.checkInputs_Nstar <- function(data, zeroes, N_star) {
+
+  if (zeroes && !is.null(N_star)) {
+    stop("if zeroes are used, 'N_star' should be NULL")
+  }
+  if (!zeroes && is.null(N_star)) {
+    stop("if zeroes are not used, 'N_star' must be specified")
+  }
+  if (!is.null(N_star)) {
+    if (!is.numeric(N_star) || N_star < 1 || N_star %% 1 != 0) {
+      stop("'N_star' must be NULL or a positive whole number")
+    }
+    N_star <- as.integer(N_star)
+    if (N_star != min(as.integer(names(table(data$N))))) {
+      stop("'N_star' does not agree with the data set")
+    }
+  }
+}
+
+.checkInputs_theta_init <- function(theta_init) {
+
+  if (ncol(theta_init) != 5) {
+    stop("'theta_init' must contain 5 columns")
+  }
+  if (min(theta_init) <= 0) {
+    stop("'theta_init' must contain nonnegative values")
+  }
+  if (max(theta_init[5]) >= 1) {
+    stop("'theta[5]' (i.e., 'P') must be <1")
+  }
+}
+
+.checkInputs_theta_hat <- function(theta_hat) {
+
+  if (length(theta_hat) != 5) {
+    stop("'theta_hat' must contain 5 values")
+  }
+  if (any(is.na((theta_hat)))) {
+    stop("'theta_hat' cannot contain missing values")
+  }
+  if (min(theta_hat) <= 0) {
+    stop("'theta_hat' must contain only positive values")
+  }
+  if (theta_hat[5] >= 1) {
+    stop("'theta_hat[5]' (i.e., 'P') must be less than 1")
+  }
+}
+
+.checkInputs_theta_init_vec <- function(theta_init_vec) {
+
+  if (length(theta_init_vec) != 5) {
+    stop("'theta_init_vec' must contain 5 elements")
+  }
+  if (any(is.na((theta_init_vec)))) {
+    stop("'theta_init_vec' cannot contain missing values")
+  }
+  if (!is.numeric(theta_init_vec) || min(theta_init_vec) <= 0) {
+    stop("'theta_init_vec' must contain positive numeric values")
+  }
+  if (theta_init_vec[5] >= 1) {
+    stop("'theta_init_vec[5]' (i.e., 'P') must be <1")
+  }
+}
+
+.checkInputs_score <- function(N_star) {
+
+  if (N_star != 1 && !is.null(N_star)) {
+    stop("if 'method' is 'score', N_star must be 1 or NULL")
+  }
+}
+
+.checkInputs_LL_converge <- function(LL_tol, consecutive, max_iter) {
+
+  if (!is.numeric(LL_tol) || LL_tol <= 0) {
+    stop("'LL_tol' must be a positive numeric value")
+  }
+  if (!is.numeric(consecutive) || consecutive < 0 || consecutive %% 1 != 0) {
+    stop("'consecutive' must be a nonnegative whole number")
+  }
+  if (!is.numeric(max_iter) || max_iter <= 0 || max_iter %% 1 != 0) {
+    stop("'max_iter' must be a positive whole number")
+  }
+}
+
+.checkInputs_param_lower_upper <- function(param_lower, param_upper) {
+
+  if (!is.numeric(param_lower) || param_lower <= 0) {
+    stop("'param_lower' must be a positive numeric value")
+  }
+  if (!is.numeric(param_upper) || param_upper <= 0) {
+    stop("'param_upper' must be a positive numeric value")
+  }
+  if (param_lower >= param_upper) {
+    stop("'param_lower' must be less than 'param_upper'")
+  }
+}
+
+.checkInputs_print_level <- function(print_level) {
+
+  if (!print_level %in% 0:2) {
+    stop("'print_level' must be 0, 1, or 2")
+  }
+}
+
+.checkInputs_N_E <- function(N, E) {
+
+  if (length(N) != length(E)) {
+    stop("'N' and 'E' must have the same length")
+  }
+  if (.isMissing_num(N) | .isMissing_num(E)) {
+    stop("missing or infinite values for 'N' and 'E' are not allowed")
+  }
+}
+
+.checkInputs_N_E_qn <- function(N, E, qn) {
+
+  if (length(N) != length(E) || length(N) != length(qn)) {
+    stop("'N', 'E', and 'qn' must have the same length")
+  }
+  if (.isMissing_num(N) || .isMissing_num(E) || .isMissing_num(qn)) {
+    stop("missing or infinite values for 'N', 'E', and 'qn' are not allowed")
+  }
+}
+
+#*******************************************************************************
+#*******************  Data Processing Functions  *******************************
+#*******************************************************************************
+
 #processRaw() ------------------------------------------------------------------
-.checkInputs_processRaw <- function(data = data, stratify = stratify,
-                                    zeroes = zeroes) {
-  #Sanity checks for actual arguments
+.checkInputs_processRaw <- function(data, stratify, zeroes) {
 
   if (!is.data.frame(data)) {
     stop("'data' must be a data frame")
@@ -20,10 +182,9 @@
   }
 }
 
-.checkStrata_processRaw <- function(data = data, max_cats = max_cats) {
-  #Sanity checks for actual arguments. Also prints messages and
-  #adds 'stratum' column to 'data'
+.checkStrata_processRaw <- function(data, max_cats) {
 
+  #Also prints messages and adds 'stratum' column to 'data'
   strat_vars <- colnames(data)[grepl("strat", colnames(data))]
   if (length(strat_vars) == 0) {
     stop("no stratification variables found")
@@ -53,16 +214,11 @@
 }
 
 #squashData() ------------------------------------------------------------------
-.checkInputs_squashData <- function(data = data, count = count,
-                                    bin_size = bin_size, keep_bins = keep_bins,
-                                    min_bin = min_bin, min_pts = min_pts) {
-  #Sanity checks for actual arguments. Also coerces df to data table.
-  if (!is.data.frame(data)) {
-    stop("'data' must be a data frame")
-  }
-  if (!all(c("N", "E") %in% colnames(data))) {
-    stop("missing the appropriate column names (need 'N' and 'E')")
-  }
+.checkInputs_squashData <- function(data, count, bin_size, keep_bins,
+                                    min_bin, min_pts) {
+
+  #Also coerces data frame to data table.
+  .checkInputs_processed_data(data)
   count     <- as.integer(count)
   bin_size  <- as.integer(bin_size)
   keep_bins <- as.integer(keep_bins)
@@ -106,9 +262,12 @@
   data
 }
 
-#Likelihood functions ----------------------------------------------------------
-.checkInputs_negLLzero <- function(theta = theta, N = N, E = E) {
-  #Sanity checks for actual arguments
+#*******************************************************************************
+#************************  Likelihood Functions  *******************************
+#*******************************************************************************
+
+.checkInputs_negLLzero <- function(theta, N, E) {
+
   if (length(N) != length(E)) {
     stop("'N' & 'E' must be the same length")
   }
@@ -117,8 +276,8 @@
   }
 }
 
-.checkInputs_negLLzeroSquash <- function(theta = theta, ni = ni, ei = ei,
-                                         wi = wi) {
+.checkInputs_negLLzeroSquash <- function(theta, ni, ei, wi) {
+
   ni_len <- length(ni)
   if (ni_len != length(ei) || ni_len != length(wi)) {
     stop("'ni', 'ei', & 'wi' must be the same length")
@@ -128,7 +287,8 @@
   }
 }
 
-.checkInputs_negLL <- function(theta = theta, N = N, E = E, N_star = N_star) {
+.checkInputs_negLL <- function(theta, N, E, N_star) {
+
   if (length(N) != length(E)) {
     stop("'N' & 'E' must be the same length")
   }
@@ -137,8 +297,8 @@
   }
 }
 
-.checkInputs_negLLsquash <- function(theta = theta, ni = ni, ei = ei, wi = wi,
-                                     N_star = N_star) {
+.checkInputs_negLLsquash <- function(theta, ni, ei, wi, N_star) {
+
   ni_len <- length(ni)
   if (ni_len != length(ei) || ni_len != length(wi)) {
     stop("'ni', 'ei', & 'wi' must be the same length")
@@ -148,75 +308,34 @@
   }
 }
 
-#exploreHypers() ---------------------------------------------------------------
-.checkInputs_exploreHypers <-
-  function(data = data, theta_init = theta_init, squashed = squashed,
-           zeroes = zeroes, N_star = N_star, method = method,
-           param_limit = param_limit, max_pts = max_pts,
-           std_errors = std_errors) {
 
-  #Sanity checks for actual arguments
-  if (!all(c("N", "E") %in% colnames(data))) {
-    stop("missing the appropriate column names (need 'N' and 'E')")
-  }
-  if (.isMissing_num(data$N) || .isMissing_num(data$E)){
-    stop("missing or infinite values for 'N' and 'E' are not allowed")
-  }
-  if (!is.logical(squashed) || !is.logical(zeroes) || !is.logical(std_errors)) {
-    stop("'squashed', 'zeroes', and 'std_errors' must be logical values")
-  }
-  if (zeroes && !is.null(N_star)) {
-    stop("if zeroes are used, 'N_star' should be NULL")
-  }
-  if (!zeroes && is.null(N_star)) {
-    stop("if zeroes are not used, 'N_star' must be specified")
-  }
-  if (zeroes && min(data$N) != 0) {
-    stop("no zero counts found")
-  }
-  if (!zeroes && min(data$N) == 0) {
-    stop("zero counts found")
-  }
-  if (!is.null(N_star)) {
-    if (!is.numeric(N_star) || N_star < 1) {
-      stop("'N_star' must be >= 1 or NULL")
-    }
-    N_star <- as.integer(N_star)
-    if (N_star != min(as.integer(names(table(data$N))))) {
-      stop("'N_star' does not agree with the data set")
-    }
-  }
+#*******************************************************************************
+#************************  Prior Functions  ************************************
+#*******************************************************************************
+
+#exploreHypers() ---------------------------------------------------------------
+.checkInputs_exploreHypers <- function(data, theta_init, squashed, zeroes,
+                                       N_star, method, param_limit, max_pts,
+                                       std_errors) {
+
+  .checkInputs_processed_data(data)
+  .checkInputs_theta_init(theta_init)
+  .checkInputs_squashed_zeroes(data, squashed, zeroes)
+  .checkInputs_Nstar(data, zeroes, N_star)
   if (nrow(data) > max_pts) {
     error1 <- "there are more than "
     error2 <- "\n  either squash data, run individual optimizations,"
     error3 <- "\n  or increase 'max_pts' (caution: long run times)"
     stop(paste0(error1, max_pts, " points --", error2, error3))
   }
-  if (ncol(theta_init) != 5) {
-    stop("'theta_init' must contain 5 columns")
-  }
-  if (min(theta_init) <= 0) {
-    stop("'theta_init' must contain nonnegative values")
-  }
-  if (max(theta_init[5]) >= 1) {
-    stop("'theta[5]' (i.e., 'P') must be <1")
-  }
-  if (squashed && !"weight" %in% colnames(data)) {
-    stop("'weight' column is missing -- are these data really squashed?")
-  }
-  if (!squashed && "weight" %in% colnames(data)) {
-    stop("'weight' column was found -- were these data squashed?")
+  if (!is.logical(std_errors)) {
+    stop("'std_errors' must be a logical value")
   }
 }
 
 #autoHyper() -------------------------------------------------------------------
-.checkInputs_autoHyper <-
-  function(data = data, theta_init = theta_init, squashed = squashed,
-           zeroes = zeroes, N_star = N_star, tol = tol, min_conv = min_conv,
-           param_limit = param_limit, max_pts = max_pts, conf_ints = conf_ints,
-           conf_level = conf_level) {
+.checkInputs_autoHyper <- function(tol, min_conv, theta_init, conf_ints) {
 
-  #Sanity checks for actual arguments
   if (length(tol) != 5) {
     stop("'tol' must have a length of 5")
   }
@@ -232,76 +351,61 @@
   }
 }
 
+#hyperEM() ---------------------------------------------------------------------
+.checkInputs_hyperEM <-
+  function(data, theta_init_vec, squashed, zeroes, N_star, method, LL_tol,
+           consecutive, param_lower, param_upper, print_level, max_iter,
+           conf_ints, track) {
+
+    .checkInputs_processed_data(data)
+    .checkInputs_theta_init_vec(theta_init_vec)
+    .checkInputs_squashed_zeroes(data, squashed, zeroes)
+    if (method == "score") .checkInputs_score(N_star)
+    .checkInputs_Nstar(data, zeroes, N_star)
+    .checkInputs_LL_converge(LL_tol, consecutive, max_iter)
+    .checkInputs_param_lower_upper(param_lower, param_upper)
+    .checkInputs_print_level(print_level)
+    if (!is.logical(conf_ints)) {
+      stop("'conf_ints' must be a logical value")
+    }
+    if (!is.logical(track)) {
+      stop("'track' must be a logical value")
+    }
+}
+
+#*******************************************************************************
+#************************  Posterior Functions  ********************************
+#*******************************************************************************
+
 #Qn() --------------------------------------------------------------------------
-.checkInputs_Qn <- function(theta_hat = theta_hat, N = N, E = E) {
-  #Sanity checks for actual arguments
-  if (length(theta_hat) != 5) {
-    stop("'theta_hat' must contain 5 values")
-  }
-  if (min(theta_hat) <= 0) {
-    stop("'theta_hat' must contain only positive values")
-  }
-  if (theta_hat[5] >= 1) {
-    stop("'theta_hat[5]' (i.e., 'P') must be less than 1")
-  }
-  if (length(N) != length(E)) {
-    stop("'N' and 'E' must have the same length")
-  }
-  if (.isMissing_num(N) | .isMissing_num(E)) {
-    stop("missing or infinite values for 'N' and 'E' are not allowed")
-  }
+.checkInputs_Qn <- function(theta_hat, N, E) {
+
+  .checkInputs_theta_hat(theta_hat)
+  .checkInputs_N_E(N, E)
 }
 
 #ebgm() ------------------------------------------------------------------------
-.checkInputs_ebgm <- function(theta_hat = theta_hat, N = N, E = E, qn = qn,
-                  digits = digits) {
-  #Sanity checks for actual arguments
-  if (length(theta_hat) != 5) {
-    stop("'theta_hat' must contain 5 values")
-  }
-  if (min(theta_hat) <= 0) {
-    stop("'theta_hat' must contain only positive values")
-  }
-  if (theta_hat[5] >= 1) {
-    stop("'theta_hat[5]' (i.e., 'P') must be less than 1")
-  }
-  if (length(N) != length(E) || length(N) != length(qn)) {
-    stop("'N', 'E', and 'qn' must have the same length")
-  }
-  if (.isMissing_num(N) || .isMissing_num(E) || .isMissing_num(qn)) {
-    stop("missing or infinite values for 'N', 'E', and 'qn' are not allowed")
-  }
+.checkInputs_ebgm <- function(theta_hat, N, E, qn, digits) {
+
+  .checkInputs_theta_hat(theta_hat)
+  .checkInputs_N_E_qn(N, E, qn)
 }
 
 #quantBisect() -----------------------------------------------------------------
-.checkInputs_quantBisect <- function(percent = percent, theta_hat = theta_hat,
-                                     N = N, E = E, qn = qn, digits = digits,
-                                     limits = limits, max_iter = max_iter) {
-  #Sanity checks for actual arguments
+.checkInputs_quantBisect <- function(percent, theta_hat, N, E, qn, digits,
+                                     limits, max_iter) {
+
   if (percent < 1 || percent > 99) {
     stop("'percent' must be a value between 1 and 99 (inclusive)")
   }
-  if (length(theta_hat) != 5) {
-    stop("'theta_hat' must contain 5 values")
-  }
-  if (min(theta_hat) <= 0) {
-    stop("'theta_hat' must contain only positive values")
-  }
-  if (theta_hat[5] >= 1) {
-    stop("'theta_hat[5]' (i.e., 'P') must be less than 1")
-  }
-  if (length(N) != length(E) || length(N) != length(qn)) {
-    stop("'N', 'E', and 'qn' must have the same length")
-  }
-  if (.isMissing_num(N) || .isMissing_num(E) || .isMissing_num(qn)) {
-    stop("missing or infinite values for 'N', 'E', and 'qn' are not allowed")
-  }
+  .checkInputs_theta_hat(theta_hat = theta_hat)
+  .checkInputs_N_E_qn(N, E, qn)
 }
 
 #ebScores() --------------------------------------------------------------------
-.checkInputs_ebScores <- function(processed = processed,
-                                  hyper_estimate = hyper_estimate,
-                                  quantiles = quantiles, digits = digits) {
+.checkInputs_ebScores <- function(processed, hyper_estimate, quantiles,
+                                  digits) {
+
   if(!is.null(quantiles) & !is.numeric(quantiles)) {
     stop("'quantiles' must be NULL or a numeric vector of quantiles")
   }
@@ -319,4 +423,5 @@
     stop("'processed' dataframe does not have 'var' variables. Was this dataframe
          actually created by processRaw()?")
   }
+  .checkInputs_processed_data(processed)
 }

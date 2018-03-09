@@ -61,7 +61,7 @@ testthat::test_that("do warnings/errors get correctly printed?", {
                "missing the appropriate column names (need 'N' and 'E')",
                fixed = TRUE)
   expect_error(squashData(dat_missing1),
-               "missing values for 'N' or 'E' are not allowed",
+               "missing or infinite values for 'N' and 'E' are not allowed",
                fixed = TRUE)
   expect_error(squashData(dat_missing2),
                "missing values for 'N' or 'E' are not allowed",

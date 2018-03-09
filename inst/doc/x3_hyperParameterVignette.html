@@ -11,7 +11,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
-<meta name="date" content="2017-11-15" />
+<meta name="date" content="2018-03-09" />
 
 <title>Hyperparameter Estimation with openEBGM</title>
 
@@ -68,13 +68,13 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 <h1 class="title toc-ignore">Hyperparameter Estimation with openEBGM</h1>
-<h4 class="date"><em>2017-11-15</em></h4>
+<h4 class="date"><em>2018-03-09</em></h4>
 
 
 
 <div id="background" class="section level2">
 <h2>Background</h2>
-<p>The basis of DuMouchel’s method lies in the fact that it is an “Empirical Bayes” (EB) method. That is, the data are a driving force behind the choice of the prior distribution (in contrast to typical Bayesian methods, where the prior is chosen without regard to the actual data). One outcome of this is a known posterior distribution that relies on a set of hyperparameters derived from the prior distribution. These hyperparameters are estimated by their most likely value in the context of Empirical Bayesian methods. One process by which this can occur involves maximizing the likelihood function of the marginal distributions of the counts (or in our case, minimizing the negative log-likelihood function).</p>
+<p>DuMouchel used an “Empirical Bayes” (EB) method. That is, the data are a driving force behind the choice of the prior distribution (in contrast to typical Bayesian methods, where the prior is chosen without regard to the actual data). One outcome of this is a known posterior distribution that relies on a set of hyperparameters derived from the prior distribution. These hyperparameters are estimated by their most likely value in the context of Empirical Bayesian methods. One process by which this can occur involves maximizing the likelihood function of the marginal distributions of the counts (or in our case, minimizing the negative log-likelihood function).</p>
 <div id="optimization" class="section level3">
 <h3>Optimization</h3>
 <p>Global optimization is a broad field. There are many existing R packages with minimization routines which may be used in the estimation of these hyperparameters. The hyperparameter estimation functions offered by <em>openEBGM</em> utilize the following:</p>
@@ -82,16 +82,17 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li>Optimization using PORT routines</li>
 <li>Newton-type algorithm</li>
 <li>A quasi-Newton method (also known as a variable metric method)</li>
+<li><em>new in v0.4.0</em>: A version of the Expectation-Maximization (EM) Algorithm known as the Expectation/Conditional Maximization (ECM) Algorithm (<em>1</em>)</li>
 </ul>
-<p><em>openEBGM</em>’s functions actually use local optimization algorithms implemented in R’s <em>stats</em> package, except with multiple starting points. The user is encouraged to explore a variety of optimization approaches because the accuracy of a global optimization result is extremely difficult (if not impossible) to verify and other approaches might work just as well (or better).</p>
-</div>
-<div id="additional-notes" class="section level3">
-<h3>Additional notes</h3>
-<p>In his 2001 paper, DuMouchel mentions a methodology he calls “data squashing”, which “compacts” the dataset to reduce the amount of computation needed to estimate the hyperparameters. <em>openEBGM</em> provides an implementation for data squashing.</p>
+<p><em>openEBGM</em>’s functions (prior to v0.4.0) use multiple starting points and local optimization algorithms implemented in R’s <em>stats</em> package. The user is encouraged to explore a variety of optimization approaches because the accuracy of a global optimization result is extremely difficult to verify and other approaches might work better in some cases.</p>
 </div>
 <div id="references" class="section level3">
 <h3>References</h3>
-<p>Please see the <em>Introduction to openEBGM</em> vignette.</p>
+<ol style="list-style-type: decimal">
+<li><p>Meng X-L, Rubin D (1993). “Maximum likelihood estimation via the ECM algorithm: A general framework.” <em>Biometrika</em>, 80(2), 267-278. <a href="https://doi.org/10.1093/biomet/80.2.267" class="uri">https://doi.org/10.1093/biomet/80.2.267</a></p></li>
+<li><p>DuMouchel W, Pregibon D (2001). “Empirical Bayes Screening for Multi-item Associations.” In <em>Proceedings of the Seventh ACM SIGKDD International Conference on Knowledge Discovery and Data Mining</em>, KDD ’01, pp. 67-76. ACM, New York, NY, USA. ISBN 1-58113-391-X. <a href="https://doi.org/10.1145/502512.502526" class="uri">https://doi.org/10.1145/502512.502526</a></p></li>
+<li><p>Millar, Russell B (2011). “Maximum Likelihood Estimation and Inference.” <em>John Wiley &amp; Sons, Ltd</em>, 111-112. <a href="https://doi.org/10.1002/9780470094846" class="uri">https://doi.org/10.1002/9780470094846</a></p></li>
+</ol>
 <hr />
 </div>
 </div>
@@ -99,13 +100,14 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <h1>Estimating the Hyperparameters</h1>
 <div id="data-squashing" class="section level2">
 <h2>Data Squashing</h2>
+<p>DuMouchel &amp; Pregibon (<em>2</em>) discuss a methodology they call “data squashing”, which “compacts” the dataset to reduce the amount of computation needed to estimate the hyperparameters. <em>openEBGM</em> provides an implementation for data squashing.</p>
 <p>The actual counts (<span class="math inline">\(N\)</span>) and expected counts (<span class="math inline">\(E\)</span>) are used to estimate the hyperparameters of the prior distribution. A large contingency table will have many cells, resulting in computational difficulties for the optimization routines needed for estimation. Data squashing (DuMouchel et al., 2001) transforms a set of 2-dimensional points to a smaller number of 3-dimensional points. The idea is to reduce a large number of points <span class="math inline">\((N, E)\)</span> to a smaller number of points <span class="math inline">\((N_k, E_k, W_k)\)</span>, where <span class="math inline">\(k = 1,...,M\)</span> and <span class="math inline">\(W_k\)</span> is the weight of the <span class="math inline">\(k^{th}\)</span> “superpoint”. To minimize information loss, only points close to each other should be squashed.</p>
 <p>For a given <span class="math inline">\(N\)</span>, <code>squashData()</code> combines points with similar <span class="math inline">\(E\)</span>s into bins using a specified bin size and uses the average <span class="math inline">\(E\)</span> within each bin as the <span class="math inline">\(E\)</span> for that bin’s “superpoint”. The new superpoints are weighted by bin size. For example, the points (1, 1.1) and (1, 1.3) could be squashed to the superpoint (1, 1.2, 2).</p>
 <p>An example is given below using unstratified expected counts:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(openEBGM)
 <span class="kw">data</span>(caers)
 
-processed &lt;-<span class="st"> </span><span class="kw">processRaw</span>(<span class="dt">data =</span> caers)
+processed &lt;-<span class="st"> </span><span class="kw">processRaw</span>(caers)
 processed[<span class="dv">1</span><span class="op">:</span><span class="dv">4</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>]
 <span class="co">#&gt;                      var1                  var2 N            E</span>
 <span class="co">#&gt; 1         1-PHENYLALANINE  HEART RATE INCREASED 1 0.0360548272</span>
@@ -113,7 +115,7 @@ processed[<span class="dv">1</span><span class="op">:</span><span class="dv">4</
 <span class="co">#&gt; 3 11 UNSPECIFIED VITAMINS CARDIAC FUNCTION </span><span class="al">TEST</span><span class="co"> 1 0.0002979738</span>
 <span class="co">#&gt; 4 11 UNSPECIFIED VITAMINS            CHEST PAIN 1 0.0360548272</span>
 
-squashed &lt;-<span class="st"> </span><span class="kw">squashData</span>(<span class="dt">data =</span> processed) <span class="co">#Using defaults</span>
+squashed &lt;-<span class="st"> </span><span class="kw">squashData</span>(processed) <span class="co">#Using defaults</span>
 <span class="kw">head</span>(squashed)
 <span class="co">#&gt;   N            E weight</span>
 <span class="co">#&gt; 1 1 0.0002979738     50</span>
@@ -171,14 +173,14 @@ hyper_estimates_full &lt;-<span class="st"> </span><span class="kw">autoHyper</s
                                   <span class="dt">squashed =</span> <span class="ot">FALSE</span>)
 )
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;   41.96    0.00   42.01</span>
+<span class="co">#&gt;   35.91    0.00   35.91</span>
 
 squashed2 &lt;-<span class="st"> </span><span class="kw">squashData</span>(squashed, <span class="dt">count =</span> <span class="dv">2</span>, <span class="dt">bin_size =</span> <span class="dv">10</span>, <span class="dt">keep_bins =</span> <span class="dv">5</span>)
 <span class="kw">system.time</span>(
 hyper_estimates_squashed &lt;-<span class="st"> </span><span class="kw">autoHyper</span>(<span class="dt">data =</span> squashed2, <span class="dt">theta_init =</span> theta_init)
 )
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;    2.45    0.00    2.45</span>
+<span class="co">#&gt;     1.9     0.0     1.9</span>
 
 hyper_estimates_full
 <span class="co">#&gt; $method</span>
@@ -187,6 +189,9 @@ hyper_estimates_full
 <span class="co">#&gt; $estimates</span>
 <span class="co">#&gt;     alpha1      beta1     alpha2      beta2          P </span>
 <span class="co">#&gt; 3.25596617 0.39998845 2.02374464 1.90612821 0.06530723 </span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; $conf_int</span>
+<span class="co">#&gt; NULL</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $num_close</span>
 <span class="co">#&gt; [1] 2</span>
@@ -208,6 +213,9 @@ hyper_estimates_squashed
 <span class="co">#&gt; $estimates</span>
 <span class="co">#&gt;     alpha1      beta1     alpha2      beta2          P </span>
 <span class="co">#&gt; 3.25374326 0.39988617 2.02613782 1.90809094 0.06534647 </span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; $conf_int</span>
+<span class="co">#&gt; NULL</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $num_close</span>
 <span class="co">#&gt; [1] 2</span>
@@ -252,6 +260,81 @@ hyper_estimates_squashed
 <span class="co">#&gt; 2         2 2.287478 0.1438959 0.4513849 0.4327522 0.03578442</span>
 <span class="co">#&gt; 3         3 2.288223 0.1439303 0.4514478 0.4328547 0.03579575</span></code></pre></div>
 <p><code>exploreHypers()</code> offers three gradient-based optimization methods and is basically just a wrapper around commonly used functions from the <em>stats</em> package mentioned earlier: <code>nlminb()</code> (the default), <code>nlm()</code>, &amp; <code>optim()</code>.</p>
+</div>
+<div id="hyperem-new-in-v0.4.0" class="section level3">
+<h3><code>hyperEM()</code> (<em>new in v0.4.0</em>)</h3>
+<p><code>hyperEM()</code> implements a version of the EM algorithm referred to by Meng &amp; Rubin (<em>1</em>) as the Expectation/Conditional Maximization (ECM) algorithm. <code>hyperEM()</code> uses a single starting point to find a local maximum likelihood estimate for <span class="math inline">\(\theta\)</span> either by finding roots of the score functions (partial derivatives of the log-likelihood function) or by using <code>stats::nlminb()</code> to directly minimize the negative log-likelihood function. The method described by Millar (<em>3</em>) is used to accelerate the estimate of <span class="math inline">\(\theta\)</span> every 100 iterations of the algorithm.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(caers)
+proc &lt;-<span class="st"> </span><span class="kw">processRaw</span>(caers)
+squashed &lt;-<span class="st"> </span><span class="kw">squashData</span>(proc, <span class="dt">bin_size =</span> <span class="dv">100</span>, <span class="dt">keep_bins =</span> <span class="dv">0</span>)
+squashed &lt;-<span class="st"> </span><span class="kw">squashData</span>(squashed, <span class="dt">count =</span> <span class="dv">2</span>, <span class="dt">bin_size =</span> <span class="dv">12</span>)
+hyperEM_ests &lt;-<span class="st"> </span><span class="kw">hyperEM</span>(squashed, <span class="dt">theta_init_vec =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>, .<span class="dv">3</span>),
+                        <span class="dt">conf_int =</span> <span class="ot">TRUE</span>, <span class="dt">track =</span> <span class="ot">TRUE</span>)
+<span class="co">#&gt; change in LL: 1.15e+00 | theta: 3.12  0.63  1.661 2.102 0.159 </span>
+<span class="co">#&gt; change in LL: 2.87e-01 | theta: 3.364 0.528 2.223 2.282 0.104 </span>
+<span class="co">#&gt; change in LL: 5.66e-02 | theta: 3.46  0.47  2.388 2.264 0.081 </span>
+<span class="co">#&gt; change in LL: 2.03e-02 | theta: 3.457 0.44  2.36  2.189 0.072 </span>
+<span class="co">#&gt; change in LL: 1.27e-02 | theta: 3.409 0.425 2.283 2.114 0.069 </span>
+<span class="co">#&gt;     Current iterations: 50 </span>
+<span class="co">#&gt; change in LL:  7.4e-03 | theta: 3.356 0.416 2.211 2.057 0.068 </span>
+<span class="co">#&gt; change in LL: 3.92e-03 | theta: 3.311 0.411 2.157 2.015 0.067 </span>
+<span class="co">#&gt; change in LL: 1.97e-03 | theta: 3.275 0.407 2.117 1.986 0.067 </span>
+<span class="co">#&gt; change in LL: 9.69e-04 | theta: 3.247 0.404 2.09  1.967 0.067 </span>
+<span class="co">#&gt; change in LL: 2.54e-04 | theta: 3.132 0.395 2.034 1.928 0.067 </span>
+<span class="co">#&gt;     Current iterations: 100 </span>
+<span class="co">#&gt; change in LL: 1.79e-05 | theta: 3.141 0.395 2.034 1.929 0.068 </span>
+<span class="co">#&gt; change in LL:  1.5e-05 | theta: 3.135 0.395 2.035 1.931 0.068 </span>
+<span class="co">#&gt; change in LL: 1.01e-05 | theta: 3.13  0.395 2.036 1.932 0.068 </span>
+<span class="co">#&gt; change in LL: 7.94e-06 | theta: 3.125 0.394 2.037 1.933 0.068 </span>
+<span class="co">#&gt; change in LL: 7.62e-06 | theta: 3.121 0.394 2.038 1.934 0.068 </span>
+<span class="co">#&gt;     Current iterations: 150 </span>
+<span class="co">#&gt; change in LL: 6.13e-06 | theta: 3.118 0.394 2.038 1.934 0.068 </span>
+<span class="co">#&gt; change in LL: 5.56e-06 | theta: 3.115 0.394 2.039 1.935 0.068 </span>
+<span class="co">#&gt; change in LL: 5.13e-06 | theta: 3.112 0.394 2.04  1.936 0.068 </span>
+<span class="co">#&gt; change in LL: 4.76e-06 | theta: 3.109 0.394 2.04  1.937 0.068 </span>
+<span class="co">#&gt; change in LL: 4.42e-06 | theta: 3.106 0.393 2.041 1.937 0.068 </span>
+<span class="co">#&gt;     Current iterations: 200 </span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;    Iterations used: 203 </span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;    Timing:  </span>
+<span class="co">#&gt;    user  system elapsed </span>
+<span class="co">#&gt;    4.20    0.00    4.19</span>
+<span class="kw">str</span>(hyperEM_ests)
+<span class="co">#&gt; List of 9</span>
+<span class="co">#&gt;  $ estimates : num [1:5] 3.1049 0.3933 2.0412 1.9377 0.0684</span>
+<span class="co">#&gt;  $ conf_int  :'data.frame':  5 obs. of  4 variables:</span>
+<span class="co">#&gt;   ..$ pt_est: num [1:5] 3.1049 0.3933 2.0412 1.9377 0.0684</span>
+<span class="co">#&gt;   ..$ SE    : num [1:5] 1.957 0.1246 0.4651 0.4453 0.0356</span>
+<span class="co">#&gt;   ..$ LL_95 : num [1:5] -0.7308 0.149 1.1295 1.0649 -0.0013</span>
+<span class="co">#&gt;   ..$ UL_95 : num [1:5] 6.941 0.638 2.953 2.81 0.138</span>
+<span class="co">#&gt;  $ maximum   : num -4164</span>
+<span class="co">#&gt;  $ method    : chr &quot;score&quot;</span>
+<span class="co">#&gt;  $ elapsed   : num 4.19</span>
+<span class="co">#&gt;  $ iters     : num 203</span>
+<span class="co">#&gt;  $ score     : num [1:5] -0.01144 0.02895 0.01031 0.00942 0.00216</span>
+<span class="co">#&gt;  $ score_norm: num 0.0342</span>
+<span class="co">#&gt;  $ tracking  :'data.frame':  204 obs. of  7 variables:</span>
+<span class="co">#&gt;   ..$ iter  : int [1:204] 0 1 2 3 4 5 6 7 8 9 ...</span>
+<span class="co">#&gt;   ..$ logL  : num [1:204] -4328 -4250 -4221 -4200 -4187 ...</span>
+<span class="co">#&gt;   ..$ alpha1: num [1:204] 1 1.89 2.02 2.25 2.49 ...</span>
+<span class="co">#&gt;   ..$ beta1 : num [1:204] 1 0.894 0.821 0.77 0.735 ...</span>
+<span class="co">#&gt;   ..$ alpha2: num [1:204] 2 2.54 2.06 1.74 1.55 ...</span>
+<span class="co">#&gt;   ..$ beta2 : num [1:204] 2 1.93 1.89 1.88 1.89 ...</span>
+<span class="co">#&gt;   ..$ P     : num [1:204] 0.3 0.313 0.283 0.254 0.232 ...</span></code></pre></div>
+<p>Setting <code>track = TRUE</code> tracks the log-likelihood and hyperparameter estimates at each iteration, which we can plot to study the behavior of the algorithm:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(ggplot2)
+<span class="kw">library</span>(tidyr)
+pdat &lt;-<span class="st"> </span><span class="kw">gather</span>(hyperEM_ests<span class="op">$</span>tracking, <span class="dt">key =</span> <span class="st">&quot;metric&quot;</span>, <span class="dt">value =</span> <span class="st">&quot;value&quot;</span>, logL<span class="op">:</span>P)
+pdat<span class="op">$</span>metric &lt;-<span class="st"> </span><span class="kw">factor</span>(pdat<span class="op">$</span>metric, <span class="dt">levels =</span> <span class="kw">unique</span>(pdat<span class="op">$</span>metric), <span class="dt">ordered =</span> <span class="ot">TRUE</span>)
+<span class="kw">ggplot</span>(pdat, <span class="kw">aes</span>(<span class="dt">x =</span> iter, <span class="dt">y =</span> value)) <span class="op">+</span>
+<span class="st">  </span><span class="kw">geom_line</span>(<span class="dt">size =</span> <span class="fl">1.1</span>, <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>) <span class="op">+</span>
+<span class="st">  </span><span class="kw">facet_grid</span>(metric <span class="op">~</span><span class="st"> </span>., <span class="dt">scales =</span> <span class="st">&quot;free&quot;</span>) <span class="op">+</span>
+<span class="st">  </span><span class="kw">ggtitle</span>(<span class="st">&quot;Convergence Assessment&quot;</span>,
+          <span class="dt">sub =</span> <span class="st">&quot;Dashed red line indicates accelerated estimate&quot;</span>) <span class="op">+</span>
+<span class="st">  </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="st">&quot;Iteration Count&quot;</span>, <span class="dt">y =</span> <span class="st">&quot;Estimate&quot;</span>) <span class="op">+</span>
+<span class="st">  </span><span class="kw">geom_vline</span>(<span class="dt">xintercept =</span> <span class="kw">c</span>(<span class="dv">100</span>, <span class="dv">200</span>), <span class="dt">size =</span> <span class="dv">1</span>, <span class="dt">linetype =</span> <span class="dv">2</span>, <span class="dt">col =</span> <span class="st">&quot;red&quot;</span>)</code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
 <p>Although the user is encouraged to explore various approaches for maximum likelihood hyperparameter estimation, <code>autoHyper()</code> will often give reasonable results with minimal effort. Once the hyperparameters have been estimated, they can be used in the calculation of the <span class="math inline">\(EBGM\)</span> and quantile scores by applying them to the posterior distribution. This process can be found in the <em>Empirical Bayes Metrics with openEBGM</em> vignette.</p>
 </div>
 </div>

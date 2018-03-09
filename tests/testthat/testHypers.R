@@ -51,13 +51,13 @@ testthat::test_that("see if exploreHypers() errors are correctly printed", {
                fixed = TRUE)
   expect_error(exploreHypers(data = proc_dat_ustrat, theta_init = theta_init,
                              squashed = 0, zeroes = FALSE, N_star = 1),
-               "'squashed', 'zeroes', and 'std_errors' must be logical values",
+               "'squashed' and 'zeroes' must be logical values",
                fixed = TRUE)
   expect_error(exploreHypers(data = proc_dat_ustrat, theta_init = theta_init,
-                             std_errors = 1),
-               "'squashed', 'zeroes', and 'std_errors' must be logical values",
+                             squashed = FALSE, std_errors = 1),
+               "'std_errors' must be a logical value",
                fixed = TRUE)
-  expect_error(exploreHypers(data = proc_dat_ustrat, theta_init = theta_init,
+  expect_error(exploreHypers(data = proc_zeroes, theta_init = theta_init,
                              squashed = FALSE, zeroes = TRUE, N_star = 1),
                "if zeroes are used, 'N_star' should be NULL",
                fixed = TRUE)
@@ -72,12 +72,12 @@ testthat::test_that("see if exploreHypers() errors are correctly printed", {
   expect_error(exploreHypers(data = proc_dat_ustrat, theta_init = theta_init,
                              squashed = FALSE, zeroes = FALSE,
                              N_star = -1),
-               "'N_star' must be >= 1 or NULL",
+               "'N_star' must be NULL or a positive whole number",
                fixed = TRUE)
   expect_error(exploreHypers(data = proc_dat_ustrat, theta_init = theta_init,
                              squashed = FALSE, zeroes = FALSE,
                              N_star = 0),
-               "'N_star' must be >= 1 or NULL",
+               "'N_star' must be NULL or a positive whole number",
                fixed = TRUE)
   expect_error(exploreHypers(data = proc_dat_ustrat, theta_init = theta_init,
                              squashed = FALSE, zeroes = FALSE,
@@ -116,6 +116,96 @@ testthat::test_that("see if exploreHypers() errors are correctly printed", {
                fixed = TRUE)
 })
 
+#hyperEM()
+testthat::test_that("see if hyperEM() errors are correctly printed", {
+  expect_error(hyperEM(proc_dat_ustrat, theta_init_vec = c(1, 1, 2, 2, .3),
+                       squashed = FALSE, N_star = 2),
+               "if 'method' is 'score', N_star must be 1 or NULL",
+               fixed = TRUE)
+  expect_error(hyperEM(dat_miss, theta_init_vec = c(1, 1, 2, 2, .3),
+                       squashed = FALSE),
+               "missing or infinite values for 'N' and 'E' are not allowed",
+               fixed = TRUE)
+  expect_error(hyperEM(proc_dat_ustrat, theta_init_vec = c(1, 1, 2, 2, .3),
+                       squashed = 0),
+               "'squashed' and 'zeroes' must be logical values",
+               fixed = TRUE)
+  expect_error(hyperEM(proc_zeroes, theta_init_vec = c(1, 1, 2, 2, .3),
+                       squashed = FALSE, zeroes = TRUE, N_star = 1),
+               "if zeroes are used, 'N_star' should be NULL",
+               fixed = TRUE)
+  expect_error(hyperEM(proc_dat_ustrat, theta_init_vec = c(1, 1, 2, 2, .3),
+                       squashed = FALSE, zeroes = TRUE, N_star = NULL),
+               "no zero counts found",
+               fixed = TRUE)
+  expect_error(hyperEM(proc_zeroes, theta_init_vec = c(1, 1, 2, 2, .3),
+                       squashed = FALSE, zeroes = FALSE, N_star = 1),
+               "zero counts found",
+               fixed = TRUE)
+  expect_error(hyperEM(proc_dat_ustrat, theta_init_vec = c(1, 1, 2, 2, .3),
+                       method = "nlminb", squashed = FALSE, zeroes = FALSE,
+                       N_star = -1),
+               "'N_star' must be NULL or a positive whole number",
+               fixed = TRUE)
+  expect_error(hyperEM(proc_dat_ustrat, theta_init_vec = c(1, 1, 2, 2, .3),
+                       method = "nlminb", squashed = FALSE, zeroes = FALSE,
+                       N_star = 2),
+               "'N_star' does not agree with the data set",
+               fixed = TRUE)
+  expect_error(hyperEM(proc_dat_ustrat, theta_init_vec = c(1, 1, 2, 2),
+                             squashed = FALSE),
+               "'theta_init_vec' must contain 5 elements",
+               fixed = TRUE)
+  expect_error(hyperEM(proc_dat_ustrat, theta_init_vec = c(1, 1, NA, 2, .3),
+                       squashed = FALSE),
+               "'theta_init_vec' cannot contain missing values",
+               fixed = TRUE)
+  expect_error(hyperEM(proc_dat_ustrat, theta_init_vec = c(1, 1, 2, 2, 0),
+                       squashed = FALSE),
+               "'theta_init_vec' must contain positive numeric values",
+               fixed = TRUE)
+  expect_error(hyperEM(proc_dat_ustrat, theta_init_vec = c(1, 1, 2, 2, 1),
+                       squashed = FALSE),
+               "'theta_init_vec[5]' (i.e., 'P') must be <1",
+               fixed = TRUE)
+  expect_error(hyperEM(proc_dat_ustrat, theta_init_vec = c(1, 1, 2, 2, .3),
+                       squashed = TRUE, zeroes = FALSE, N_star = 1),
+               "'weight' column is missing -- are these data really squashed?",
+               fixed = TRUE)
+  expect_error(hyperEM(proc_dat_ustrat_squash, theta_init_vec = c(1, 1, 2, 2, .3),
+                       squashed = FALSE, zeroes = FALSE, N_star = 1),
+               "'weight' column was found -- were these data squashed?",
+               fixed = TRUE)
+  expect_error(hyperEM(proc_dat_ustrat_squash, theta_init_vec = c(1, 1, 2, 2, .3),
+                       LL_tol = ".001"),
+               "'LL_tol' must be a positive numeric value",
+               fixed = TRUE)
+  expect_error(hyperEM(proc_dat_ustrat_squash, theta_init_vec = c(1, 1, 2, 2, .3),
+                       LL_tol = 0),
+               "'LL_tol' must be a positive numeric value",
+               fixed = TRUE)
+  expect_error(hyperEM(proc_dat_ustrat_squash, theta_init_vec = c(1, 1, 2, 2, .3),
+                       consecutive = 10.5),
+               "'consecutive' must be a nonnegative whole number",
+               fixed = TRUE)
+  expect_error(hyperEM(proc_dat_ustrat_squash, theta_init_vec = c(1, 1, 2, 2, .3),
+                       max_iter = 0),
+               "'max_iter' must be a positive whole number",
+               fixed = TRUE)
+  expect_error(hyperEM(proc_dat_ustrat_squash, theta_init_vec = c(1, 1, 2, 2, .3),
+                       param_lower = 0),
+               "'param_lower' must be a positive numeric value",
+               fixed = TRUE)
+  expect_error(hyperEM(proc_dat_ustrat_squash, theta_init_vec = c(1, 1, 2, 2, .3),
+                       param_lower = 0.01, param_upper = 0.001),
+               "'param_lower' must be less than 'param_upper'",
+               fixed = TRUE)
+  expect_error(hyperEM(proc_dat_ustrat_squash, theta_init_vec = c(1, 1, 2, 2, .3),
+                       print_level = 3),
+               "'print_level' must be 0, 1, or 2",
+               fixed = TRUE)
+})
+
 
 #autoHyper() -------------------------------------------------------------------
 testthat::test_that("see if autoHyper() errors are correctly printed", {
@@ -142,18 +232,20 @@ testthat::test_that("see if autoHyper() errors are correctly printed", {
                       "\n  less than the number of rows in 'theta_init'"),
                fixed = TRUE)
   expect_error(suppressWarnings(
-               autoHyper(data = dat_processed, theta_init = theta_init,
-                         squashed = FALSE),
-               paste0("consistent convergence failed --",
-                      "\n  try squashing data with another 'bin_size' value --",
-                      "\n  if that fails, try using zeroes with data squashing --",
-                      "\n  or, try using neither zeroes nor data squashing"),
-               fixed = TRUE))
+    autoHyper(data = dat_processed, theta_init = theta_init,
+              squashed = FALSE)
+    ),
+    paste0("consistent convergence failed --",
+           "\n  try squashing data with another 'bin_size' value --",
+           "\n  if that fails, try using zeroes with data squashing --",
+           "\n  or, try using neither zeroes nor data squashing"),
+    fixed = TRUE)
   expect_error(suppressWarnings(
-               autoHyper(data = dat_processed, theta_init = theta_init,
-                         squashed = FALSE, conf_ints = 1),
-               "'conf_ints' must be a logical value"
-  ))
+    autoHyper(data = dat_processed, theta_init = theta_init,
+              squashed = FALSE, conf_ints = 1)
+    ),
+    "'conf_ints' must be a logical value",
+    fixed = TRUE)
   #Common to exploreHypers...
   #Make sure arguments "line up"
   expect_error(autoHyper(data = proc_dat_ustrat[, c("E", "RR", "PRR")],
@@ -167,9 +259,9 @@ testthat::test_that("see if autoHyper() errors are correctly printed", {
                fixed = TRUE)
   expect_error(autoHyper(data = proc_dat_ustrat, theta_init = theta_init,
                          squashed = 0),
-               "'squashed', 'zeroes', and 'std_errors' must be logical values",
+               "'squashed' and 'zeroes' must be logical values",
                fixed = TRUE)
-  expect_error(autoHyper(data = proc_dat_ustrat, theta_init = theta_init,
+  expect_error(autoHyper(data = proc_zeroes, theta_init = theta_init,
                          squashed = FALSE, zeroes = TRUE),
                "if zeroes are used, 'N_star' should be NULL",
                fixed = TRUE)
@@ -188,12 +280,12 @@ testthat::test_that("see if autoHyper() errors are correctly printed", {
   expect_error(autoHyper(data = proc_dat_ustrat, theta_init = theta_init,
                          squashed = FALSE, zeroes = FALSE,
                          N_star = 0),
-               "'N_star' must be >= 1 or NULL",
+               "'N_star' must be NULL or a positive whole number",
                fixed = TRUE)
   expect_error(autoHyper(data = proc_dat_ustrat, theta_init = theta_init,
                          squashed = FALSE, zeroes = FALSE,
                          N_star = -1),
-               "'N_star' must be >= 1 or NULL",
+               "'N_star' must be NULL or a positive whole number",
                fixed = TRUE)
   expect_error(autoHyper(data = proc_dat_ustrat, theta_init = theta_init,
                          squashed = FALSE, zeroes = FALSE,
@@ -244,8 +336,8 @@ hyper_squash <- suppressWarnings(
 )
 
 testthat::test_that("check that a list is being output under correct circumstance", {
-  expect_equal(length(hyper_no_squash), 4)
-  expect_equal(length(hyper_squash), 4)
+  expect_equal(length(hyper_no_squash), 5)
+  expect_equal(length(hyper_squash), 5)
   expect_true(is.list(hyper_no_squash))
   expect_true(is.list(hyper_squash))
 })
@@ -299,4 +391,28 @@ testthat::test_that("check if 'bfgs' method works", {
   expect_true(max(hypers_bfgs[, 2:5]) < 4)
   expect_true(max(hypers_bfgs[, 6]) < 0.1)
   expect_true(!any(is.na(hypers_bfgs)))
+})
+
+#hyperEM()
+squashed <- squashData(proc_dat_ustrat, bin_size = 100, keep_bins = 0)
+squashed <- squashData(squashed, count = 2, bin_size = 12)
+hyperEM_ests <- hyperEM(squashed, theta_init_vec = c(1, 1, 2, 2, .3),
+                        print_level = 0)
+testthat::test_that("check if hyperEM() works", {
+  expect_equal(length(hyperEM_ests), 9)
+  expect_true(hyperEM_ests$estimates[1] > 3.00)
+  expect_true(hyperEM_ests$estimates[1] < 3.20)
+  expect_true(hyperEM_ests$estimates[2] > 0.30)
+  expect_true(hyperEM_ests$estimates[2] < 0.50)
+  expect_true(hyperEM_ests$estimates[3] > 1.95)
+  expect_true(hyperEM_ests$estimates[3] < 2.15)
+  expect_true(hyperEM_ests$estimates[4] > 1.85)
+  expect_true(hyperEM_ests$estimates[4] < 2.00)
+  expect_true(hyperEM_ests$estimates[5] > .04)
+  expect_true(hyperEM_ests$estimates[5] < .08)
+  expect_true(!any(is.na(hyperEM_ests$estimates)))
+  expect_true(hyperEM_ests$maximum < -4160)
+  expect_true(hyperEM_ests$maximum > -4170)
+  expect_true(hyperEM_ests$score_norm < .075)
+  expect_true(!any(is.na(hyperEM_ests$score_norm)))
 })

@@ -3,8 +3,8 @@
 #' \code{exploreHypers} finds hyperparameter estimates using a variety of
 #' starting points to examine the consistency of the optimization procedure.
 #'
-#' @param data A data frame containing columns named \emph{N}, \emph{E},
-#'   and (if squashed) \emph{weight}.
+#' @param data A data frame from \code{\link{processRaw}} containing columns
+#'   named \emph{N}, \emph{E}, and (if squashed) \emph{weight}.
 #' @param theta_init A data frame of initial hyperparameter guesses with
 #'   columns ordered as:
 #'   \eqn{\alpha_1, \beta_1, \alpha_2, \beta_2, P}.
@@ -50,7 +50,7 @@
 #'   you must filter out the ones and zeroes (if present) from \code{data} prior
 #'   to using this function.
 #' @details The \code{method} argument determines which optimization procedure
-#'   is used. All the options use functions from the \code{\link[stats]{stats}}
+#'   is used. All the options use functions from the \code{\link{stats}}
 #'   package:
 #'   \itemize{
 #'     \item{\code{"nlminb":}} \code{\link[stats]{nlminb}}
@@ -118,6 +118,7 @@ exploreHypers <-
   results <- data.frame(guess_num = 1:nrow(theta_init), a1_hat = NA,
                         b1_hat = NA, a2_hat = NA, b2_hat = NA, p_hat = NA,
                         code = NA, converge = NA, in_bounds = NA, minimum = NA)
+  std_errs <- NULL
   if (std_errors) {
     std_errs <- data.frame(guess_num = 1:nrow(theta_init), a1_se = NA,
                            b1_se = NA, a2_se = NA, b2_se = NA, p_se = NA)
@@ -189,37 +190,13 @@ exploreHypers <-
 
       if (std_errors) {
         theta_hat_i <- results[i, 2:6]
-        N <- data$N
-        E <- data$E
-        if (zeroes) {
-          if (squashed) {
-            hess_i <- optimHess(theta_hat_i, fn = negLLzeroSquash,
-                                ni = N, ei = E, wi = data$weight)
-          } else {
-            hess_i <- optimHess(theta_hat_i, fn = negLLzero,
-                                N = N, E = E)
-          }
-        } else {
-          if (squashed) {
-            hess_i <- optimHess(theta_hat_i, fn = negLLsquash,
-                                ni = N, ei = E, wi = data$weight,
-                                N_star = N_star)
-          } else {
-            hess_i <- optimHess(theta_hat_i, fn = negLL,
-                                N = N, E = E, N_star = N_star)
-          }
-        }
-        std_errs[i, 2:6] <- sqrt(diag(solve(hess_i)))
+        hess_i <- .hessianMatrix(data, theta_hat_i, zeroes, squashed, N_star)
+        std_errs[i, 2:6] <- .hyperStdErrs(hess_i)
       }
-
     }, silent = TRUE)
   }
 
-  if (std_errors) {
-    return(list(estimates = results, std_errs = std_errs))
-  } else {
-    return(list(estimates = results))
-  }
+  list(estimates = results, std_errs = std_errs)
 }
 
 #' Semi-automated hyperparameter estimation
@@ -315,28 +292,11 @@ autoHyper <-
            param_limit = 100, max_pts = 20000, conf_ints = FALSE,
            conf_level = c("95", "80", "90", "99")) {
 
-  .checkInputs_autoHyper(data, theta_init, squashed, zeroes, N_star, tol,
-                         min_conv, param_limit, max_pts, conf_ints, conf_level)
-
+  .checkInputs_autoHyper(tol, min_conv, theta_init, conf_ints)
   conf_level <- match.arg(conf_level)
-  estimate_names <- c("a1_hat", "b1_hat", "a2_hat", "b2_hat", "p_hat")
 
-  if (conf_ints) {
-    if (conf_level == "95") {
-      crit_val <- qnorm(.975)
-    } else if (conf_level == "80") {
-      crit_val <- qnorm(.90)
-    } else if (conf_level == "90") {
-      crit_val <- qnorm(.95)
-    } else {
-      crit_val <- qnorm(.995)
-    }
-    conf_int <- matrix(NA, nrow = 5, ncol = 4)
-    conf_int <- as.data.frame(conf_int, row.names = estimate_names)
-    LL_name <- paste0("LL_", conf_level)
-    UL_name <- paste0("UL_", conf_level)
-    colnames(conf_int) <-  c("pt_est", "SE", LL_name, UL_name)
-  }
+  conf_int <- NULL
+  estimate_names <- c("a1_hat", "b1_hat", "a2_hat", "b2_hat", "p_hat")
 
   for (i in c("nlminb", "nlm", "bfgs")) {
     theta_hats <-
@@ -365,36 +325,10 @@ autoHyper <-
         theta_hat <- as.numeric(candidate[, estimate_names])
         names(theta_hat) <- c("alpha1", "beta1", "alpha2", "beta2", "P")
         if (conf_ints) {
-          N <- data$N
-          E <- data$E
-          if (zeroes) {
-            if (squashed) {
-              hess <- optimHess(theta_hat, fn = negLLzeroSquash,
-                                ni = N, ei = E, wi = data$weight)
-            } else {
-              hess <- optimHess(theta_hat, fn = negLLzero,
-                                N = N, E = E)
-            }
-          } else {
-            if (squashed) {
-              hess <- optimHess(theta_hat, fn = negLLsquash,
-                                ni = N, ei = E, wi = data$weight,
-                                N_star = N_star)
-            } else {
-              hess <- optimHess(theta_hat, fn = negLL,
-                                N = N, E = E, N_star = N_star)
-            }
-          }
-          std_errs <- sqrt(diag(solve(hess)))
-          conf_int$pt_est <- theta_hat
-          conf_int$SE <- std_errs
-          conf_int[LL_name] <- theta_hat - crit_val * std_errs
-          conf_int[UL_name] <- theta_hat + crit_val * std_errs
-          conf_int <- round(conf_int, 4)
-          return(list(method = i, estimates = theta_hat, conf_int = conf_int,
-                      num_close = num_close, theta_hats = theta_hats))
+          conf_int <- .hyperConfInts(data, theta_hat, zeroes, squashed, N_star,
+                                     conf_level)
         }
-        return(list(method = i, estimates = theta_hat,
+        return(list(method = i, estimates = theta_hat, conf_int = conf_int,
                     num_close = num_close, theta_hats = theta_hats))
       }
     }

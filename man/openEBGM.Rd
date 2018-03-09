@@ -14,7 +14,8 @@ calculating the EBGM (Empirical Bayes Geometric Mean) score and the quantile
 scores used to create credibility intervals. Some simple disproportionality
 scores (relative report rate and proportional reporting ratio) are also
 included. Adverse event report data are used as an example application. Much
-of \pkg{openEBGM}'s code is derived from the \pkg{PhViD} package.
+of \pkg{openEBGM}'s code is derived from the \pkg{PhViD} and \pkg{mederrRank}
+packages.
 }
 \section{Data preparation & squashing functions}{
 
@@ -45,7 +46,8 @@ The hyperparameter estimation functions (\code{\link{exploreHypers}} and
   using the negative log-likelihood functions from the marginal distributions
   of the counts (negative binomial). \eqn{\theta} is a vector containing five
   parameters (\eqn{\alpha_1}, \eqn{\beta_1}, \eqn{\alpha_2}, \eqn{\beta_2},
-  and \eqn{P}).
+  and \eqn{P}). \code{\link{hyperEM}} estimates \eqn{\theta} using a version
+  of the EM algorithm.
 }
 
 \section{Posterior distribution functions}{
@@ -63,6 +65,10 @@ The posterior distribution functions calculate the mixture fraction
 \references{
 Ahmed I, Poncet A (2016). \pkg{PhViD}: an R package for
   PharmacoVigilance signal Detection. \emph{R package version 1.0.8}.
+
+Venturini S, Myers J (2015). \pkg{mederrRank}: Bayesian Methods
+  for Identifying the Most Harmful Medication Errors. \emph{R package version
+  0.0.8}.
 
 DuMouchel W (1999). "Bayesian Data Mining in Large Frequency
   Tables, With an Application to the FDA Spontaneous Reporting System."

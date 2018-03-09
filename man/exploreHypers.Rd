@@ -9,8 +9,8 @@ exploreHypers(data, theta_init, squashed = TRUE, zeroes = FALSE,
   max_pts = 20000, std_errors = FALSE)
 }
 \arguments{
-\item{data}{A data frame containing columns named \emph{N}, \emph{E},
-and (if squashed) \emph{weight}.}
+\item{data}{A data frame from \code{\link{processRaw}} containing columns
+named \emph{N}, \emph{E}, and (if squashed) \emph{weight}.}
 
 \item{theta_init}{A data frame of initial hyperparameter guesses with
 columns ordered as:
@@ -64,7 +64,7 @@ starting points to examine the consistency of the optimization procedure.
 }
 \details{
 The \code{method} argument determines which optimization procedure
-  is used. All the options use functions from the \code{\link[stats]{stats}}
+  is used. All the options use functions from the \code{\link{stats}}
   package:
   \itemize{
     \item{\code{"nlminb":}} \code{\link[stats]{nlminb}}
@@ -133,6 +133,7 @@ DuMouchel W (1999). "Bayesian Data Mining in Large Frequency
 
 \code{\link{squashData}} for data preparation
 
-Other hyperparameter estimation functions: \code{\link{autoHyper}}
+Other hyperparameter estimation functions: \code{\link{autoHyper}},
+  \code{\link{hyperEM}}
 }
 \keyword{openEBGM}

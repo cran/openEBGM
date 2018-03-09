@@ -14,61 +14,80 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 
 ## Background
 
-William DuMouchel created an empirical Bayes (EB) data mining approach (1999, 
-2001) for finding "interestingly large" counts in contingency tables, where rows
-and columns represent levels of two different variables such as food products 
-and adverse events. The approach works well even when most of the counts are 
-zero or one (i.e., a sparse table). The EB metrics ($EBGM$ and quantile scores) 
-are similar to the relative reporting ratio $(RR)$. The benefit of DuMouchel's
-model is that Bayesian shrinkage corrects for the high variability in $RR$ that
-results with small counts.
+William DuMouchel (*1*, *2*) created an empirical Bayes (EB) data mining
+approach for finding "interestingly large" counts in contingency tables.
+DuMouchel's approach works well even when most of the counts are zero or one
+(i.e., a sparse table). The benefit of DuMouchel's model over simpler approaches
+such as the *relative reporting ratio*, $RR$, is that Bayesian shrinkage
+corrects for the high variability in $RR$ that results from small counts.
 
-The relative reporting ratio is calculated as $RR=\frac{N}{E}$, where $N$ is the 
-actual count for a cell in the table and $E$ is the expected count under the 
-assumption of independence between rows and columns. When $RR = 1$, you observe 
-exactly the number of events you would expect to observe if no association 
-exists between the two variables. When $RR > 1$, you observe more events than
-expected. This approach works well for large counts; however, small counts cause
-$RR$ to become quite unstable. For instance, an actual count of $N = 1$ with an
-expected count of $E = 0.01$ gives us $RR = 100$ --which seems large-- but a
-single event could easily occur simply by chance. The EB approach shrinks large
-$RR$s that result from small counts to a value much closer to the "null
-hypothesis" value of 1. The shrinkage is smaller for larger counts and 
-negligible for very large counts. Shrinkage gives results that are more stable 
-than the simple $RR$ measurement.
+The rows and columns of the table represent levels of two different variables,
+such as food or drug products and adverse events:
 
-DuMouchel's model uses a Poisson likelihood for the cell counts and a mixture of
-two gamma distributions as the prior, resulting in a posterior distribution 
-which is a mixture of two gamma distributions. For this reason, the model is 
-sometimes referred to as the **Gamma-Poisson Shrinkage (GPS)** model. The 
-posterior distribution can be thought of as a Bayesian representation of $RR$. 
+|                | Headache  |Nausea |Vomiting | ...   |
+| :-------------:|:---------:|:-----:|:-------:|:-----:|
+| **Product A**  | 0         |1      |0        |**...**|
+| **Product B**  | 4         |0      |0        |**...**|
+| **Product C**  | 1         |0      |9        |**...**|
+| **...**        | **...**   |**...**|**...**  |**...**|
+
+The relative reporting ratio is calculated as $RR=\frac{N}{E}$, where $N$ is the
+actual count for a cell in the table and $E$ is the expected count under the
+assumption of independence between rows and columns. When $RR = 1$, you observe
+the exact count you would expect to observe if no association exists between the
+two variables. When $RR > 1$, you observe a larger count than expected. This
+approach works well for large counts; however, small counts cause $RR$ to become
+quite unstable. For instance, an actual count of $N = 1$ with an expected count
+of $E = 0.01$ gives us $RR = 100$ -- which seems large -- but a single event
+could easily occur simply by chance. The EB approach shrinks large $RR$s that
+result from small counts to a value much closer to the "null hypothesis" value
+of 1. The shrinkage is smaller for larger counts and negligible for very large
+counts. Shrinkage gives results that are more stable than the simple $RR$
+measurement.
+
+DuMouchel's model uses a Poisson($\mu_{ij}$) likelihood (i.e. data distribution)
+for the actual cell counts, $N_{ij}$, in row *i* and column *j*. The expected
+cell counts, $E_{ij}$, are treated as constants. We are interested in the ratio
+$\lambda_{ij}=\frac{\mu_{ij}}{E_{ij}}$, which is analagous to $RR=\frac{N}{E}$.
+The prior on $\lambda$ is a mixture of two gamma distributions, resulting in a
+posterior distribution for $\lambda$ which is a mixture of two gamma
+distributions. Hence, the model is sometimes referred to as the **Gamma-Poisson
+Shrinkage (GPS)** model. The posterior distribution of $\lambda$ can be thought
+of as a Bayesian representation of $RR$. Summary statsistics from the posterior
+distribution are used as attenuated versions of $RR$.
+
 Each cell in the contingency table will have its own posterior distribution
-determined both by that cell's actual and expected counts and by the
-distribution of actual and expected counts in the entire table. Often the
-Empirical Bayes Geometric Mean $(EBGM)$ of the posterior distribution is used in
-place of $RR$. Alternatively, the more conservative percentiles (5th, 10th,
-etc.) can be used. The percentiles can also be used to construct credibility
-intervals.
+determined both by that cell's actual and expected counts (the data) and by the
+distribution of actual and expected counts in the entire table (the prior).
+Often, the Empirical Bayes Geometric Mean $(EBGM)$ of the posterior distribution
+is used in place of $RR$. Alternatively, the more conservative percentiles (5th,
+10th, etc.) can be used. The percentiles can also be used to construct Bayesian
+credible intervals. Similar to $RR$, an $EBGM$ (or lower percentile) much bigger
+than 1 represents an actual count much bigger than expected. Such cases might
+represent signals of interest, and the product/event pair can be further
+examined by subject matter experts to determine if the association might
+actually be causal in nature.
 
 An extension of the GPS model, the Multi-Item Gamma-Poisson Shrinker (MGPS) 
 model (2001), is currently being used by the U.S. Food and Drug Administration 
 (FDA) to find higher-than-expected reporting of adverse events associated with 
 food, drugs, etc. For instance, FDA's Center for Food Safety and Applied 
-Nutrition (CFSAN) uses the MGPS model to mine data from the CFSAN adverse events
-reporting system (CAERS): <https://www.fda.gov/Food/ComplianceEnforcement>. (The 
+Nutrition (CFSAN) uses the MGPS model to mine data from the CFSAN Adverse Events
+Reporting System (CAERS): <https://www.fda.gov/Food/ComplianceEnforcement>. (The 
 variables forming the rows and columns of the contingency table are *product*
 and *adverse event*.) MGPS allows for product interactions, unlike the GPS model
-implemented in *openEBGM*, which can only use individual product-event pairs.
+implemented in *openEBGM* (*3*), which can only use individual product-event
+pairs.
 
 ## Purpose
 
-The *openEBGM* package implements DuMouchel's approach with some small 
+The *openEBGM* package implements DuMouchel's approach with some small
 differences. For example, the expected counts are calculated by counting unique
-"events of interest" in each row and column, not actual marginal totals. In some
-applications, a single "event of interest" could occur in several cells. For
-instance, a single CAERS report ("event of interest") might mention multiple 
-products and/or adverse events. Using simple marginal totals would then count a 
-single report multiple times.
+"transactions" (*2*) in each row and column, not actual marginal totals. In the
+CAERS data, a unique report is a transaction. In some applications, a single
+transaction could occur in several cells. For instance, a single CAERS report
+might mention multiple products and/or adverse events. Using simple marginal
+totals would then count a single report multiple times.
 
 This document teaches you how to prepare your data for use by *openEBGM*'s 
 functions. Other vignettes give explanations and examples of more advanced 
@@ -90,12 +109,18 @@ to use with generic functions such as `plot()`.
 
 1. DuMouchel W (1999). "Bayesian Data Mining in Large Frequency
 Tables, With an Application to the FDA Spontaneous Reporting System."
-*The American Statistician*, 53(3), 177-190.
+*The American Statistician*, 53(3), 177-190. 
+https://doi.org/10.1080/00031305.1999.10474456
 
 1. DuMouchel W, Pregibon D (2001). "Empirical Bayes Screening for
 Multi-item Associations." In *Proceedings of the Seventh ACM SIGKDD
 International Conference on Knowledge Discovery and Data Mining*, KDD '01,
 pp. 67-76. ACM, New York, NY, USA. ISBN 1-58113-391-X.
+https://doi.org/10.1145/502512.502526
+
+1. Canida T, Ihrie J (2017). "openEBGM: An R Implementation of the Gamma-Poisson
+Shrinker Data Mining Model." *The R Journal*, 9(2), 499-519. https://journal.r-project.org/archive/2017/RJ-2017-063/index.html
+
 
 ---------
 
@@ -109,6 +134,7 @@ Data must be in tidy format (one column per variable and one observation per
 row). The columns can be of type factor, character, integer, or numeric. Missing
 values are not allowed - either replace NAs and empty strings with appropriate
 values or remove them from the data.
+
 
 ## Column names
 

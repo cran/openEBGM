@@ -45,8 +45,8 @@ Typically, \code{\link{processRaw}} is used to create the data frame
   supplied to the \code{data} argument.
 
 The \emph{N} column in \code{data} will be coerced using
-  \code{\link[base]{as.integer}}, and \emph{E} will be coerced using
-  \code{\link[base]{as.numeric}}. Missing data are not allowed.
+  \code{\link{as.integer}}, and \emph{E} will be coerced using
+  \code{\link{as.numeric}}. Missing data are not allowed.
 
 Since the distribution of expected counts, \emph{E}, tends to be
   skewed to the right, the largest \emph{E}s are not squashed by default.

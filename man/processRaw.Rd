@@ -83,13 +83,13 @@ dat <- data.frame(
   strat2 = c(rep("age_cat1", 5), rep("age_cat1", 3), rep("age_cat2", 2))
 )
 dat$id <- 1:nrow(dat)
-processRaw(dat, digits = 3)
+processRaw(dat)
 suppressWarnings(
-  processRaw(dat, stratify = TRUE, digits = 3)
+  processRaw(dat, stratify = TRUE)
 )
-processRaw(dat, zeroes = TRUE, digits = 3)
+processRaw(dat, zeroes = TRUE)
 suppressWarnings(
-  processRaw(dat, stratify = TRUE, zeroes = TRUE, digits = 3)
+  processRaw(dat, stratify = TRUE, zeroes = TRUE)
 )
 
 }

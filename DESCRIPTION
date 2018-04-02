@@ -1,6 +1,6 @@
 Package: openEBGM
 Title: EBGM Scores for Mining Large Contingency Tables
-Version: 0.4.0
+Version: 0.5.0
 Authors@R: c(
 	person("John", "Ihrie", email = "John.Ihrie@fda.hhs.gov",
 	       role = c("cre", "aut")),
@@ -8,9 +8,11 @@ Authors@R: c(
 	person("Ismaïl", "Ahmed", role = "ctb",
 	       comment = "author of 'PhViD' package (derived code)"),
 	person("Antoine", "Poncet", role = "ctb",
-	       comment = "author of 'PhViD' package"),
+	       comment = "author of 'PhViD'"),
 	person("Sergio", "Venturini", role = "ctb",
-	       comment = "author of 'mederrRank' package (derived code)"))
+	       comment = "author of 'mederrRank' package (derived code)"),
+	person("Jessica", "Myers", role = "ctb",
+	       comment = "author of 'mederrRank'"))
 Maintainer: John Ihrie <John.Ihrie@fda.hhs.gov>
 Description: An implementation of DuMouchel's (1999) 
   <doi:10.1080/00031305.1999.10474456> Bayesian data mining method for the
@@ -37,11 +39,12 @@ Suggests: dplyr (>= 0.5.0), knitr (>= 1.15.1), rmarkdown (>= 1.2),
 VignetteBuilder: knitr
 Encoding: UTF-8
 NeedsCompilation: no
-Packaged: 2018-03-09 14:30:31 UTC; John.Ihrie
+Packaged: 2018-04-02 15:17:44 UTC; John.Ihrie
 Author: John Ihrie [cre, aut],
   Travis Canida [aut],
   Ismaïl Ahmed [ctb] (author of 'PhViD' package (derived code)),
-  Antoine Poncet [ctb] (author of 'PhViD' package),
-  Sergio Venturini [ctb] (author of 'mederrRank' package (derived code))
+  Antoine Poncet [ctb] (author of 'PhViD'),
+  Sergio Venturini [ctb] (author of 'mederrRank' package (derived code)),
+  Jessica Myers [ctb] (author of 'mederrRank')
 Repository: CRAN
-Date/Publication: 2018-03-09 16:48:18 UTC
+Date/Publication: 2018-04-02 16:15:13 UTC

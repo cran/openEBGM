@@ -225,8 +225,8 @@
   min_bin   <- as.integer(min_bin)
   min_pts   <- as.integer(min_pts)
   data <- data.table::as.data.table(data)
-  data <- data[, N := as.integer(N)]
-  data <- data[, E := as.numeric(E)]
+  data[, N := as.integer(N)]
+  data[, E := as.numeric(E)]
 
   if (.isMissing_num(data[, N]) | .isMissing_num(data[, E])) {
     stop("missing values for 'N' or 'E' are not allowed")
@@ -248,7 +248,7 @@
       stop("this data set has already been squashed for this count size")
     }
   } else {
-    data <- data[, weight := 1L]
+    data[, weight := 1L]
   }
 
   num_pts <- nrow(data[N == count, ])

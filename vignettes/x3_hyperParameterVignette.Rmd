@@ -34,8 +34,9 @@ utilize the following:
 * Optimization using PORT routines
 * Newton-type algorithm
 * A quasi-Newton method (also known as a variable metric method)
-* *new in v0.4.0*: A version of the Expectation-Maximization (EM) Algorithm
-known as the Expectation/Conditional Maximization (ECM) Algorithm (*1*)
+* *new starting in v0.4.0*: A version of the Expectation-Maximization (EM)
+Algorithm known as the Expectation/Conditional Maximization (ECM) Algorithm
+(*1*)
 
 *openEBGM*'s functions (prior to v0.4.0) use multiple starting points and local
 optimization algorithms implemented in R's *stats* package. The user is

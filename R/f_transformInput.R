@@ -61,13 +61,13 @@
 #'   strat2 = c(rep("age_cat1", 5), rep("age_cat1", 3), rep("age_cat2", 2))
 #' )
 #' dat$id <- 1:nrow(dat)
-#' processRaw(dat, digits = 3)
+#' processRaw(dat)
 #' suppressWarnings(
-#'   processRaw(dat, stratify = TRUE, digits = 3)
+#'   processRaw(dat, stratify = TRUE)
 #' )
-#' processRaw(dat, zeroes = TRUE, digits = 3)
+#' processRaw(dat, zeroes = TRUE)
 #' suppressWarnings(
-#'   processRaw(dat, stratify = TRUE, zeroes = TRUE, digits = 3)
+#'   processRaw(dat, stratify = TRUE, zeroes = TRUE)
 #' )
 #'
 #' @references DuMouchel W (1999). "Bayesian Data Mining in Large Frequency
@@ -82,73 +82,69 @@ processRaw <- function(data, stratify = FALSE, zeroes = FALSE, digits = 2,
   .checkInputs_processRaw(data, stratify, zeroes)
 
   data <- data.table::as.data.table(data)
-  data <- unique(data)
 
   #Actual var1/var2 combination counts
-  actual   <- data[, .countUnique(id), by = .(var1, var2)]
-  actual$N <- actual$V1; actual$V1 <- NULL
-  if (zeroes == TRUE) {
+  actual <- data[, j = list(N = .countUnique(id)), by = .(var1, var2)]
+
+  if (zeroes) {
     data.table::setkeyv(actual, c("var1", "var2"))
     actual <- actual[data.table::CJ(unique(var1), unique(var2))]
-    actual <- actual[is.na(N), N := 0L]
+    actual[is.na(N), N := 0L]
   }
 
   #Unstratified marginal counts
-  v1_marg      <- data[, .countUnique(id), by = .(var1)]
-  v1_marg$N_v1 <- v1_marg$V1; v1_marg$V1 <- NULL
-  v2_marg      <- data[, .countUnique(id), by = .(var2)]
-  v2_marg$N_v2 <- v2_marg$V1; v2_marg$V1 <- NULL
+  v1_marg <- data[, j = list(N_v1 = .countUnique(id)), by = .(var1)]
+  v2_marg <- data[, j = list(N_v2 = .countUnique(id)), by = .(var2)]
 
   #Expected counts
-  if (stratify == FALSE) {
-    counts       <- merge(actual, v1_marg, by = "var1",
-                          all.x = zeroes, sort = FALSE)
-    counts       <- merge(counts, v2_marg, by = "var2",
-                          all.x = zeroes, sort = FALSE)
-    counts$N_tot <- .countUnique(data$id)
-    counts$E     <- (counts$N_v1 * counts$N_v2) / counts$N_tot
+  if (!stratify) {
+    counts <- merge(actual, v1_marg, by = "var1", all.x = zeroes, sort = FALSE)
+    counts <- merge(counts, v2_marg, by = "var2", all.x = zeroes, sort = FALSE)
+    counts[, N_tot := .countUnique(data$id)]
+    counts[, E := N_v1 * N_v2 / N_tot]
   } else {
     data <- .checkStrata_processRaw(data, max_cats)  #adds 'stratum' column
-    v1_marg_str          <- data[, .countUnique(id), by = .(var1, stratum)]
-    v1_marg_str$N_v1_str <- v1_marg_str$V1; v1_marg_str$V1 <- NULL
-    v2_marg_str          <- data[, .countUnique(id), by = .(var2, stratum)]
-    v2_marg_str$N_v2_str <- v2_marg_str$V1; v2_marg_str$V1 <- NULL
-    strat_tot            <- data[, .countUnique(id), by = .(stratum)]
-    strat_tot$N_tot_str  <- strat_tot$V1; strat_tot$V1 <- NULL
+    v1_marg_str <- data[, j = list(N_v1_str = .countUnique(id)),
+                        by = .(var1, stratum)]
+    v2_marg_str <- data[, j = list(N_v2_str = .countUnique(id)),
+                        by = .(var2, stratum)]
+    strat_tot <- data[, j = list(N_tot_str = .countUnique(id)), by = .(stratum)]
     counts <- merge(actual, v1_marg_str, by = "var1",
                     all.x = zeroes, sort = FALSE, allow.cartesian = TRUE)
-    counts <- counts[is.na(N_v1_str), N_v1_str := 0L]
+    counts[is.na(N_v1_str), N_v1_str := 0L]
     counts <- merge(counts, v2_marg_str, by = c("var2", "stratum"),
                     all.x = zeroes, sort = FALSE)
-    counts <- counts[is.na(N_v2_str), N_v2_str := 0L]
+    counts[is.na(N_v2_str), N_v2_str := 0L]
     counts <- merge(counts, strat_tot, by = "stratum",
                     all.x = zeroes, sort = FALSE)
-    counts$E <- (counts$N_v1_str * counts$N_v2_str) / counts$N_tot_str
-    counts <- counts[, sum(E, na.rm = TRUE), by = .(var1, var2)]
-    counts$E <- counts$V1; counts$V1 <- NULL
+    counts[, E := N_v1_str * N_v2_str / N_tot_str]
+    counts <- counts[, j = list(E = sum(E, na.rm = TRUE)), by = .(var1, var2)]
     counts <- merge(actual, counts, by = c("var1", "var2"),
                     all.x = zeroes, sort = FALSE)
     counts <- merge(counts, v1_marg, by = "var1", all.x = zeroes, sort = FALSE)
     counts <- merge(counts, v2_marg, by = "var2", all.x = zeroes, sort = FALSE)
-    counts$N_tot <- .countUnique(data$id)
+    counts[, N_tot := .countUnique(data$id)]
   }
 
   #Add disproportionality measures
-  counts$RR  <- round(counts$N / counts$E, digits)
-  counts$RR  <- ifelse(is.nan(counts$RR), 0, counts$RR)
-  PRR_num    <- counts$N / counts$N_v1
-  PRR_den    <- (counts$N_v2 - counts$N) / (counts$N_tot - counts$N_v1)
-  counts$PRR <- round(PRR_num / PRR_den, digits)
-  counts$PRR <- ifelse(is.nan(counts$PRR), Inf, counts$PRR)
-  vars        <- c("var1", "var2", "N", "E", "RR", "PRR")
-  counts$var1 <- as.factor(counts$var1)
-  counts$var2 <- as.factor(counts$var2)
-  counts      <- counts[order(var1, var2), vars, with = FALSE]
-  as.data.frame(counts)
+  counts[, RR := round(N / E, digits)]
+  counts[is.nan(RR), RR := 0]
+  counts[, PRR_num := N / N_v1]
+  counts[, PRR_den := (N_v2 - N) / (N_tot - N_v1)]
+  counts[, PRR := round(PRR_num / PRR_den, digits)]
+  counts <- counts[, .(var1, var2, N, E, RR, PRR)]
+  counts[is.nan(PRR), PRR := Inf]
+  counts[, var1 := as.factor(var1)]
+  counts[, var2 := as.factor(var2)]
+  data.table::setorder(counts, var1, var2)
+  data.table::setDF(counts)
+  counts
 }
 
 #Hack to trick 'R CMD check'
 if (getRversion() >= "2.15.1") {
   utils::globalVariables(c(".", "id", "var1", "var2", "N", "stratum",
-                           "N_v1_str", "N_v2_str", "E"))
+                           "N_v1_str", "N_v2_str", "E", "N_tot", "N_v1",
+                           "N_v2", "N_tot_str", "RR", "PRR_num", "PRR_den",
+                           "PRR"))
 }

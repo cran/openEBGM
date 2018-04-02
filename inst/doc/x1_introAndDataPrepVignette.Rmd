@@ -52,7 +52,7 @@ $\lambda_{ij}=\frac{\mu_{ij}}{E_{ij}}$, which is analagous to $RR=\frac{N}{E}$.
 The prior on $\lambda$ is a mixture of two gamma distributions, resulting in a
 posterior distribution for $\lambda$ which is a mixture of two gamma
 distributions. Hence, the model is sometimes referred to as the **Gamma-Poisson
-Shrinkage (GPS)** model. The posterior distribution of $\lambda$ can be thought
+Shrinker (GPS)** model. The posterior distribution of $\lambda$ can be thought
 of as a Bayesian representation of $RR$. Summary statsistics from the posterior
 distribution are used as attenuated versions of $RR$.
 

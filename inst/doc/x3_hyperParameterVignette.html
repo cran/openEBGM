@@ -11,7 +11,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
-<meta name="date" content="2018-03-09" />
+<meta name="date" content="2018-04-02" />
 
 <title>Hyperparameter Estimation with openEBGM</title>
 
@@ -68,7 +68,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 <h1 class="title toc-ignore">Hyperparameter Estimation with openEBGM</h1>
-<h4 class="date"><em>2018-03-09</em></h4>
+<h4 class="date"><em>2018-04-02</em></h4>
 
 
 
@@ -82,7 +82,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li>Optimization using PORT routines</li>
 <li>Newton-type algorithm</li>
 <li>A quasi-Newton method (also known as a variable metric method)</li>
-<li><em>new in v0.4.0</em>: A version of the Expectation-Maximization (EM) Algorithm known as the Expectation/Conditional Maximization (ECM) Algorithm (<em>1</em>)</li>
+<li><em>new starting in v0.4.0</em>: A version of the Expectation-Maximization (EM) Algorithm known as the Expectation/Conditional Maximization (ECM) Algorithm (<em>1</em>)</li>
 </ul>
 <p><em>openEBGM</em>’s functions (prior to v0.4.0) use multiple starting points and local optimization algorithms implemented in R’s <em>stats</em> package. The user is encouraged to explore a variety of optimization approaches because the accuracy of a global optimization result is extremely difficult to verify and other approaches might work better in some cases.</p>
 </div>
@@ -173,7 +173,7 @@ hyper_estimates_full &lt;-<span class="st"> </span><span class="kw">autoHyper</s
                                   <span class="dt">squashed =</span> <span class="ot">FALSE</span>)
 )
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;   35.91    0.00   35.91</span>
+<span class="co">#&gt;   35.33    0.00   35.33</span>
 
 squashed2 &lt;-<span class="st"> </span><span class="kw">squashData</span>(squashed, <span class="dt">count =</span> <span class="dv">2</span>, <span class="dt">bin_size =</span> <span class="dv">10</span>, <span class="dt">keep_bins =</span> <span class="dv">5</span>)
 <span class="kw">system.time</span>(
@@ -299,7 +299,7 @@ hyperEM_ests &lt;-<span class="st"> </span><span class="kw">hyperEM</span>(squas
 <span class="co">#&gt; </span>
 <span class="co">#&gt;    Timing:  </span>
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;    4.20    0.00    4.19</span>
+<span class="co">#&gt;    3.75    0.00    3.74</span>
 <span class="kw">str</span>(hyperEM_ests)
 <span class="co">#&gt; List of 9</span>
 <span class="co">#&gt;  $ estimates : num [1:5] 3.1049 0.3933 2.0412 1.9377 0.0684</span>
@@ -310,7 +310,7 @@ hyperEM_ests &lt;-<span class="st"> </span><span class="kw">hyperEM</span>(squas
 <span class="co">#&gt;   ..$ UL_95 : num [1:5] 6.941 0.638 2.953 2.81 0.138</span>
 <span class="co">#&gt;  $ maximum   : num -4164</span>
 <span class="co">#&gt;  $ method    : chr &quot;score&quot;</span>
-<span class="co">#&gt;  $ elapsed   : num 4.19</span>
+<span class="co">#&gt;  $ elapsed   : num 3.74</span>
 <span class="co">#&gt;  $ iters     : num 203</span>
 <span class="co">#&gt;  $ score     : num [1:5] -0.01144 0.02895 0.01031 0.00942 0.00216</span>
 <span class="co">#&gt;  $ score_norm: num 0.0342</span>

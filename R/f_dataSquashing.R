@@ -73,37 +73,40 @@ squashData <- function(data, count = 1, bin_size = 50, keep_bins = 2,
   data <- .checkInputs_squashData(data, count, bin_size, keep_bins, min_bin,
                                   min_pts)
 
-  hold <- data[N != count, .(N, E, weight)]  #not squashed
-  maybe_squash <- data[N == count, .(N, E, weight)]  #squash most points
-  maybe_squash <- maybe_squash[order(E), ]  #need similar Es in same bin
+  hold         <- data[N != count, .(N, E, weight)]  #not squashed
+  maybe_squash <- data[N == count, .(N, E, weight)]
+  data.table::setorder(maybe_squash, E)  #need similar Es in same bin
+  num_maybe_squash <- nrow(maybe_squash)
 
   #Largest values are most variable, so keep (i.e., do not squash)
-  num_squash <- nrow(maybe_squash) - (keep_bins * bin_size)
+  num_keep   <- keep_bins * bin_size
+  num_squash <- num_maybe_squash - num_keep
   if (num_squash < bin_size) {
     stop("reduce 'bin_size' or 'keep_bins'")
   }
-  squash    <- maybe_squash[1:num_squash, ]
-  keep      <- maybe_squash[(num_squash + 1):nrow(maybe_squash), ]
-  remainder <- nrow(squash) %% bin_size
+  squash     <- maybe_squash[1:num_squash, ]
+  keep       <- maybe_squash[(num_squash + 1):num_maybe_squash, ]
+  num_remain <- num_squash %% bin_size  #partial bin count
 
-  #Create bins and squash points
-  if (remainder == 0) {
-    num_bins <- nrow(squash) / bin_size
-    bins   <- sort(rep.int(1:num_bins, bin_size))
-    squash <- squash[, bins := bins]
-    squash <- squash[, mean(E, na.rm = TRUE), by = .(N, bins)]
-    weight <- rep(bin_size, num_bins)
-    squash <- squash[, weight := weight]
+  #Create bin indices and squash points
+  if (num_remain == 0) {
+    num_bins <- num_squash / bin_size
+    squash[, bin_index := rep(1:num_bins, each = bin_size)]
+    squash <- squash[, j = list(E = mean(E, na.rm = TRUE)),
+                     by = .(N, bin_index)]
+    squash[, bin_index := NULL]
+    squash[, weight := rep.int(bin_size, num_bins)]
   } else {
-    num_bins <- (nrow(squash) / bin_size) + 1
-    bins   <- c(sort(rep.int(1:(num_bins - 1), bin_size)),
-                rep.int(num_bins, remainder))
-    squash <- squash[, bins := bins]
-    squash <- squash[, mean(E, na.rm = TRUE), by = .(N, bins)]
-    weight <- c(rep(bin_size, num_bins - 1), remainder)
-    squash <- squash[, weight := weight]
+    num_bins_full    <- floor(num_squash / bin_size)
+    bin_full_index   <- rep(1:num_bins_full, each = bin_size)
+    bin_remain_index <- rep.int(num_bins_full + 1, num_remain)
+    squash[, bin_index := c(bin_full_index, bin_remain_index)]
+    squash <- squash[, j = list(E = mean(E, na.rm = TRUE)),
+                     by = .(N, bin_index)]
+    squash[, bin_index := NULL]
+    weights_full <- rep.int(bin_size, num_bins_full)
+    squash[, weight := c(weights_full, num_remain)]
   }
-  squash <- squash[, bins := NULL]
 
   if (keep_bins == 0) {
     results <- data.table::rbindlist(list(hold, squash))
@@ -111,12 +114,13 @@ squashData <- function(data, count = 1, bin_size = 50, keep_bins = 2,
     results <- data.table::rbindlist(list(hold, squash, keep))
   }
 
-  results <- results[order(N), ]
+  data.table::setorder(results, N)
   row.names(results) <- NULL
-  as.data.frame(results)
+  data.table::setDF(results)
+  results
 }
 
 #Hack to trick 'R CMD check'
 if (getRversion() >= "2.15.1") {
-  utils::globalVariables(c(".", "weight", "bins"))
+  utils::globalVariables(c(".", "weight", "bin_index"))
 }

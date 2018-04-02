@@ -113,8 +113,8 @@ If \code{method = "score"}, the model is reparameterized. The
   parameters are transformed to force the parameter space to include all real
   numbers. This approach addresses numerical issues at the edge of the
   parameter space. The reparameterization follows:
-  \eqn{\alpha_prime = log(\alpha)}, \eqn{\beta_prime = log(\beta)}, and
-  \eqn{P_prime = tan(pi * P - pi / 2)}. However, the values returned in
+  \eqn{\alpha_{prime} = log(\alpha)}, \eqn{\beta_{prime} = log(\beta)}, and
+  \eqn{P_{prime} = tan(pi * P - pi / 2)}. However, the values returned in
   \code{estimates} are on the original scale (back-transformed).
 
 On every 100th iteration, the procedure described in Millar (2011)

@@ -33,9 +33,9 @@ proc_zeroes <- processRaw(dat, zeroes = TRUE)
 data(caers)
 proc_dat_ustrat <- processRaw(caers, stratify = FALSE)
 proc_dat_ustrat_squash <- squashData(proc_dat_ustrat, bin_size = 80,
-                                     keep_bins = 1)
+                                     keep_pts = 80)
 proc_dat_ustrat_squash <- squashData(proc_dat_ustrat_squash, count = 2,
-                                     bin_size = 12, keep_bins = 1)
+                                     bin_size = 12, keep_pts = 12)
 
 #Begin exception handling tests ------------------------------------------------
 #exploreHypers()
@@ -394,7 +394,7 @@ testthat::test_that("check if 'bfgs' method works", {
 })
 
 #hyperEM()
-squashed <- squashData(proc_dat_ustrat, bin_size = 100, keep_bins = 0)
+squashed <- squashData(proc_dat_ustrat, bin_size = 100, keep_pts = 0)
 squashed <- squashData(squashed, count = 2, bin_size = 12)
 hyperEM_ests <- hyperEM(squashed, theta_init_vec = c(1, 1, 2, 2, .3),
                         print_level = 0)

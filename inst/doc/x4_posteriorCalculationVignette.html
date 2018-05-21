@@ -11,7 +11,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
-<meta name="date" content="2018-04-02" />
+<meta name="date" content="2018-05-21" />
 
 <title>Empirical Bayes Metrics with openEBGM</title>
 
@@ -68,7 +68,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 <h1 class="title toc-ignore">Empirical Bayes Metrics with openEBGM</h1>
-<h4 class="date"><em>2018-04-02</em></h4>
+<h4 class="date"><em>2018-05-21</em></h4>
 
 
 
@@ -87,7 +87,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 processed &lt;-<span class="st"> </span><span class="kw">processRaw</span>(caers, <span class="dt">stratify =</span> <span class="ot">FALSE</span>, <span class="dt">zeroes =</span> <span class="ot">FALSE</span>)
 squashed &lt;-<span class="st"> </span><span class="kw">squashData</span>(processed)
-squashed2 &lt;-<span class="st"> </span><span class="kw">squashData</span>(squashed, <span class="dt">count =</span> <span class="dv">2</span>, <span class="dt">bin_size =</span> <span class="dv">10</span>, <span class="dt">keep_bins =</span> <span class="dv">5</span>)
+squashed2 &lt;-<span class="st"> </span><span class="kw">squashData</span>(squashed, <span class="dt">count =</span> <span class="dv">2</span>, <span class="dt">bin_size =</span> <span class="dv">10</span>, <span class="dt">keep_pts =</span> <span class="dv">50</span>)
 theta_init &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">alpha1 =</span> <span class="kw">c</span>(<span class="fl">0.2</span>, <span class="fl">0.1</span>, <span class="fl">0.3</span>, <span class="fl">0.5</span>, <span class="fl">0.2</span>),
                          <span class="dt">beta1  =</span> <span class="kw">c</span>(<span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.3</span>, <span class="fl">0.2</span>),
                          <span class="dt">alpha2 =</span> <span class="kw">c</span>(<span class="dv">2</span>,   <span class="dv">10</span>,  <span class="dv">6</span>,   <span class="dv">12</span>,  <span class="dv">5</span>),

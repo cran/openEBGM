@@ -8,8 +8,9 @@
 #' estimate both parameters for each distribution in the mixture while holding
 #' the parameters from the other distribution and the mixing fraction fixed.
 #'
-#' @param data A data frame from \code{\link{processRaw}} containing columns
-#'   named \emph{N}, \emph{E}, and (if squashed) \emph{weight}.
+#' @param data A data frame from \code{\link{processRaw}} or
+#'   \code{\link{squashData}} containing columns named \emph{N}, \emph{E}, and
+#'   (if squashed) \emph{weight}.
 #' @param theta_init_vec A numeric vector of initial hyperparameter guesses
 #'   ordered as: \eqn{\alpha_1, \beta_1, \alpha_2, \beta_2, P}.
 #' @param squashed A scalar logical (\code{TRUE} or \code{FALSE}) indicating
@@ -96,8 +97,8 @@
 #' @examples
 #' data(caers)
 #' proc <- processRaw(caers)
-#' squashed <- squashData(proc, bin_size = 100, keep_bins = 0)
-#' squashed <- squashData(squashed, count = 2, bin_size = 12)
+#' squashed <- squashData(proc, bin_size = 100, keep_pts = 0)
+#' squashed <- squashData(squashed, count = 2, bin_size = 12, keep_pts = 24)
 #' hyperEM(squashed, theta_init_vec = c(1, 1, 2, 2, .3), consecutive = 10)
 #'
 #' @references DuMouchel W (1999). "Bayesian Data Mining in Large Frequency

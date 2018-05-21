@@ -11,8 +11,9 @@ hyperEM(data, theta_init_vec, squashed = TRUE, zeroes = FALSE, N_star = 1,
   conf_level = c("95", "80", "90", "99"), track = FALSE)
 }
 \arguments{
-\item{data}{A data frame from \code{\link{processRaw}} containing columns
-named \emph{N}, \emph{E}, and (if squashed) \emph{weight}.}
+\item{data}{A data frame from \code{\link{processRaw}} or
+\code{\link{squashData}} containing columns named \emph{N}, \emph{E}, and
+(if squashed) \emph{weight}.}
 
 \item{theta_init_vec}{A numeric vector of initial hyperparameter guesses
 ordered as: \eqn{\alpha_1, \beta_1, \alpha_2, \beta_2, P}.}
@@ -131,8 +132,8 @@ Asymptotic normal confidence intervals, if requested, use standard
 \examples{
 data(caers)
 proc <- processRaw(caers)
-squashed <- squashData(proc, bin_size = 100, keep_bins = 0)
-squashed <- squashData(squashed, count = 2, bin_size = 12)
+squashed <- squashData(proc, bin_size = 100, keep_pts = 0)
+squashed <- squashData(squashed, count = 2, bin_size = 12, keep_pts = 24)
 hyperEM(squashed, theta_init_vec = c(1, 1, 2, 2, .3), consecutive = 10)
 
 }

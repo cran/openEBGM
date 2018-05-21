@@ -241,8 +241,8 @@ negLL <- function(theta, N, E, N_star = 1) {
 #' theta_init <- c(0.2, 0.1, 2, 4, 1/3)  #initial guess
 #' data(caers)
 #' proc <- processRaw(caers)
-#' squashed <- squashData(proc, count = 1, bin_size = 100, keep_bins = 1)
-#' squashed <- squashData(squashed, count = 2, bin_size = 10)
+#' squashed <- squashData(proc, count = 1, bin_size = 100, keep_pts = 100)
+#' squashed <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 20)
 #' negLLsquash(theta = theta_init, ni = squashed$N, ei = squashed$E,
 #'             wi = squashed$weight)
 #' #For hyperparameter estimation...

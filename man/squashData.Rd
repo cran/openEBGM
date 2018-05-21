@@ -4,28 +4,30 @@
 \alias{squashData}
 \title{Squash data for hyperparameter estimation}
 \usage{
-squashData(data, count = 1, bin_size = 50, keep_bins = 2, min_bin = 50,
+squashData(data, count = 1, bin_size = 50, keep_pts = 100, min_bin = 50,
   min_pts = 500)
 }
 \arguments{
-\item{data}{A data frame containing columns named \emph{N}, \emph{E},
-and (possibly) \emph{weight}. Can contain additional columns, which will
-be ignored.}
+\item{data}{A data frame (typically from \code{\link{processRaw}} or a
+previous call to \code{\link{squashData}}) containing columns named
+\emph{N}, \emph{E}, and (possibly) \emph{weight}. Can contain additional
+columns, which will be ignored.}
 
 \item{count}{A non-negative scalar whole number for the count size, \emph{N},
 used for binning}
 
 \item{bin_size}{A scalar whole number (>= 2)}
 
-\item{keep_bins}{A nonnegative scalar whole number for number of bins of the
-largest expected counts to leave unsquashed. Used to help prevent
+\item{keep_pts}{A nonnegative scalar whole number for number of points with
+the largest expected counts to leave unsquashed. Used to help prevent
 \dQuote{oversquashing}.}
 
 \item{min_bin}{A positive scalar whole number for the minimum number of bins
 needed. Used to help prevent \dQuote{oversquashing}.}
 
 \item{min_pts}{A positive scalar whole number for the minimum number of
-points needed for squashing. Used to help prevent \dQuote{oversquashing}.}
+original (unsquashed) points needed for squashing. Used to help prevent
+\dQuote{oversquashing}.}
 }
 \value{
 A data frame with column names \emph{N}, \emph{E}, and
@@ -40,9 +42,6 @@ A data frame with column names \emph{N}, \emph{E}, and
 }
 \details{
 Can be used iteratively (count = 1, then 2, etc.).
-
-Typically, \code{\link{processRaw}} is used to create the data frame
-  supplied to the \code{data} argument.
 
 The \emph{N} column in \code{data} will be coerced using
   \code{\link{as.integer}}, and \emph{E} will be coerced using
@@ -65,18 +64,20 @@ dat <- data.frame(var1 = letters[1:26], var2 = LETTERS[1:26],
                   E = round(abs(c(rnorm(11, 0), rnorm(10, 1), rnorm(4, 2),
                             rnorm(1, 3))), 3)
                   )
-(zeroes <- squashData(dat, count = 0, bin_size = 3, keep_bins = 1,
+(zeroes <- squashData(dat, count = 0, bin_size = 3, keep_pts = 1,
                       min_bin = 2, min_pts = 2))
-(ones <- squashData(zeroes, bin_size = 2, keep_bins = 1,
+(ones <- squashData(zeroes, bin_size = 2, keep_pts = 1,
                     min_bin = 2, min_pts = 2))
-(twos <- squashData(ones, count = 2, bin_size = 2, keep_bins = 1,
+(twos <- squashData(ones, count = 2, bin_size = 2, keep_pts = 1,
                     min_bin = 2, min_pts = 2))
 
-squashData(dat, count = 0, bin_size = 3, keep_bins = 0,
+squashData(zeroes, bin_size = 2, keep_pts = 0,
            min_bin = 2, min_pts = 2)
-squashData(dat, count = 0, bin_size = 3, keep_bins = 1,
+squashData(zeroes, bin_size = 2, keep_pts = 1,
            min_bin = 2, min_pts = 2)
-squashData(dat, count = 0, bin_size = 3, keep_bins = 2,
+squashData(zeroes, bin_size = 2, keep_pts = 2,
+           min_bin = 2, min_pts = 2)
+squashData(zeroes, bin_size = 2, keep_pts = 3,
            min_bin = 2, min_pts = 2)
 
 }

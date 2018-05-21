@@ -6,37 +6,36 @@
 #'   can be squashed to reduce computational burden (see DuMouchel et al.,
 #'   2001) when estimating the hyperparameters.
 #'
-#' @param data A data frame containing columns named \emph{N}, \emph{E},
-#'   and (possibly) \emph{weight}. Can contain additional columns, which will
-#'   be ignored.
+#' @param data A data frame (typically from \code{\link{processRaw}} or a
+#'   previous call to \code{\link{squashData}}) containing columns named
+#'   \emph{N}, \emph{E}, and (possibly) \emph{weight}. Can contain additional
+#'   columns, which will be ignored.
 #' @param count A non-negative scalar whole number for the count size, \emph{N},
 #'   used for binning
 #' @param bin_size A scalar whole number (>= 2)
-#' @param keep_bins A nonnegative scalar whole number for number of bins of the
-#'   largest expected counts to leave unsquashed. Used to help prevent
+#' @param keep_pts A nonnegative scalar whole number for number of points with
+#'   the largest expected counts to leave unsquashed. Used to help prevent
 #'   \dQuote{oversquashing}.
 #' @param min_bin A positive scalar whole number for the minimum number of bins
 #'   needed. Used to help prevent \dQuote{oversquashing}.
 #' @param min_pts A positive scalar whole number for the minimum number of
-#'   points needed for squashing. Used to help prevent \dQuote{oversquashing}.
+#'   original (unsquashed) points needed for squashing. Used to help prevent
+#'   \dQuote{oversquashing}.
 #' @return A data frame with column names \emph{N}, \emph{E}, and
 #'   \emph{weight} containing the reduced data set.
 #'
 #' @details Can be used iteratively (count = 1, then 2, etc.).
-#' @details Typically, \code{\link{processRaw}} is used to create the data frame
-#'   supplied to the \code{data} argument.
 #' @details The \emph{N} column in \code{data} will be coerced using
 #'   \code{\link{as.integer}}, and \emph{E} will be coerced using
 #'   \code{\link{as.numeric}}. Missing data are not allowed.
 #' @details Since the distribution of expected counts, \emph{E}, tends to be
 #'   skewed to the right, the largest \emph{E}s are not squashed by default.
-#'   This behavior can be changed by setting the \code{keep_bins} argument to
+#'   This behavior can be changed by setting the \code{keep_pts} argument to
 #'   zero (0); however, this is not recommended. Squashing the largest \emph{E}s
 #'   could result in a large loss of information, so it is recommended to use a
-#'   value of one (1) or more for \code{keep_bins}.
-#' @details Values for \code{keep_bins}, \code{min_bin}, and \code{min_pts}
+#'   value of one (100) or more for \code{keep_pts}.
+#' @details Values for \code{keep_pts}, \code{min_bin}, and \code{min_pts}
 #'   should typically be at least as large as the default values.
-
 #' @examples
 #' set.seed(483726)
 #' dat <- data.frame(var1 = letters[1:26], var2 = LETTERS[1:26],
@@ -44,18 +43,20 @@
 #'                   E = round(abs(c(rnorm(11, 0), rnorm(10, 1), rnorm(4, 2),
 #'                             rnorm(1, 3))), 3)
 #'                   )
-#' (zeroes <- squashData(dat, count = 0, bin_size = 3, keep_bins = 1,
+#' (zeroes <- squashData(dat, count = 0, bin_size = 3, keep_pts = 1,
 #'                       min_bin = 2, min_pts = 2))
-#' (ones <- squashData(zeroes, bin_size = 2, keep_bins = 1,
+#' (ones <- squashData(zeroes, bin_size = 2, keep_pts = 1,
 #'                     min_bin = 2, min_pts = 2))
-#' (twos <- squashData(ones, count = 2, bin_size = 2, keep_bins = 1,
+#' (twos <- squashData(ones, count = 2, bin_size = 2, keep_pts = 1,
 #'                     min_bin = 2, min_pts = 2))
 #'
-#' squashData(dat, count = 0, bin_size = 3, keep_bins = 0,
+#' squashData(zeroes, bin_size = 2, keep_pts = 0,
 #'            min_bin = 2, min_pts = 2)
-#' squashData(dat, count = 0, bin_size = 3, keep_bins = 1,
+#' squashData(zeroes, bin_size = 2, keep_pts = 1,
 #'            min_bin = 2, min_pts = 2)
-#' squashData(dat, count = 0, bin_size = 3, keep_bins = 2,
+#' squashData(zeroes, bin_size = 2, keep_pts = 2,
+#'            min_bin = 2, min_pts = 2)
+#' squashData(zeroes, bin_size = 2, keep_pts = 3,
 #'            min_bin = 2, min_pts = 2)
 #'
 #' @references DuMouchel W, Pregibon D (2001). "Empirical Bayes Screening for
@@ -66,11 +67,11 @@
 #' @seealso \code{\link{processRaw}} for data preparation
 #' @import data.table
 #' @export
-squashData <- function(data, count = 1, bin_size = 50, keep_bins = 2,
+squashData <- function(data, count = 1, bin_size = 50, keep_pts = 100,
                        min_bin = 50, min_pts = 500) {
 
   #Check inputs & coerce to data table
-  data <- .checkInputs_squashData(data, count, bin_size, keep_bins, min_bin,
+  data <- .checkInputs_squashData(data, count, bin_size, keep_pts, min_bin,
                                   min_pts)
 
   hold         <- data[N != count, .(N, E, weight)]  #not squashed
@@ -79,10 +80,9 @@ squashData <- function(data, count = 1, bin_size = 50, keep_bins = 2,
   num_maybe_squash <- nrow(maybe_squash)
 
   #Largest values are most variable, so keep (i.e., do not squash)
-  num_keep   <- keep_bins * bin_size
-  num_squash <- num_maybe_squash - num_keep
+  num_squash <- num_maybe_squash - keep_pts
   if (num_squash < bin_size) {
-    stop("reduce 'bin_size' or 'keep_bins'")
+    stop("reduce 'bin_size' or 'keep_pts'")
   }
   squash     <- maybe_squash[1:num_squash, ]
   keep       <- maybe_squash[(num_squash + 1):num_maybe_squash, ]
@@ -108,7 +108,7 @@ squashData <- function(data, count = 1, bin_size = 50, keep_bins = 2,
     squash[, weight := c(weights_full, num_remain)]
   }
 
-  if (keep_bins == 0) {
+  if (keep_pts == 0) {
     results <- data.table::rbindlist(list(hold, squash))
   } else {
     results <- data.table::rbindlist(list(hold, squash, keep))

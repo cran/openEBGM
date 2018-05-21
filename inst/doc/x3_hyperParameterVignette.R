@@ -33,7 +33,7 @@ hyper_estimates_full <- autoHyper(data = processed, theta_init = theta_init,
                                   squashed = FALSE)
 )
 
-squashed2 <- squashData(squashed, count = 2, bin_size = 10, keep_bins = 5)
+squashed2 <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 50)
 system.time(
 hyper_estimates_squashed <- autoHyper(data = squashed2, theta_init = theta_init)
 )
@@ -51,7 +51,7 @@ exploreHypers(data = squashed2, theta_init = theta_init, std_errors = TRUE)
 ## ----hyperEM example, warning = FALSE------------------------------------
 data(caers)
 proc <- processRaw(caers)
-squashed <- squashData(proc, bin_size = 100, keep_bins = 0)
+squashed <- squashData(proc, bin_size = 100, keep_pts = 0)
 squashed <- squashData(squashed, count = 2, bin_size = 12)
 hyperEM_ests <- hyperEM(squashed, theta_init_vec = c(1, 1, 2, 2, .3),
                         conf_int = TRUE, track = TRUE)

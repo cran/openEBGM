@@ -7,7 +7,7 @@ data(caers)  #subset of publicly available CAERS data
 
 processed <- processRaw(caers, stratify = FALSE, zeroes = FALSE)
 squashed <- squashData(processed)
-squashed2 <- squashData(squashed, count = 2, bin_size = 10, keep_bins = 5)
+squashed2 <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 50)
 theta_init <- data.frame(alpha1 = c(0.2, 0.1, 0.3, 0.5, 0.2),
                          beta1  = c(0.1, 0.1, 0.5, 0.3, 0.2),
                          alpha2 = c(2,   10,  6,   12,  5),

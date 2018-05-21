@@ -214,16 +214,16 @@
 }
 
 #squashData() ------------------------------------------------------------------
-.checkInputs_squashData <- function(data, count, bin_size, keep_bins,
+.checkInputs_squashData <- function(data, count, bin_size, keep_pts,
                                     min_bin, min_pts) {
 
   #Also coerces data frame to data table.
   .checkInputs_processed_data(data)
-  count     <- as.integer(count)
-  bin_size  <- as.integer(bin_size)
-  keep_bins <- as.integer(keep_bins)
-  min_bin   <- as.integer(min_bin)
-  min_pts   <- as.integer(min_pts)
+  count    <- as.integer(count)
+  bin_size <- as.integer(bin_size)
+  keep_pts <- as.integer(keep_pts)
+  min_bin  <- as.integer(min_bin)
+  min_pts  <- as.integer(min_pts)
   data <- data.table::as.data.table(data)
   data[, N := as.integer(N)]
   data[, E := as.numeric(E)]
@@ -237,8 +237,8 @@
   if (bin_size < 2) {
     stop("'bin_size' must be >= 2")
   }
-  if (keep_bins < 0) {
-    stop("'keep_bins' must be non-negative")
+  if (keep_pts < 0) {
+    stop("'keep_pts' must be non-negative")
   }
 
   #In case we want to run the function iteratively (count = 1, then 2, etc.)

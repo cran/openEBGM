@@ -14,11 +14,11 @@ dat_missing1[3, "N"] <- NA
 dat_missing2 <- dat
 dat_missing2[1, "E"] <- ""
 
-zeroes <- squashData(dat, count = 0, bin_size = 3, keep_bins = 1,
+zeroes <- squashData(dat, count = 0, bin_size = 3, keep_pts = 3,
                      min_bin = 2, min_pts = 2)
-ones   <- squashData(zeroes, count = 1, bin_size = 2, keep_bins = 1,
+ones   <- squashData(zeroes, count = 1, bin_size = 2, keep_pts = 2,
                      min_bin = 2, min_pts = 2)
-twos   <- squashData(ones, count = 2, bin_size = 2, keep_bins = 1,
+twos   <- squashData(ones, count = 2, bin_size = 2, keep_pts = 2,
                      min_bin = 2, min_pts = 2)
 
 testthat::test_that("correct number of rows and columns from squashData()", {
@@ -29,13 +29,13 @@ testthat::test_that("correct number of rows and columns from squashData()", {
 })
 
 testthat::test_that("do the weights make sense?", {
-  expect_equal(squashData(dat, count = 0, bin_size = 3, keep_bins = 0,
+  expect_equal(squashData(dat, count = 0, bin_size = 3, keep_pts = 0,
                           min_bin = 2, min_pts = 2)$weight,
                c(3,3,3,2, rep(1, 15)))
-  expect_equal(squashData(dat, count = 0, bin_size = 3, keep_bins = 1,
+  expect_equal(squashData(dat, count = 0, bin_size = 3, keep_pts = 3,
                           min_bin = 2, min_pts = 2)$weight,
                c(3,3,2,1,1,1, rep(1, 15)))
-  expect_equal(squashData(dat, count = 0, bin_size = 3, keep_bins = 2,
+  expect_equal(squashData(dat, count = 0, bin_size = 3, keep_pts = 6,
                           min_bin = 2, min_pts = 2)$weight,
                c(3,2,1,1,1,1,1,1, rep(1, 15)))
 })
@@ -75,8 +75,8 @@ testthat::test_that("do warnings/errors get correctly printed?", {
   expect_error(squashData(dat, bin_size = 1),
                "'bin_size' must be >= 2",
                fixed = TRUE)
-  expect_error(squashData(dat, keep_bins = -1),
-               "'keep_bins' must be non-negative",
+  expect_error(squashData(dat, keep_pts = -1),
+               "'keep_pts' must be non-negative",
                fixed = TRUE)
   expect_error(squashData(ones, count = 1),
                "this data set has already been squashed for this count size",
@@ -84,26 +84,26 @@ testthat::test_that("do warnings/errors get correctly printed?", {
   expect_error(squashData(dat, count = 3, min_pts = 2),
                "not enough points for squashing",
                fixed = TRUE)
-  expect_error(squashData(dat, count = 0, bin_size = 50, keep_bins = 0,
+  expect_error(squashData(dat, count = 0, bin_size = 50, keep_pts = 0,
                           min_bin = 2, min_pts = 2),
                "not enough bins -- reduce 'bin_size'",
                fixed = TRUE)
-  expect_error(squashData(dat, count = 0, bin_size = 2, keep_bins = 6,
+  expect_error(squashData(dat, count = 0, bin_size = 2, keep_pts = 12,
                           min_bin = 2, min_pts = 2),
-               "reduce 'bin_size' or 'keep_bins'",
+               "reduce 'bin_size' or 'keep_pts'",
                fixed = TRUE)
 })
 
 dat_E     <- dat[order(dat$N, dat$E), "E"]
-dat_E1    <- squashData(dat, count = 0, bin_size = 5, keep_bins = 0,
+dat_E1    <- squashData(dat, count = 0, bin_size = 5, keep_pts = 0,
                         min_bin = 2, min_pts = 2)
 dat_E1    <- dat_E1[dat_E1$N == 0, "E"]
 
-dat_E2    <- squashData(dat, count = 0, bin_size = 5, keep_bins = 1,
+dat_E2    <- squashData(dat, count = 0, bin_size = 5, keep_pts = 5,
                         min_bin = 2, min_pts = 2)
 dat_E2    <- dat_E2[dat_E2$N == 0, "E"]
 
-dat_E3    <- squashData(dat, count = 1, bin_size = 2, keep_bins = 0,
+dat_E3    <- squashData(dat, count = 1, bin_size = 2, keep_pts = 0,
                         min_bin = 2, min_pts = 2)
 dat_E3    <- dat_E3[dat_E3$N == 1, "E"]
 

@@ -33,8 +33,8 @@
 #' )
 #' data(caers)
 #' proc <- processRaw(caers)
-#' squashed <- squashData(proc, bin_size = 100, keep_bins = 1)
-#' squashed <- squashData(squashed, count = 2, bin_size = 10)
+#' squashed <- squashData(proc, bin_size = 100, keep_pts = 100)
+#' squashed <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 20)
 #' suppressWarnings(
 #'   theta_hat <- autoHyper(data = squashed, theta_init = theta_init)$estimates
 #' )
@@ -105,8 +105,8 @@ Qn <- function(theta_hat, N, E) {
 #' )
 #' data(caers)
 #' proc <- processRaw(caers)
-#' squashed <- squashData(proc, bin_size = 100, keep_bins = 1)
-#' squashed <- squashData(squashed, count = 2, bin_size = 10)
+#' squashed <- squashData(proc, bin_size = 100, keep_pts = 100)
+#' squashed <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 20)
 #' suppressWarnings(
 #'   theta_hat <- autoHyper(data = squashed, theta_init = theta_init)$estimates
 #' )
@@ -189,8 +189,8 @@ ebgm <- function(theta_hat, N, E, qn, digits = 2) {
 #' )
 #' data(caers)
 #' proc <- processRaw(caers)
-#' squashed <- squashData(proc, bin_size = 100, keep_bins = 1)
-#' squashed <- squashData(squashed, count = 2, bin_size = 10)
+#' squashed <- squashData(proc, bin_size = 100, keep_pts = 100)
+#' squashed <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 20)
 #' suppressWarnings(
 #'   theta_hat <- autoHyper(data = squashed, theta_init = theta_init)$estimates
 #' )

@@ -4,8 +4,8 @@
 \alias{squashData}
 \title{Squash data for hyperparameter estimation}
 \usage{
-squashData(data, count = 1, bin_size = 50, keep_pts = 100, min_bin = 50,
-  min_pts = 500)
+squashData(data, count = 1, bin_size = 50, keep_pts = 100,
+  min_bin = 50, min_pts = 500)
 }
 \arguments{
 \item{data}{A data frame (typically from \code{\link{processRaw}} or a
@@ -49,12 +49,12 @@ The \emph{N} column in \code{data} will be coerced using
 
 Since the distribution of expected counts, \emph{E}, tends to be
   skewed to the right, the largest \emph{E}s are not squashed by default.
-  This behavior can be changed by setting the \code{keep_bins} argument to
+  This behavior can be changed by setting the \code{keep_pts} argument to
   zero (0); however, this is not recommended. Squashing the largest \emph{E}s
   could result in a large loss of information, so it is recommended to use a
-  value of one (1) or more for \code{keep_bins}.
+  value of 100 or more for \code{keep_pts}.
 
-Values for \code{keep_bins}, \code{min_bin}, and \code{min_pts}
+Values for \code{keep_pts}, \code{min_bin}, and \code{min_pts}
   should typically be at least as large as the default values.
 }
 \examples{
@@ -88,6 +88,8 @@ DuMouchel W, Pregibon D (2001). "Empirical Bayes Screening for
   pp. 67-76. ACM, New York, NY, USA. ISBN 1-58113-391-X.
 }
 \seealso{
-\code{\link{processRaw}} for data preparation
+\code{\link{processRaw}} for data preparation and
+  \code{\link{autoSquash}} for automatically squashing an entire data set in
+  one function call
 }
 \keyword{openEBGM}

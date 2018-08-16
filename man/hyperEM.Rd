@@ -4,11 +4,12 @@
 \alias{hyperEM}
 \title{Estimate hyperparameters using an EM algorithm}
 \usage{
-hyperEM(data, theta_init_vec, squashed = TRUE, zeroes = FALSE, N_star = 1,
-  method = c("score", "nlminb"), profile = c("parameter", "distribution"),
-  LL_tol = 1e-04, consecutive = 100, param_lower = 1e-05,
-  param_upper = 20, print_level = 2, max_iter = 5000, conf_ints = FALSE,
-  conf_level = c("95", "80", "90", "99"), track = FALSE)
+hyperEM(data, theta_init_vec, squashed = TRUE, zeroes = FALSE,
+  N_star = 1, method = c("score", "nlminb"), profile = c("parameter",
+  "distribution"), LL_tol = 1e-04, consecutive = 100,
+  param_lower = 1e-05, param_upper = 20, print_level = 2,
+  max_iter = 5000, conf_ints = FALSE, conf_level = c("95", "80",
+  "90", "99"), track = FALSE)
 }
 \arguments{
 \item{data}{A data frame from \code{\link{processRaw}} or
@@ -156,4 +157,5 @@ Millar, Russell B (2011). "Maximum Likelihood Estimation and
 Other hyperparameter estimation functions: \code{\link{autoHyper}},
   \code{\link{exploreHypers}}
 }
+\concept{hyperparameter estimation functions}
 \keyword{openEBGM}

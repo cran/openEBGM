@@ -72,4 +72,5 @@ DuMouchel W, Pregibon D (2001). "Empirical Bayes Screening for
 Other negative log-likelihood functions: \code{\link{negLLsquash}},
   \code{\link{negLLzeroSquash}}, \code{\link{negLLzero}}
 }
+\concept{negative log-likelihood functions}
 \keyword{openEBGM}

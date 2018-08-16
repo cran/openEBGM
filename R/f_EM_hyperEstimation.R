@@ -145,8 +145,7 @@ hyperEM <-
   track_P  <- theta_init_vec[5]
   theta       <- theta_init_vec
   count_iter  <- count_converge <- count_iter_acc <- count_stuck_all <- 0L
-  count_stuck <- rep.int(0L, 5); stuck_limit <- 10L
-  conf_int <- NULL
+  count_stuck <- rep.int(0L, 5); conf_int <- NULL
 
   #Responsibilities (E-step)
   if (method == "score") {
@@ -154,8 +153,9 @@ hyperEM <-
     PQ        <- .updateProbs(theta, marg_dens$f1, marg_dens$f2)
   }
 
-  while(count_converge <= consecutive && count_stuck_all < 10L
-        && count_iter < max_iter) {
+  while(count_converge <= consecutive &&
+        count_stuck_all < 20L &&
+        count_iter < max_iter) {
 
     count_iter     <- count_iter + 1
     count_iter_acc <- count_iter_acc + 1
@@ -166,8 +166,8 @@ hyperEM <-
       theta <- .updateTheta(old_theta, PQ$P_vec, PQ$Q_vec, N, E, W, squashed,
                             zeroes, param_lower, param_upper)
       count_stuck <- ifelse(theta == old_theta, count_stuck + 1, 0L)
-      if (any(count_stuck > stuck_limit)) {
-        theta <- .nudgeTheta(theta, count_stuck, stuck_limit, param_lower)
+      if (any(count_stuck > 10L)) {
+        theta <- .nudgeTheta(theta, count_stuck, 10L, param_lower)
       }
     } else {
       if (profile == "parameter") {
@@ -224,6 +224,7 @@ hyperEM <-
   }
 
   if (count_iter >= max_iter) stop("exceeded maximum number of iterations")
+  if (count_stuck_all >= 20) stop("estimate seems to be stuck")
 
   #Finish up
   elapsed <- proc.time() - start_time

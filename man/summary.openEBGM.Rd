@@ -4,7 +4,8 @@
 \alias{summary.openEBGM}
 \title{Summarize an openEBGM object}
 \usage{
-\method{summary}{openEBGM}(object, plot.out = TRUE, log.trans = FALSE, ...)
+\method{summary}{openEBGM}(object, plot.out = TRUE, log.trans = FALSE,
+  ...)
 }
 \arguments{
 \item{object}{An openEBGM object constructed by \code{\link{ebScores}}}

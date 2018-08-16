@@ -1,6 +1,6 @@
 Package: openEBGM
 Title: EBGM Scores for Mining Large Contingency Tables
-Version: 0.6.0
+Version: 0.7.0
 Authors@R: c(
 	person("John", "Ihrie", email = "John.Ihrie@fda.hhs.gov",
 	       role = c("cre", "aut")),
@@ -32,14 +32,14 @@ Depends: R (>= 3.2.3)
 License: GPL-2 | GPL-3
 URL: https://journal.r-project.org/archive/2017/RJ-2017-063/index.html
 LazyData: TRUE
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
 Imports: data.table (>= 1.10.0), ggplot2 (>= 2.2.1), stats (>= 3.2.3)
 Suggests: dplyr (>= 0.5.0), knitr (>= 1.15.1), rmarkdown (>= 1.2),
         testthat (>= 1.0.2), tidyr (>= 0.6.0)
 VignetteBuilder: knitr
 Encoding: UTF-8
 NeedsCompilation: no
-Packaged: 2018-05-21 18:29:20 UTC; John.Ihrie
+Packaged: 2018-08-16 16:45:18 UTC; John.Ihrie
 Author: John Ihrie [cre, aut],
   Travis Canida [aut],
   Ismaïl Ahmed [ctb] (author of 'PhViD' package (derived code)),
@@ -47,4 +47,4 @@ Author: John Ihrie [cre, aut],
   Sergio Venturini [ctb] (author of 'mederrRank' package (derived code)),
   Jessica Myers [ctb] (author of 'mederrRank')
 Repository: CRAN
-Date/Publication: 2018-05-21 20:08:31 UTC
+Date/Publication: 2018-08-16 18:00:03 UTC

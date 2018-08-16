@@ -34,15 +34,16 @@ utilize the following:
 * Optimization using PORT routines
 * Newton-type algorithm
 * A quasi-Newton method (also known as a variable metric method)
-* *new starting in v0.4.0*: A version of the Expectation-Maximization (EM)
-Algorithm known as the Expectation/Conditional Maximization (ECM) Algorithm
-(*1*)
+* A version of the Expectation-Maximization (EM) Algorithm known as the
+Expectation/Conditional Maximization (ECM) Algorithm (*1*)
 
-*openEBGM*'s functions (prior to v0.4.0) use multiple starting points and local
-optimization algorithms implemented in R's *stats* package. The user is
-encouraged to explore a variety of optimization approaches because the accuracy
-of a global optimization result is extremely difficult to verify and other
-approaches might work better in some cases.
+*openEBGM*'s hyperparameter estimation functions use local optimization
+algorithms. The Newton-like approaches use algorithms implemented in R's *stats*
+package and allow the user to choose multiple starting points to improve the
+chances of finding a global optimum. The user is encouraged to explore a variety
+of optimization approaches because the accuracy of a global optimization result
+is extremely difficult to verify and other approaches might work better in some
+cases.
 
 ### References
 
@@ -106,6 +107,20 @@ As shown above, the squashed data set has
 `r round(nrow(squashed)/nrow(processed)*100, 2)`% of the observations as the
 full dataset. Using this squashed data, we can then estimate the hyperparameters
 in a far more efficient manner.
+
+`squashData()` can be used iteratively for each count ($N$):
+
+```{r iterative squashing example}
+squash1 <- squashData(processed)
+squash2 <- squashData(squash1, count = 2, bin_size = 8)
+```
+
+Or `autoSquash()` can be used to squash all counts at once:
+
+```{r autoSquash example}
+squash3 <- autoSquash(processed)
+ftable(squash3[, c("N", "weight")])
+```
 
 ## Likelihood Functions
 
@@ -235,7 +250,7 @@ exploreHypers(data = squashed2, theta_init = theta_init, std_errors = TRUE)
 basically just a wrapper around commonly used functions from the *stats* package
 mentioned earlier: `nlminb()` (the default), `nlm()`, & `optim()`.
 
-###`hyperEM()` (*new in v0.4.0*)
+###`hyperEM()`
 
 `hyperEM()` implements a version of the EM algorithm referred to by Meng & Rubin
 (*1*) as the Expectation/Conditional Maximization (ECM) algorithm. `hyperEM()`

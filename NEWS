@@ -1,3 +1,16 @@
+openEBGM v0.7.0
+============
+
+Changes:
+
+* Added the autoSquash() function to automate data squashing.
+* Changed exit condition for while loop in hyperEM(). hyperEM() now throws an
+    error if the number of "stuck" or repeated estimates of theta exceeds 20
+    when using 'method = "nlminb"'.
+* Changed upper limit from 1 to 0.999 in hidden functions .updateThetaLL() and
+    .updateThetaLLD(), which are called by hyperEM().
+
+
 openEBGM v0.6.0
 ============
 

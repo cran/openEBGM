@@ -262,6 +262,29 @@
   data
 }
 
+#autoSquash() ------------------------------------------------------------------
+.checkInputs_autoSquash <- function(data, keep_pts, cut_offs, num_super_pts) {
+
+  .checkInputs_processed_data(data)
+  if ("weight" %in% colnames(data)) {
+    stop("'data' has already been squashed")
+  }
+  check_miss <- c(keep_pts, cut_offs, num_super_pts)
+  if (any(c(is.na(check_miss), is.nan(check_miss)))) {
+    stop("missing values not allowed in 'keep_pts', 'cut_offs', or 'num_super_pts'")
+  }
+  if (length(keep_pts) < 1 || length(cut_offs) < 1 || length(num_super_pts) < 1) {
+    stop("'keep_pts', 'cut_offs', & 'num_super_pts' must have a length of 1 or more")
+  }
+  if (length(num_super_pts) != length(cut_offs) + 1) {
+    stop("'num_super_pts' must have length 1 more than length of 'cut_offs'")
+  }
+  if (min(diff(cut_offs)) < 1) {
+    stop("elements in 'cut_offs' must be in increasing order")
+  }
+}
+
+
 #*******************************************************************************
 #************************  Likelihood Functions  *******************************
 #*******************************************************************************

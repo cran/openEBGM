@@ -78,7 +78,7 @@
 
   optimizeParam <- function(start, param_str) {
     nlminb(start, objective = .LLtheta, lower = param_lower, upper = param_upper,
-           param = param_str, N= N, E = E, W = W, N_star = N_star,
+           param = param_str, N = N, E = E, W = W, N_star = N_star,
            theta = theta, squashed = squashed, zeroes = zeroes)$par
   }
 
@@ -90,7 +90,7 @@
   theta[3] <- alpha2
   beta2 <- optimizeParam(oldb2, param_str = "beta2")
   theta[4] <- beta2
-  P <- nlminb(start = oldP, objective = .LLtheta, lower = 0.001, upper = 1,
+  P <- nlminb(start = oldP, objective = .LLtheta, lower = 0.001, upper = 0.999,
               param = "P", N = N, E = E, W = W, N_star = N_star, theta = theta,
               squashed = squashed, zeroes = zeroes)$par
 
@@ -119,7 +119,7 @@
   D2 <- optimizeParam(oldD2, param_str = "D2")
   theta[3] <- D2[1]
   theta[4] <- D2[2]
-  P <- nlminb(start = oldP, objective = .LLtheta, lower = 0.001, upper = 1,
+  P <- nlminb(start = oldP, objective = .LLtheta, lower = 0.001, upper = 0.999,
               param = "P", N = N, E = E, W = W, N_star = N_star, theta = theta,
               squashed = squashed, zeroes = zeroes)$par
               #, control = list(xf.tol = 1e-4, x.tol = 1e-4, rel.tol = 1e-4))$par

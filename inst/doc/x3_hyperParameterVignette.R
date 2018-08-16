@@ -14,6 +14,14 @@ head(squashed)
 nrow(processed)
 nrow(squashed)
 
+## ----iterative squashing example-----------------------------------------
+squash1 <- squashData(processed)
+squash2 <- squashData(squash1, count = 2, bin_size = 8)
+
+## ----autoSquash example--------------------------------------------------
+squash3 <- autoSquash(processed)
+ftable(squash3[, c("N", "weight")])
+
 ## ----negLLsquash example, warning = FALSE--------------------------------
 theta_init <- c(alpha1 = 0.2, beta1 = 0.1, alpha2 = 2, beta2 = 4, p = 1/3)
 stats::nlm(negLLsquash, p = theta_init,

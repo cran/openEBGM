@@ -82,4 +82,5 @@ DuMouchel W (1999). "Bayesian Data Mining in Large Frequency
 Other posterior distribution functions: \code{\link{Qn}},
   \code{\link{quantBisect}}
 }
+\concept{posterior distribution functions}
 \keyword{openEBGM}

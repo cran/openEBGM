@@ -136,4 +136,5 @@ DuMouchel W (1999). "Bayesian Data Mining in Large Frequency
 Other hyperparameter estimation functions: \code{\link{autoHyper}},
   \code{\link{hyperEM}}
 }
+\concept{hyperparameter estimation functions}
 \keyword{openEBGM}

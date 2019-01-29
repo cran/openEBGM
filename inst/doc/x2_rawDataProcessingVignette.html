@@ -11,14 +11,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
-<meta name="date" content="2018-08-16" />
+<meta name="date" content="2019-01-29" />
 
 <title>Processing Raw Data with openEBGM</title>
 
 
 
 <style type="text/css">code{white-space: pre;}</style>
-<style type="text/css">
+<style type="text/css" data-origin="pandoc">
 div.sourceCode { overflow-x: auto; }
 table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
   margin: 0; padding: 0; vertical-align: baseline; border: none; }
@@ -54,7 +54,29 @@ code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
 code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
 code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
 code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+
 </style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' || rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
 
 
 
@@ -68,7 +90,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 <h1 class="title toc-ignore">Processing Raw Data with openEBGM</h1>
-<h4 class="date"><em>2018-08-16</em></h4>
+<h4 class="date"><em>2019-01-29</em></h4>
 
 
 
@@ -133,7 +155,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>Notice that now we have stratifications variables (<em>‘strat’</em> substring) present. We can use these stratification variables to get adjusted estimates for the <span class="math inline">\(EBGM\)</span> scores. Stratification will affect <span class="math inline">\(E\)</span> and <span class="math inline">\(RR\)</span>, but not <span class="math inline">\(PRR\)</span>. The <span class="math inline">\(E\)</span>s are calculated by summing the expected counts from every stratum. Ideally, each stratum should contain several unique CAERS reports to insure good estimates of <span class="math inline">\(E\)</span>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">processRaw</span>(<span class="dt">data =</span> dat, <span class="dt">stratify =</span> <span class="ot">TRUE</span>, <span class="dt">zeroes =</span> <span class="ot">FALSE</span>)
 <span class="co">#&gt; stratification variables used: strat1, strat2</span>
-<span class="co">#&gt; there were 4 strata</span>
+<span class="co">#&gt; there were 4 strata:  F-age_cat1, F-age_cat2, M-age_cat1, M-age_cat2</span>
 <span class="co">#&gt; Warning in .checkStrata_processRaw(data, max_cats): at least one stratum</span>
 <span class="co">#&gt; contains less than 50 unique IDs</span>
 <span class="co">#&gt;        var1    var2 N   E   RR  PRR</span>

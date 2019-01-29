@@ -5,7 +5,7 @@
 \title{Process raw data}
 \usage{
 processRaw(data, stratify = FALSE, zeroes = FALSE, digits = 2,
-  max_cats = 10)
+  max_cats = 10, list_ids = FALSE)
 }
 \arguments{
 \item{data}{A data frame containing columns named: \emph{id}, \emph{var1},
@@ -27,11 +27,15 @@ use for rounding \emph{RR} and \emph{PRR}.}
 categories to allow in any given stratification variable. Used to help
 prevent a situation where the user forgets to categorize a continuous
 variable, such as age.}
+
+\item{list_ids}{A logical scalar specifying if a column for pipe-concatenated
+IDs should be returned.}
 }
 \value{
 A data frame with actual counts (\emph{N}), expected counts
   (\emph{E}), relative reporting ratio (\emph{RR}), and proportional
-  reporting ratio (\emph{PRR}) for \emph{var1-var2} pairs.
+  reporting ratio (\emph{PRR}) for \emph{var1-var2} pairs. Also includes a
+  column for IDs (\emph{ids}) if \code{list_ids = TRUE}.
 }
 \description{
 \code{processRaw} finds the actual and expected counts using the methodology
@@ -91,6 +95,7 @@ processRaw(dat, zeroes = TRUE)
 suppressWarnings(
   processRaw(dat, stratify = TRUE, zeroes = TRUE)
 )
+processRaw(dat, list_ids = TRUE)
 
 }
 \references{

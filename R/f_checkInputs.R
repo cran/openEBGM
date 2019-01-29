@@ -165,13 +165,13 @@
 #*******************************************************************************
 
 #processRaw() ------------------------------------------------------------------
-.checkInputs_processRaw <- function(data, stratify, zeroes) {
+.checkInputs_processRaw <- function(data, stratify, zeroes, list_ids) {
 
   if (!is.data.frame(data)) {
     stop("'data' must be a data frame")
   }
-  if (!is.logical(stratify) || !is.logical(zeroes)) {
-    stop("'stratify' and 'zeroes' must be logical values")
+  if (!is.logical(stratify) || !is.logical(zeroes) || !is.logical(list_ids)) {
+    stop("'stratify', 'zeroes', & 'list_ids' must be logical values")
   }
   if (!all(c("id", "var1", "var2") %in% colnames(data))) {
     stop("missing the appropriate column names (need 'id', 'var1', & 'var2')")
@@ -205,7 +205,11 @@
   }
 
   data$stratum <- do.call(paste, c(data[, strat_vars, with = FALSE], sep = "-"))
-  message(paste("there were", .countUnique(data$stratum), "strata\n"))
+  unique_strata <- sort(unique(data$stratum))
+  unique_strata_str <- paste(unique_strata, collapse = ", ")
+  message(paste("there were", length(unique_strata), "strata: ",
+                unique_strata_str, "\n")
+  )
   if (min(data[, .countUnique(id), by = .(stratum)]$V1) < 50) {
     warning("at least one stratum contains less than 50 unique IDs")
   }

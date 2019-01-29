@@ -69,10 +69,13 @@ testthat::test_that("do warnings/errors get correctly printed?", {
                "'data' must be a data frame",
                fixed = TRUE)
   expect_error(processRaw(dat, stratify = 4),
-               "'stratify' and 'zeroes' must be logical values",
+               "'stratify', 'zeroes', & 'list_ids' must be logical values",
                fixed = TRUE)
   expect_error(processRaw(dat, zeroes = 4),
-               "'stratify' and 'zeroes' must be logical values",
+               "'stratify', 'zeroes', & 'list_ids' must be logical values",
+               fixed = TRUE)
+  expect_error(processRaw(dat, list_ids = 4),
+               "'stratify', 'zeroes', & 'list_ids' must be logical values",
                fixed = TRUE)
   expect_error(processRaw(dat_no_id),
                "missing the appropriate column names (need 'id', 'var1', & 'var2')",

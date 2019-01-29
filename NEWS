@@ -1,3 +1,12 @@
+openEBGM v0.8.0
+===========
+
+Changes:
+
+* processRaw() now lists all strata when stratification is used.
+* Added argument 'list_ids' to processRaw().
+
+
 openEBGM v0.7.0
 ============
 

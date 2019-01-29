@@ -22,9 +22,12 @@
 #'   categories to allow in any given stratification variable. Used to help
 #'   prevent a situation where the user forgets to categorize a continuous
 #'   variable, such as age.
+#' @param list_ids A logical scalar specifying if a column for pipe-concatenated
+#'   IDs should be returned.
 #' @return A data frame with actual counts (\emph{N}), expected counts
 #'   (\emph{E}), relative reporting ratio (\emph{RR}), and proportional
-#'   reporting ratio (\emph{PRR}) for \emph{var1-var2} pairs.
+#'   reporting ratio (\emph{PRR}) for \emph{var1-var2} pairs. Also includes a
+#'   column for IDs (\emph{ids}) if \code{list_ids = TRUE}.
 #'
 #' @details An \emph{id} column must be included in \code{data}. If your data
 #'   set does not include IDs, make a column of unique IDs using \code{df$id <-
@@ -69,6 +72,7 @@
 #' suppressWarnings(
 #'   processRaw(dat, stratify = TRUE, zeroes = TRUE)
 #' )
+#' processRaw(dat, list_ids = TRUE)
 #'
 #' @references DuMouchel W (1999). "Bayesian Data Mining in Large Frequency
 #'   Tables, With an Application to the FDA Spontaneous Reporting System."
@@ -77,14 +81,19 @@
 #' @import data.table
 #' @export
 processRaw <- function(data, stratify = FALSE, zeroes = FALSE, digits = 2,
-                       max_cats = 10) {
+                       max_cats = 10, list_ids = FALSE) {
 
-  .checkInputs_processRaw(data, stratify, zeroes)
+  .checkInputs_processRaw(data, stratify, zeroes, list_ids)
 
   data <- data.table::as.data.table(data)
 
   #Actual var1/var2 combination counts
-  actual <- data[, j = list(N = .countUnique(id)), by = .(var1, var2)]
+  if (list_ids) {
+    actual <- data[, j = list(ids = paste(id, collapse = "|"),
+                              N = .countUnique(id)), by = .(var1, var2)]
+  } else {
+    actual <- data[, j = list(N = .countUnique(id)), by = .(var1, var2)]
+  }
 
   if (zeroes) {
     data.table::setkeyv(actual, c("var1", "var2"))
@@ -132,7 +141,11 @@ processRaw <- function(data, stratify = FALSE, zeroes = FALSE, digits = 2,
   counts[, PRR_num := N / N_v1]
   counts[, PRR_den := (N_v2 - N) / (N_tot - N_v1)]
   counts[, PRR := round(PRR_num / PRR_den, digits)]
-  counts <- counts[, .(var1, var2, N, E, RR, PRR)]
+  if (list_ids) {
+    counts <- counts[, .(var1, var2, N, E, RR, PRR, ids)]
+  } else {
+    counts <- counts[, .(var1, var2, N, E, RR, PRR)]
+  }
   counts[is.nan(PRR), PRR := Inf]
   counts[, var1 := as.factor(var1)]
   counts[, var2 := as.factor(var2)]
@@ -146,5 +159,5 @@ if (getRversion() >= "2.15.1") {
   utils::globalVariables(c(".", "id", "var1", "var2", "N", "stratum",
                            "N_v1_str", "N_v2_str", "E", "N_tot", "N_v1",
                            "N_v2", "N_tot_str", "RR", "PRR_num", "PRR_den",
-                           "PRR"))
+                           "PRR", "ids"))
 }

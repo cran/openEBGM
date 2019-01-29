@@ -11,14 +11,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
-<meta name="date" content="2018-08-16" />
+<meta name="date" content="2019-01-29" />
 
 <title>Hyperparameter Estimation with openEBGM</title>
 
 
 
 <style type="text/css">code{white-space: pre;}</style>
-<style type="text/css">
+<style type="text/css" data-origin="pandoc">
 div.sourceCode { overflow-x: auto; }
 table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
   margin: 0; padding: 0; vertical-align: baseline; border: none; }
@@ -54,7 +54,29 @@ code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
 code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
 code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
 code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+
 </style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' || rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
 
 
 
@@ -68,7 +90,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 <h1 class="title toc-ignore">Hyperparameter Estimation with openEBGM</h1>
-<h4 class="date"><em>2018-08-16</em></h4>
+<h4 class="date"><em>2019-01-29</em></h4>
 
 
 
@@ -208,14 +230,14 @@ hyper_estimates_full &lt;-<span class="st"> </span><span class="kw">autoHyper</s
                                   <span class="dt">squashed =</span> <span class="ot">FALSE</span>)
 )
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;   40.56    0.01   40.59</span>
+<span class="co">#&gt;   27.69    0.00   27.70</span>
 
 squashed2 &lt;-<span class="st"> </span><span class="kw">squashData</span>(squashed, <span class="dt">count =</span> <span class="dv">2</span>, <span class="dt">bin_size =</span> <span class="dv">10</span>, <span class="dt">keep_pts =</span> <span class="dv">50</span>)
 <span class="kw">system.time</span>(
 hyper_estimates_squashed &lt;-<span class="st"> </span><span class="kw">autoHyper</span>(<span class="dt">data =</span> squashed2, <span class="dt">theta_init =</span> theta_init)
 )
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;     2.2     0.0     2.2</span>
+<span class="co">#&gt;    1.51    0.00    1.51</span>
 
 hyper_estimates_full
 <span class="co">#&gt; $method</span>
@@ -334,7 +356,7 @@ hyperEM_ests &lt;-<span class="st"> </span><span class="kw">hyperEM</span>(squas
 <span class="co">#&gt; </span>
 <span class="co">#&gt;    Timing:  </span>
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;    4.55    0.00    4.56</span>
+<span class="co">#&gt;    3.15    0.00    3.16</span>
 <span class="kw">str</span>(hyperEM_ests)
 <span class="co">#&gt; List of 9</span>
 <span class="co">#&gt;  $ estimates : num [1:5] 3.1083 0.3935 2.0392 1.9358 0.0683</span>
@@ -345,7 +367,7 @@ hyperEM_ests &lt;-<span class="st"> </span><span class="kw">hyperEM</span>(squas
 <span class="co">#&gt;   ..$ UL_95 : num [1:5] 6.959 0.639 2.95 2.807 0.138</span>
 <span class="co">#&gt;  $ maximum   : num -4164</span>
 <span class="co">#&gt;  $ method    : chr &quot;score&quot;</span>
-<span class="co">#&gt;  $ elapsed   : num 4.56</span>
+<span class="co">#&gt;  $ elapsed   : num 3.16</span>
 <span class="co">#&gt;  $ iters     : num 203</span>
 <span class="co">#&gt;  $ score     : num [1:5] -0.01142 0.03072 0.01033 0.01029 0.00216</span>
 <span class="co">#&gt;  $ score_norm: num 0.0359</span>

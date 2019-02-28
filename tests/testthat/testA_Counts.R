@@ -3,13 +3,22 @@ context("Count Output")
 #measures work properly
 
 #Process some raw data
-set.seed(5629404)
 dat <- data.frame(
-  var1   = c(sample(c("product_A", "product_B"), 16, replace = TRUE), rep("product_C", 2)),
-  var2   = c(sample(c("event_1", "event_2"), 16, replace = TRUE), "event_1", "event_3"),
-  strat1 = c(sample(c("M", "F"), 17, replace = TRUE), "M"),
-  strat2 = c(sample(c("age_cat1", "age_cat2"), 17, replace = TRUE), "age_cat1"),
-  stringsAsFactors = FALSE)
+  var1 = c("product_A", "product_B", "product_B", "product_B", "product_A",
+           "product_A", "product_A", "product_A", "product_A", "product_B",
+           "product_B", "product_A", "product_A", "product_B", "product_A",
+           "product_A", "product_C", "product_C"),
+  var2 = c("event_2", "event_1", "event_1", "event_2", "event_1", "event_1",
+           "event_1", "event_1", "event_1", "event_1", "event_1", "event_1",
+           "event_2", "event_2", "event_2", "event_1", "event_1", "event_3"),
+  strat1 = c("M", "M", "F", "F", "F", "F", "M", "F", "F", "M", "M", "M", "M",
+             "M", "F", "M", "M", "M"),
+  strat2 = c("age_cat1", "age_cat2", "age_cat2", "age_cat2", "age_cat1",
+             "age_cat1", "age_cat1", "age_cat2", "age_cat2", "age_cat2",
+             "age_cat1", "age_cat2", "age_cat1", "age_cat1", "age_cat1",
+             "age_cat2", "age_cat2", "age_cat1"),
+  stringsAsFactors = FALSE
+)
 dat$id <- 1:nrow(dat)
 
 dat_no_strat <- dat[, !grepl("strat", names(dat))]

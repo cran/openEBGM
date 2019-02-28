@@ -164,5 +164,7 @@ head(tabbed[order(tabbed, decreasing = TRUE)])
 
 The output above suggests some products which may require further investigation.
 
-Next, the *openEBGM Objects and Class Functions* vignette will demonstrate
-the object-oriented features of the *openEBGM* package.
+Next, the
+[*openEBGM Objects and Class Functions*](https://cran.r-project.org/package=openEBGM/vignettes/x5_openEBGMObjectVignette.html){target="_blank"}
+vignette will demonstrate the object-oriented features of the *openEBGM*
+package.

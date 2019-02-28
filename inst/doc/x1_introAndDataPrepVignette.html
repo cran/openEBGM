@@ -11,7 +11,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
-<meta name="date" content="2019-01-29" />
+<meta name="date" content="2019-02-28" />
 
 <title>Introduction to openEBGM</title>
 
@@ -90,7 +90,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 <h1 class="title toc-ignore">Introduction to openEBGM</h1>
-<h4 class="date"><em>2019-01-29</em></h4>
+<h4 class="date"><em>2019-02-28</em></h4>
 
 
 
@@ -142,7 +142,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>The relative reporting ratio is calculated as <span class="math inline">\(RR=\frac{N}{E}\)</span>, where <span class="math inline">\(N\)</span> is the actual count for a cell in the table and <span class="math inline">\(E\)</span> is the expected count under the assumption of independence between rows and columns. When <span class="math inline">\(RR = 1\)</span>, you observe the exact count you would expect to observe if no association exists between the two variables. When <span class="math inline">\(RR &gt; 1\)</span>, you observe a larger count than expected. This approach works well for large counts; however, small counts cause <span class="math inline">\(RR\)</span> to become quite unstable. For instance, an actual count of <span class="math inline">\(N = 1\)</span> with an expected count of <span class="math inline">\(E = 0.01\)</span> gives us <span class="math inline">\(RR = 100\)</span> – which seems large – but a single event could easily occur simply by chance. The EB approach shrinks large <span class="math inline">\(RR\)</span>s that result from small counts to a value much closer to the “null hypothesis” value of 1. The shrinkage is smaller for larger counts and negligible for very large counts. Shrinkage gives results that are more stable than the simple <span class="math inline">\(RR\)</span> measurement.</p>
 <p>DuMouchel’s model uses a Poisson(<span class="math inline">\(\mu_{ij}\)</span>) likelihood (i.e. data distribution) for the actual cell counts, <span class="math inline">\(N_{ij}\)</span>, in row <em>i</em> and column <em>j</em>. The expected cell counts, <span class="math inline">\(E_{ij}\)</span>, are treated as constants. We are interested in the ratio <span class="math inline">\(\lambda_{ij}=\frac{\mu_{ij}}{E_{ij}}\)</span>, which is analagous to <span class="math inline">\(RR=\frac{N}{E}\)</span>. The prior on <span class="math inline">\(\lambda\)</span> is a mixture of two gamma distributions, resulting in a posterior distribution for <span class="math inline">\(\lambda\)</span> which is a mixture of two gamma distributions. Hence, the model is sometimes referred to as the <strong>Gamma-Poisson Shrinker (GPS)</strong> model. The posterior distribution of <span class="math inline">\(\lambda\)</span> can be thought of as a Bayesian representation of <span class="math inline">\(RR\)</span>. Summary statsistics from the posterior distribution are used as attenuated versions of <span class="math inline">\(RR\)</span>.</p>
 <p>Each cell in the contingency table will have its own posterior distribution determined both by that cell’s actual and expected counts (the data) and by the distribution of actual and expected counts in the entire table (the prior). Often, the Empirical Bayes Geometric Mean <span class="math inline">\((EBGM)\)</span> of the posterior distribution is used in place of <span class="math inline">\(RR\)</span>. Alternatively, the more conservative percentiles (5th, 10th, etc.) can be used. The percentiles can also be used to construct Bayesian credible intervals. Similar to <span class="math inline">\(RR\)</span>, an <span class="math inline">\(EBGM\)</span> (or lower percentile) much bigger than 1 represents an actual count much bigger than expected. Such cases might represent signals of interest, and the product/event pair can be further examined by subject matter experts to determine if the association might actually be causal in nature.</p>
-<p>An extension of the GPS model, the Multi-Item Gamma-Poisson Shrinker (MGPS) model (2001), is currently being used by the U.S. Food and Drug Administration (FDA) to find higher-than-expected reporting of adverse events associated with food, drugs, etc. For instance, FDA’s Center for Food Safety and Applied Nutrition (CFSAN) uses the MGPS model to mine data from the CFSAN Adverse Events Reporting System (CAERS): <a href="https://www.fda.gov/Food/ComplianceEnforcement" class="uri">https://www.fda.gov/Food/ComplianceEnforcement</a>. (The variables forming the rows and columns of the contingency table are <em>product</em> and <em>adverse event</em>.) MGPS allows for product interactions, unlike the GPS model implemented in <em>openEBGM</em> (<em>3</em>), which can only use individual product-event pairs.</p>
+<p>An extension of the GPS model, the Multi-Item Gamma-Poisson Shrinker (MGPS) model (2001), is currently being used by the U.S. Food and Drug Administration (FDA) to find higher-than-expected reporting of adverse events associated with food, drugs, etc. For instance, FDA’s Center for Food Safety and Applied Nutrition (CFSAN) uses the MGPS model to mine data from the CFSAN Adverse Events Reporting System (CAERS): <a href="https://www.fda.gov/Food/ComplianceEnforcement" class="uri" target="_blank">https://www.fda.gov/Food/ComplianceEnforcement</a>. (The variables forming the rows and columns of the contingency table are <em>product</em> and <em>adverse event</em>.) MGPS allows for product interactions, unlike the GPS model implemented in <em>openEBGM</em> (<em>3</em>), which can only use individual product-event pairs.</p>
 </div>
 <div id="purpose" class="section level2">
 <h2>Purpose</h2>
@@ -157,9 +157,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div id="references" class="section level3">
 <h3>References</h3>
 <ol style="list-style-type: decimal">
-<li><p>DuMouchel W (1999). “Bayesian Data Mining in Large Frequency Tables, With an Application to the FDA Spontaneous Reporting System.” <em>The American Statistician</em>, 53(3), 177-190. <a href="https://doi.org/10.1080/00031305.1999.10474456" class="uri">https://doi.org/10.1080/00031305.1999.10474456</a></p></li>
-<li><p>DuMouchel W, Pregibon D (2001). “Empirical Bayes Screening for Multi-item Associations.” In <em>Proceedings of the Seventh ACM SIGKDD International Conference on Knowledge Discovery and Data Mining</em>, KDD ’01, pp. 67-76. ACM, New York, NY, USA. ISBN 1-58113-391-X. <a href="https://doi.org/10.1145/502512.502526" class="uri">https://doi.org/10.1145/502512.502526</a></p></li>
-<li><p>Canida T, Ihrie J (2017). “openEBGM: An R Implementation of the Gamma-Poisson Shrinker Data Mining Model.” <em>The R Journal</em>, 9(2), 499-519. <a href="https://journal.r-project.org/archive/2017/RJ-2017-063/index.html" class="uri">https://journal.r-project.org/archive/2017/RJ-2017-063/index.html</a></p></li>
+<li><p>DuMouchel W (1999). “Bayesian Data Mining in Large Frequency Tables, With an Application to the FDA Spontaneous Reporting System.” <em>The American Statistician</em>, 53(3), 177-190. <a href="https://doi.org/10.1080/00031305.1999.10474456" class="uri" target="_blank">https://doi.org/10.1080/00031305.1999.10474456</a></p></li>
+<li><p>DuMouchel W, Pregibon D (2001). “Empirical Bayes Screening for Multi-item Associations.” In <em>Proceedings of the Seventh ACM SIGKDD International Conference on Knowledge Discovery and Data Mining</em>, KDD ’01, pp. 67-76. ACM, New York, NY, USA. ISBN 1-58113-391-X. <a href="https://doi.org/10.1145/502512.502526" class="uri" target="_blank">https://doi.org/10.1145/502512.502526</a></p></li>
+<li><p>Canida T, Ihrie J (2017). “openEBGM: An R Implementation of the Gamma-Poisson Shrinker Data Mining Model.” <em>The R Journal</em>, 9(2), 499-519. <a href="https://journal.r-project.org/archive/2017/RJ-2017-063/index.html" class="uri" target="_blank">https://journal.r-project.org/archive/2017/RJ-2017-063/index.html</a></p></li>
 </ol>
 <hr />
 </div>
@@ -179,7 +179,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </div>
 <div id="caers-example" class="section level2">
 <h2>CAERS example</h2>
-<p>Here is a small subset of raw data from the publicly available <a href="https://www.fda.gov/Food/ComplianceEnforcement">CAERS data</a> described above:</p>
+<p>Here is a small subset of raw data from the publicly available <a href="https://www.fda.gov/Food/ComplianceEnforcement" target="_blank">CAERS data</a> described above:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(openEBGM)
 <span class="kw">data</span>(caers_raw)
 <span class="kw">head</span>(caers_raw, <span class="dv">4</span>)
@@ -236,7 +236,7 @@ dat[<span class="dv">1</span><span class="op">:</span><span class="dv">5</span>,
 <span class="co">#&gt; 3 75205 UNCLE WALLY'S BLUEBERRY MUFFIN DIARRHOEA       Female   unknown</span>
 <span class="co">#&gt; 4 75205 UNCLE WALLY'S BLUEBERRY MUFFIN  HEADACHE       Female   unknown</span>
 <span class="co">#&gt; 5 75274          BUTTERNUT HOTDOG BUNS  VOMITING         Male   unknown</span></code></pre></div>
-<p>Next, the <em>Processing Raw Data with openEBGM</em> vignette will demonstrate how to use data in this general form to find counts and simple disproportionality measures–<span class="math inline">\(RR\)</span> and <span class="math inline">\(PRR\)</span> (proportional reporting ratio).</p>
+<p>Next, the <a href="https://cran.r-project.org/package=openEBGM/vignettes/x2_rawDataProcessingVignette.html" target="_blank"><em>Processing Raw Data with openEBGM</em></a> vignette will demonstrate how to use data in this general form to find counts and simple disproportionality measures–<span class="math inline">\(RR\)</span> and <span class="math inline">\(PRR\)</span> (proportional reporting ratio).</p>
 </div>
 </div>
 

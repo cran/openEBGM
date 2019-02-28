@@ -99,5 +99,7 @@ estimating hyperparameters but before calculating $EBGM$ and quantile scores.
 processRaw(data = dat, stratify = FALSE, zeroes = TRUE)
 ```
 
-Next, the *Hyperparameter Estimation with openEBGM* vignette will demonstrate
-how to estimate the hyperparameters of the prior distribution.
+Next, the
+[*Hyperparameter Estimation with openEBGM*](https://cran.r-project.org/package=openEBGM/vignettes/x3_hyperParameterVignette.html){target="_blank"}
+vignette will demonstrate how to estimate the hyperparameters of the prior
+distribution.

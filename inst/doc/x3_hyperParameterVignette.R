@@ -78,3 +78,22 @@ ggplot(pdat, aes(x = iter, y = value)) +
   labs(x = "Iteration Count", y = "Estimate") +
   geom_vline(xintercept = c(100, 200), size = 1, linetype = 2, col = "red")
 
+## ----DEoptim example, warning = FALSE, message = FALSE-------------------
+library(DEoptim)
+set.seed(123456)
+theta_hat <- DEoptim(negLLsquash,
+                     lower = c(rep(1e-05, 4), .001),
+                     upper = c(rep(5, 4), 1 - .001),
+                     control = DEoptim.control(
+                       itermax = 2000,
+                       reltol  = 1e-04,
+                       steptol = 200,
+                       NP      = 100,
+                       CR      = 0.85,
+                       F       = 0.75,
+                       trace   = 25
+                     ),
+                     ni = squashed$N, ei = squashed$E, wi = squashed$weight
+)
+(theta_hat <- as.numeric(theta_hat$optim$bestmem))
+

@@ -144,8 +144,10 @@ plot(ebout, plot.type = "shrinkage", event = "CHOKING")
 
 *openEBGM* was designed to give the user a high level of control over data 
 analysis choices (stratification, data squashing, etc.) using DuMouchel's 
-Gamma-Poisson Shrinkage (GPS) method (1999, 2001). The GPS method applies to any 
-large contingency table, so *openEBGM* can be used to mine a variety of 
-databases in which the rate of co-occurrence of two variables or items is of
-interest (sometimes known as the "market basket problem"). U.S. FDA products and
-adverse events is just one of many possible applications.
+Gamma-Poisson Shrinkage (GPS) method ([1999](https://doi.org/10.1080/00031305.1999.10474456){target="_blank"},
+[2001](https://doi.org/10.1145/502512.502526){target="_blank"}).
+The GPS method applies to any large contingency table, so *openEBGM* can be used
+to mine a variety of databases in which the rate of co-occurrence of two
+variables or items is of interest (sometimes known as the "market basket
+problem"). U.S. FDA products and adverse events is just one of many possible
+applications.

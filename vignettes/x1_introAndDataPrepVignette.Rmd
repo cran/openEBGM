@@ -73,7 +73,7 @@ model (2001), is currently being used by the U.S. Food and Drug Administration
 (FDA) to find higher-than-expected reporting of adverse events associated with 
 food, drugs, etc. For instance, FDA's Center for Food Safety and Applied 
 Nutrition (CFSAN) uses the MGPS model to mine data from the CFSAN Adverse Events
-Reporting System (CAERS): <https://www.fda.gov/Food/ComplianceEnforcement>. (The 
+Reporting System (CAERS): <https://www.fda.gov/Food/ComplianceEnforcement>{target="_blank"}. (The 
 variables forming the rows and columns of the contingency table are *product*
 and *adverse event*.) MGPS allows for product interactions, unlike the GPS model
 implemented in *openEBGM* (*3*), which can only use individual product-event
@@ -110,16 +110,17 @@ to use with generic functions such as `plot()`.
 1. DuMouchel W (1999). "Bayesian Data Mining in Large Frequency
 Tables, With an Application to the FDA Spontaneous Reporting System."
 *The American Statistician*, 53(3), 177-190. 
-https://doi.org/10.1080/00031305.1999.10474456
+<https://doi.org/10.1080/00031305.1999.10474456>{target="_blank"}
 
 1. DuMouchel W, Pregibon D (2001). "Empirical Bayes Screening for
 Multi-item Associations." In *Proceedings of the Seventh ACM SIGKDD
 International Conference on Knowledge Discovery and Data Mining*, KDD '01,
 pp. 67-76. ACM, New York, NY, USA. ISBN 1-58113-391-X.
-https://doi.org/10.1145/502512.502526
+<https://doi.org/10.1145/502512.502526>{target="_blank"}
 
 1. Canida T, Ihrie J (2017). "openEBGM: An R Implementation of the Gamma-Poisson
-Shrinker Data Mining Model." *The R Journal*, 9(2), 499-519. https://journal.r-project.org/archive/2017/RJ-2017-063/index.html
+Shrinker Data Mining Model." *The R Journal*, 9(2), 499-519.
+<https://journal.r-project.org/archive/2017/RJ-2017-063/index.html>{target="_blank"}
 
 
 ---------
@@ -156,7 +157,8 @@ Other columns are allowed, but will be ignored.
 
 ## CAERS example
 
-Here is a small subset of raw data from the publicly available [CAERS data](https://www.fda.gov/Food/ComplianceEnforcement) described above:
+Here is a small subset of raw data from the publicly available [CAERS data](https://www.fda.gov/Food/ComplianceEnforcement){target="_blank"} described
+above:
 
 ```{r Load data}
 library(openEBGM)
@@ -211,6 +213,7 @@ vars <- c("id", "var1", "var2", "strat_gender", "strat_age")
 dat[1:5, vars]
 ```
 
-Next, the *Processing Raw Data with openEBGM* vignette will demonstrate how to
-use data in this general form to find counts and simple disproportionality
-measures--$RR$ and $PRR$ (proportional reporting ratio).
+Next, the [*Processing Raw Data with openEBGM*](https://cran.r-project.org/package=openEBGM/vignettes/x2_rawDataProcessingVignette.html){target="_blank"}
+vignette will demonstrate how to use data in this general form to find counts
+and simple disproportionality measures--$RR$ and $PRR$ (proportional reporting
+ratio).

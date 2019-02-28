@@ -1,3 +1,13 @@
+openEBGM v0.8.1
+===========
+
+Changes:
+
+* Corrected unit test failures for processRaw() resulting from base R changes to
+the sample() function.
+* Added DEoptim::DEoptim() example to hyperparameter estimation vignette.
+
+
 openEBGM v0.8.0
 ===========
 

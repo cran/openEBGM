@@ -1,7 +1,13 @@
-openEBGM v0.8.1
+openEBGM v0.8.2
 ===========
 
-Changes:
+* Adjusted calculation for expected counts using suggestion from
+    Piotr Świnarski. Previously, calculation failed when marginal counts became
+    too large for integer multiplication.
+
+
+openEBGM v0.8.1
+===========
 
 * Corrected unit test failures for processRaw() resulting from base R changes to
 the sample() function.
@@ -11,16 +17,12 @@ the sample() function.
 openEBGM v0.8.0
 ===========
 
-Changes:
-
 * processRaw() now lists all strata when stratification is used.
 * Added argument 'list_ids' to processRaw().
 
 
 openEBGM v0.7.0
 ============
-
-Changes:
 
 * Added the autoSquash() function to automate data squashing.
 * Changed exit condition for while loop in hyperEM(). hyperEM() now throws an
@@ -33,8 +35,6 @@ Changes:
 openEBGM v0.6.0
 ============
 
-Changes:
-
 * Changed 'keep_bins' formal argument in squashData() to 'keep_pts' for added
     flexibility.
 
@@ -42,15 +42,11 @@ Changes:
 openEBGM v0.5.0
 ============
 
-Changes:
-
 * Efficiency and code hygiene improvements to processRaw() and squashData().
 
 
 openEBGM v0.4.0
 ============
-
-Changes:
 
 * Added the hyperEM() function to estimate hyperparameters using an
     implementation of the EM algorithm.
@@ -58,8 +54,6 @@ Changes:
 
 openEBGM v0.3.0
 ============
-
-Changes:
 
 * Added confidence intervals to autoHyper() and standard errors to autoHyper()
     and exploreHypers().
@@ -70,8 +64,6 @@ Changes:
 
 openEBGM v0.2.0
 ============
-
-Changes:
 
 * Minor aesthetic changes to plot(), summary(), and print() methods.
 * Relaxed convergence requirements for exploreHypers() and autoHyper().

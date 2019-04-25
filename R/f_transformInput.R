@@ -110,7 +110,8 @@ processRaw <- function(data, stratify = FALSE, zeroes = FALSE, digits = 2,
     counts <- merge(actual, v1_marg, by = "var1", all.x = zeroes, sort = FALSE)
     counts <- merge(counts, v2_marg, by = "var2", all.x = zeroes, sort = FALSE)
     counts[, N_tot := .countUnique(data$id)]
-    counts[, E := N_v1 * N_v2 / N_tot]
+    #counts[, E := N_v1 * N_v2 / N_tot]  #v0.8.1
+    counts[, E := (N_v1 / N_tot) * N_v2]
   } else {
     data <- .checkStrata_processRaw(data, max_cats)  #adds 'stratum' column
     v1_marg_str <- data[, j = list(N_v1_str = .countUnique(id)),
@@ -126,7 +127,8 @@ processRaw <- function(data, stratify = FALSE, zeroes = FALSE, digits = 2,
     counts[is.na(N_v2_str), N_v2_str := 0L]
     counts <- merge(counts, strat_tot, by = "stratum",
                     all.x = zeroes, sort = FALSE)
-    counts[, E := N_v1_str * N_v2_str / N_tot_str]
+    #counts[, E := N_v1_str * N_v2_str / N_tot_str]  #v0.8.1
+    counts[, E := (N_v1_str / N_tot_str) * N_v2_str]
     counts <- counts[, j = list(E = sum(E, na.rm = TRUE)), by = .(var1, var2)]
     counts <- merge(actual, counts, by = c("var1", "var2"),
                     all.x = zeroes, sort = FALSE)

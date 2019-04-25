@@ -11,7 +11,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
-<meta name="date" content="2019-02-28" />
+<meta name="date" content="2019-04-25" />
 
 <title>Hyperparameter Estimation with openEBGM</title>
 
@@ -82,6 +82,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
 
+
+
+
 </head>
 
 <body>
@@ -90,7 +93,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 <h1 class="title toc-ignore">Hyperparameter Estimation with openEBGM</h1>
-<h4 class="date"><em>2019-02-28</em></h4>
+<h4 class="date">2019-04-25</h4>
 
 
 
@@ -199,10 +202,10 @@ stats<span class="op">::</span><span class="kw">nlm</span>(negLLsquash, <span cl
 <span class="co">#&gt; [1] 4162.496</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $estimate</span>
-<span class="co">#&gt; [1] 3.25164477 0.39974616 2.02567548 1.90789320 0.06537599</span>
+<span class="co">#&gt; [1] 3.25086926 0.39971401 2.02581887 1.90806636 0.06539159</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $gradient</span>
-<span class="co">#&gt; [1]  3.915842e-05 -3.374225e-04 -2.200019e-04  3.270169e-04 -1.196895e-03</span>
+<span class="co">#&gt; [1]  3.076907e-05 -2.253273e-04 -1.156701e-04  2.452500e-04 -3.937066e-04</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $code</span>
 <span class="co">#&gt; [1] 1</span>
@@ -230,14 +233,14 @@ hyper_estimates_full &lt;-<span class="st"> </span><span class="kw">autoHyper</s
                                   <span class="dt">squashed =</span> <span class="ot">FALSE</span>)
 )
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;   41.59    0.00   41.59</span>
+<span class="co">#&gt;   37.72    0.02   37.74</span>
 
 squashed2 &lt;-<span class="st"> </span><span class="kw">squashData</span>(squashed, <span class="dt">count =</span> <span class="dv">2</span>, <span class="dt">bin_size =</span> <span class="dv">10</span>, <span class="dt">keep_pts =</span> <span class="dv">50</span>)
 <span class="kw">system.time</span>(
 hyper_estimates_squashed &lt;-<span class="st"> </span><span class="kw">autoHyper</span>(<span class="dt">data =</span> squashed2, <span class="dt">theta_init =</span> theta_init)
 )
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;    2.28    0.00    2.28</span>
+<span class="co">#&gt;    2.12    0.00    2.12</span>
 
 hyper_estimates_full
 <span class="co">#&gt; $method</span>
@@ -245,7 +248,7 @@ hyper_estimates_full
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $estimates</span>
 <span class="co">#&gt;     alpha1      beta1     alpha2      beta2          P </span>
-<span class="co">#&gt; 3.25596617 0.39998845 2.02374464 1.90612821 0.06530723 </span>
+<span class="co">#&gt; 3.25604233 0.39999435 2.02374669 1.90612544 0.06530649 </span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $conf_int</span>
 <span class="co">#&gt; NULL</span>
@@ -255,9 +258,9 @@ hyper_estimates_full
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $theta_hats</span>
 <span class="co">#&gt;   guess_num   a1_hat    b1_hat   a2_hat   b2_hat      p_hat code converge</span>
-<span class="co">#&gt; 1         1 3.256048 0.3999935 2.023745 1.906121 0.06530615    0     TRUE</span>
-<span class="co">#&gt; 2         2 3.256318 0.4000082 2.023726 1.906092 0.06530197    0     TRUE</span>
-<span class="co">#&gt; 3         3 3.255966 0.3999884 2.023745 1.906128 0.06530723    0     TRUE</span>
+<span class="co">#&gt; 1         1 3.256047 0.3999934 2.023745 1.906122 0.06530617    0     TRUE</span>
+<span class="co">#&gt; 2         2 3.256042 0.3999944 2.023747 1.906125 0.06530649    0     TRUE</span>
+<span class="co">#&gt; 3         3 3.255826 0.3999791 2.023748 1.906136 0.06530847    0     TRUE</span>
 <span class="co">#&gt;   in_bounds  minimum</span>
 <span class="co">#&gt; 1      TRUE 4162.456</span>
 <span class="co">#&gt; 2      TRUE 4162.456</span>
@@ -269,7 +272,7 @@ hyper_estimates_squashed
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $estimates</span>
 <span class="co">#&gt;     alpha1      beta1     alpha2      beta2          P </span>
-<span class="co">#&gt; 3.25374326 0.39988617 2.02613782 1.90809094 0.06534647 </span>
+<span class="co">#&gt; 3.25374690 0.39988541 2.02611230 1.90807039 0.06534613 </span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $conf_int</span>
 <span class="co">#&gt; NULL</span>
@@ -279,9 +282,9 @@ hyper_estimates_squashed
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $theta_hats</span>
 <span class="co">#&gt;   guess_num   a1_hat    b1_hat   a2_hat   b2_hat      p_hat code converge</span>
-<span class="co">#&gt; 1         1 3.251937 0.3997614 2.026192 1.908226 0.06536607    0     TRUE</span>
-<span class="co">#&gt; 2         2 3.253743 0.3998862 2.026138 1.908091 0.06534647    0     TRUE</span>
-<span class="co">#&gt; 3         3 3.253796 0.3998902 2.026169 1.908116 0.06534669    0     TRUE</span>
+<span class="co">#&gt; 1         1 3.251941 0.3997618 2.026192 1.908226 0.06536607    0     TRUE</span>
+<span class="co">#&gt; 2         2 3.256417 0.4000426 2.025915 1.907763 0.06530856    0     TRUE</span>
+<span class="co">#&gt; 3         3 3.253747 0.3998854 2.026112 1.908070 0.06534613    0     TRUE</span>
 <span class="co">#&gt;   in_bounds minimum</span>
 <span class="co">#&gt; 1      TRUE 4161.93</span>
 <span class="co">#&gt; 2      TRUE 4161.93</span>
@@ -291,10 +294,10 @@ hyper_estimates_squashed
 <p><code>autoHyper()</code> can now return standard errors and confidence intervals for the hyperparameter estimates:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">autoHyper</span>(squashed2, <span class="dt">theta_init =</span> theta_init, <span class="dt">conf_ints =</span> <span class="ot">TRUE</span>)<span class="op">$</span>conf_int
 <span class="co">#&gt;        pt_est     SE   LL_95  UL_95</span>
-<span class="co">#&gt; a1_hat 3.2537 2.2875 -1.2296 7.7371</span>
-<span class="co">#&gt; b1_hat 0.3999 0.1439  0.1179 0.6819</span>
+<span class="co">#&gt; a1_hat 3.2537 2.2876 -1.2298 7.7373</span>
+<span class="co">#&gt; b1_hat 0.3999 0.1439  0.1178 0.6819</span>
 <span class="co">#&gt; a2_hat 2.0261 0.4514  1.1414 2.9108</span>
-<span class="co">#&gt; b2_hat 1.9081 0.4328  1.0599 2.7563</span>
+<span class="co">#&gt; b2_hat 1.9081 0.4327  1.0599 2.7562</span>
 <span class="co">#&gt; p_hat  0.0653 0.0358 -0.0048 0.1355</span></code></pre></div>
 </div>
 <div id="explorehypers" class="section level3">
@@ -303,9 +306,9 @@ hyper_estimates_squashed
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">exploreHypers</span>(<span class="dt">data =</span> squashed2, <span class="dt">theta_init =</span> theta_init, <span class="dt">std_errors =</span> <span class="ot">TRUE</span>)
 <span class="co">#&gt; $estimates</span>
 <span class="co">#&gt;   guess_num   a1_hat    b1_hat   a2_hat   b2_hat      p_hat code converge</span>
-<span class="co">#&gt; 1         1 3.251937 0.3997614 2.026192 1.908226 0.06536607    0     TRUE</span>
-<span class="co">#&gt; 2         2 3.253743 0.3998862 2.026138 1.908091 0.06534647    0     TRUE</span>
-<span class="co">#&gt; 3         3 3.253796 0.3998902 2.026169 1.908116 0.06534669    0     TRUE</span>
+<span class="co">#&gt; 1         1 3.251941 0.3997618 2.026192 1.908226 0.06536607    0     TRUE</span>
+<span class="co">#&gt; 2         2 3.256417 0.4000426 2.025915 1.907763 0.06530856    0     TRUE</span>
+<span class="co">#&gt; 3         3 3.253747 0.3998854 2.026112 1.908070 0.06534613    0     TRUE</span>
 <span class="co">#&gt;   in_bounds minimum</span>
 <span class="co">#&gt; 1      TRUE 4161.93</span>
 <span class="co">#&gt; 2      TRUE 4161.93</span>
@@ -313,9 +316,9 @@ hyper_estimates_squashed
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $std_errs</span>
 <span class="co">#&gt;   guess_num    a1_se     b1_se     a2_se     b2_se       p_se</span>
-<span class="co">#&gt; 1         1 2.280903 0.1435339 0.4512148 0.4323755 0.03572939</span>
-<span class="co">#&gt; 2         2 2.287478 0.1438959 0.4513849 0.4327522 0.03578442</span>
-<span class="co">#&gt; 3         3 2.288223 0.1439303 0.4514478 0.4328547 0.03579575</span></code></pre></div>
+<span class="co">#&gt; 1         1 2.280948 0.1435360 0.4512232 0.4323850 0.03573008</span>
+<span class="co">#&gt; 2         2 2.296069 0.1443749 0.4515448 0.4331314 0.03584047</span>
+<span class="co">#&gt; 3         3 2.287570 0.1439002 0.4513790 0.4327496 0.03578543</span></code></pre></div>
 <p><code>exploreHypers()</code> offers three gradient-based optimization methods and is basically just a wrapper around commonly used functions from the <em>stats</em> package mentioned earlier: <code>nlminb()</code> (the default), <code>nlm()</code>, &amp; <code>optim()</code>.</p>
 </div>
 <div id="hyperem" class="section level3">
@@ -356,7 +359,7 @@ hyperEM_ests &lt;-<span class="st"> </span><span class="kw">hyperEM</span>(squas
 <span class="co">#&gt; </span>
 <span class="co">#&gt;    Timing:  </span>
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;    4.75    0.00    4.75</span>
+<span class="co">#&gt;    4.55    0.04    4.58</span>
 <span class="kw">str</span>(hyperEM_ests)
 <span class="co">#&gt; List of 9</span>
 <span class="co">#&gt;  $ estimates : num [1:5] 3.1083 0.3935 2.0392 1.9358 0.0683</span>
@@ -367,7 +370,7 @@ hyperEM_ests &lt;-<span class="st"> </span><span class="kw">hyperEM</span>(squas
 <span class="co">#&gt;   ..$ UL_95 : num [1:5] 6.959 0.639 2.95 2.807 0.138</span>
 <span class="co">#&gt;  $ maximum   : num -4164</span>
 <span class="co">#&gt;  $ method    : chr &quot;score&quot;</span>
-<span class="co">#&gt;  $ elapsed   : num 4.75</span>
+<span class="co">#&gt;  $ elapsed   : num 4.58</span>
 <span class="co">#&gt;  $ iters     : num 203</span>
 <span class="co">#&gt;  $ score     : num [1:5] -0.01142 0.03072 0.01033 0.01029 0.00216</span>
 <span class="co">#&gt;  $ score_norm: num 0.0359</span>

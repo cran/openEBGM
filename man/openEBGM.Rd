@@ -3,7 +3,6 @@
 \docType{package}
 \name{openEBGM}
 \alias{openEBGM}
-\alias{openEBGM-package}
 \title{\pkg{openEBGM}: EBGM Scores for Mining Large Contingency Tables}
 \description{
 \pkg{openEBGM} is a Bayesian data mining package for calculating Empirical

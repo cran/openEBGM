@@ -4,9 +4,17 @@
 \alias{exploreHypers}
 \title{Explore various hyperparameter estimates}
 \usage{
-exploreHypers(data, theta_init, squashed = TRUE, zeroes = FALSE,
-  N_star = 1, method = c("nlminb", "nlm", "bfgs"), param_limit = 100,
-  max_pts = 20000, std_errors = FALSE)
+exploreHypers(
+  data,
+  theta_init,
+  squashed = TRUE,
+  zeroes = FALSE,
+  N_star = 1,
+  method = c("nlminb", "nlm", "bfgs"),
+  param_limit = 100,
+  max_pts = 20000,
+  std_errors = FALSE
+)
 }
 \arguments{
 \item{data}{A data frame from \code{\link{processRaw}} containing columns
@@ -133,8 +141,9 @@ DuMouchel W (1999). "Bayesian Data Mining in Large Frequency
 
 \code{\link{squashData}} for data preparation
 
-Other hyperparameter estimation functions: \code{\link{autoHyper}},
-  \code{\link{hyperEM}}
+Other hyperparameter estimation functions: 
+\code{\link{autoHyper}()},
+\code{\link{hyperEM}()}
 }
 \concept{hyperparameter estimation functions}
 \keyword{openEBGM}

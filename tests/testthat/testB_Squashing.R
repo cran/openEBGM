@@ -3,10 +3,17 @@ context("Data Squashing")
 
 #Squash some processed data
 set.seed(483726)
-dat <- data.frame(var1 = letters[1:26], var2 = LETTERS[1:26],
+# dat <- data.frame(var1 = letters[1:26], var2 = LETTERS[1:26],
+#                   N = c(rep(0, 11), rep(1, 10), rep(2, 4), rep(3, 1)),
+#                   E = abs(c(rnorm(11, 0), rnorm(10, 1), rnorm(4, 2),
+#                             rnorm(1, 3))))
+dat <- data.frame(var1 = letters[1:26],
+                  var2 = LETTERS[1:26],
                   N = c(rep(0, 11), rep(1, 10), rep(2, 4), rep(3, 1)),
                   E = abs(c(rnorm(11, 0), rnorm(10, 1), rnorm(4, 2),
-                            rnorm(1, 3))))
+                            rnorm(1, 3))),
+                  stringsAsFactors = FALSE
+)
 
 dat_no_N <- dat[, !grepl("N", names(dat))]
 dat_missing1 <- dat

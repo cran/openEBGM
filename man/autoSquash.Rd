@@ -4,9 +4,12 @@
 \alias{autoSquash}
 \title{Automated data squashing}
 \usage{
-autoSquash(data, keep_pts = c(100, 75, 50, 25), cut_offs = c(500, 1000,
-  10000, 1e+05, 5e+05, 1e+06, 5e+06), num_super_pts = c(50, 75, 150, 500,
-  750, 1000, 2000, 5000))
+autoSquash(
+  data,
+  keep_pts = c(100, 75, 50, 25),
+  cut_offs = c(500, 1000, 10000, 1e+05, 5e+05, 1e+06, 5e+06),
+  num_super_pts = c(50, 75, 150, 500, 750, 1000, 2000, 5000)
+)
 }
 \arguments{
 \item{data}{A data frame (typically from \code{\link{processRaw}}) containing

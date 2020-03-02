@@ -69,8 +69,10 @@ DuMouchel W, Pregibon D (2001). "Empirical Bayes Screening for
 \code{\link[stats]{nlm}}, \code{\link[stats]{nlminb}}, and
   \code{\link[stats]{optim}} for optimization
 
-Other negative log-likelihood functions: \code{\link{negLLsquash}},
-  \code{\link{negLLzeroSquash}}, \code{\link{negLLzero}}
+Other negative log-likelihood functions: 
+\code{\link{negLLsquash}()},
+\code{\link{negLLzeroSquash}()},
+\code{\link{negLLzero}()}
 }
 \concept{negative log-likelihood functions}
 \keyword{openEBGM}

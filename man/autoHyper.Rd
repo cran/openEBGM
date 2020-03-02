@@ -4,10 +4,19 @@
 \alias{autoHyper}
 \title{Semi-automated hyperparameter estimation}
 \usage{
-autoHyper(data, theta_init, squashed = TRUE, zeroes = FALSE,
-  N_star = 1, tol = c(0.05, 0.05, 0.2, 0.2, 0.025), min_conv = 1,
-  param_limit = 100, max_pts = 20000, conf_ints = FALSE,
-  conf_level = c("95", "80", "90", "99"))
+autoHyper(
+  data,
+  theta_init,
+  squashed = TRUE,
+  zeroes = FALSE,
+  N_star = 1,
+  tol = c(0.05, 0.05, 0.2, 0.2, 0.025),
+  min_conv = 1,
+  param_limit = 100,
+  max_pts = 20000,
+  conf_ints = FALSE,
+  conf_level = c("95", "80", "90", "99")
+)
 }
 \arguments{
 \item{data}{A data frame from \code{\link{processRaw}} containing columns
@@ -129,8 +138,9 @@ DuMouchel W (1999). "Bayesian Data Mining in Large Frequency
 
 \code{\link{squashData}} for data preparation
 
-Other hyperparameter estimation functions: \code{\link{exploreHypers}},
-  \code{\link{hyperEM}}
+Other hyperparameter estimation functions: 
+\code{\link{exploreHypers}()},
+\code{\link{hyperEM}()}
 }
 \concept{hyperparameter estimation functions}
 \keyword{openEBGM}

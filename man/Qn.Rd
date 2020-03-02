@@ -68,8 +68,9 @@ DuMouchel W (1999). "Bayesian Data Mining in Large Frequency
 
 \code{\link{processRaw}} for finding counts.
 
-Other posterior distribution functions: \code{\link{ebgm}},
-  \code{\link{quantBisect}}
+Other posterior distribution functions: 
+\code{\link{ebgm}()},
+\code{\link{quantBisect}()}
 }
 \concept{posterior distribution functions}
 \keyword{openEBGM}

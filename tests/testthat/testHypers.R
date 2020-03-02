@@ -2,15 +2,15 @@ context("Hyperparameter Estimation")
 #For testing if the functions that explore the hyperparameter space are
 #functioning correctly
 
-dat <-
-  data.frame(var1 = c("product_A", rep("product_B", 3), "product_C",
-                      rep("product_A", 2), rep("product_B", 2), "product_C"),
-             var2 = c("event_1", rep("event_2", 2), rep("event_3", 2),
-                      "event_2", rep("event_3", 3), "event_1"),
-             strat1 = c(rep("Male", 5), rep("Female", 3), rep("Male", 2)),
-             strat2 = c(rep("age_cat1", 5), rep("age_cat1", 3),
-                        rep("age_cat2", 2))
-             )
+dat <- data.frame(
+  var1 = c("product_A", rep("product_B", 3), "product_C",
+           rep("product_A", 2), rep("product_B", 2), "product_C"),
+  var2 = c("event_1", rep("event_2", 2), rep("event_3", 2),
+           "event_2", rep("event_3", 3), "event_1"),
+  strat1 = c(rep("Male", 5), rep("Female", 3), rep("Male", 2)),
+  strat2 = c(rep("age_cat1", 5), rep("age_cat1", 3), rep("age_cat2", 2)),
+  stringsAsFactors = FALSE
+)
 dat$id <- 1:nrow(dat)
 dat_processed <- processRaw(dat)
 
@@ -21,7 +21,8 @@ theta_init <- data.frame(alpha1 = c(0.2, 0.1, 0.3),
                          beta1  = c(0.1, 0.1, 0.5),
                          alpha2 = c(2, 10, 6),
                          beta2  = c(4, 10, 6),
-                         p      = c(1/3, 0.2, 0.5))
+                         p      = c(1/3, 0.2, 0.5)
+)
 
 theta_init_neg <- theta_init
 theta_init_neg[1, 3] <- -0.5

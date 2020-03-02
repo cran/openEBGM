@@ -62,8 +62,10 @@ DuMouchel W (1999). "Bayesian Data Mining in Large Frequency
 \code{\link[stats]{nlm}}, \code{\link[stats]{nlminb}}, and
   \code{\link[stats]{optim}} for optimization
 
-Other negative log-likelihood functions: \code{\link{negLLsquash}},
-  \code{\link{negLLzeroSquash}}, \code{\link{negLL}}
+Other negative log-likelihood functions: 
+\code{\link{negLLsquash}()},
+\code{\link{negLLzeroSquash}()},
+\code{\link{negLL}()}
 }
 \concept{negative log-likelihood functions}
 \keyword{openEBGM}

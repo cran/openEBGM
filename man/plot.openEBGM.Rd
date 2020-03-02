@@ -4,8 +4,7 @@
 \alias{plot.openEBGM}
 \title{Plot an openEBGM object}
 \usage{
-\method{plot}{openEBGM}(x, y = NULL, event = NULL, plot.type = "bar",
-  ...)
+\method{plot}{openEBGM}(x, y = NULL, event = NULL, plot.type = "bar", ...)
 }
 \arguments{
 \item{x}{An openEBGM object constructed by \code{ebScores()}}

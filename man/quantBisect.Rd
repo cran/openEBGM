@@ -4,8 +4,16 @@
 \alias{quantBisect}
 \title{Find quantiles of the posterior distribution}
 \usage{
-quantBisect(percent, theta_hat, N, E, qn, digits = 2,
-  limits = c(-1e+05, 1e+05), max_iter = 2000)
+quantBisect(
+  percent,
+  theta_hat,
+  N,
+  E,
+  qn,
+  digits = 2,
+  limits = c(-1e+05, 1e+05),
+  max_iter = 2000
+)
 }
 \arguments{
 \item{percent}{A numeric scalar between 1 and 99 for the desired
@@ -103,8 +111,9 @@ head(proc)
 
 \code{\link{Qn}} for finding mixture fractions.
 
-Other posterior distribution functions: \code{\link{Qn}},
-  \code{\link{ebgm}}
+Other posterior distribution functions: 
+\code{\link{Qn}()},
+\code{\link{ebgm}()}
 }
 \concept{posterior distribution functions}
 \keyword{openEBGM}

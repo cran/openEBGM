@@ -266,7 +266,8 @@ summary.openEBGM <- function(object, plot.out = TRUE, log.trans = FALSE, ...) {
   if(any(grepl("QUANT", names(object$data)))) {
     tmp <- object$data[,grep("EB|QUANT", names(object$data))]
   } else {
-    tmp <- as.data.frame(object$data$EBGM)
+    #tmp <- as.data.frame(object$data$EBGM)
+    tmp <- as.data.frame(object$data$EBGM, stringsAsFactors = TRUE)
     names(tmp) <- "EBGM"
   }
   if(log.trans == TRUE) {

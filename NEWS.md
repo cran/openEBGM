@@ -1,69 +1,74 @@
-openEBGM v0.8.2
-===========
+# openEBGM version history
+============================
+
+## v0.8.3
+* Fixed unit testing problems caused by R's future switch to
+  stringsAsFactors = FALSE.
+
+
+## v0.8.2
 
 * Adjusted calculation for expected counts using suggestion from
-    Piotr Świnarski. Previously, calculation failed when marginal counts became
-    too large for integer multiplication.
+  Piotr Świnarski. Previously, calculation failed when marginal counts became
+  too large for integer multiplication.
 
 
-openEBGM v0.8.1
-===========
+## v0.8.1
 
 * Corrected unit test failures for processRaw() resulting from base R changes to
-the sample() function.
+  the sample() function.
+
 * Added DEoptim::DEoptim() example to hyperparameter estimation vignette.
 
 
-openEBGM v0.8.0
-===========
+## v0.8.0
 
 * processRaw() now lists all strata when stratification is used.
+
 * Added argument 'list_ids' to processRaw().
 
 
-openEBGM v0.7.0
-============
+## v0.7.0
 
 * Added the autoSquash() function to automate data squashing.
-* Changed exit condition for while loop in hyperEM(). hyperEM() now throws an
-    error if the number of "stuck" or repeated estimates of theta exceeds 20
-    when using 'method = "nlminb"'.
+
+* Changed exit condition for while loop in hyperEM(). hyperEM() now throws an 
+  error if the number of "stuck" or repeated estimates of theta exceeds 20
+  when using 'method = "nlminb"'.
+
 * Changed upper limit from 1 to 0.999 in hidden functions .updateThetaLL() and
-    .updateThetaLLD(), which are called by hyperEM().
+  .updateThetaLLD(), which are called by hyperEM().
+    
 
-
-openEBGM v0.6.0
-============
+## v0.6.0
 
 * Changed 'keep_bins' formal argument in squashData() to 'keep_pts' for added
-    flexibility.
+  flexibility.
 
 
-openEBGM v0.5.0
-============
+## v0.5.0
 
 * Efficiency and code hygiene improvements to processRaw() and squashData().
 
 
-openEBGM v0.4.0
-============
+## v0.4.0
 
 * Added the hyperEM() function to estimate hyperparameters using an
-    implementation of the EM algorithm.
+  implementation of the EM algorithm.
+  
 
-
-openEBGM v0.3.0
-============
+## v0.3.0
 
 * Added confidence intervals to autoHyper() and standard errors to autoHyper()
-    and exploreHypers().
+  and exploreHypers().
+
 * processRaw() now returns Inf instead of 99999 when PRR results in division by
-    zero.
+  zero.
+
 * Fixed minor bug in exploreHypers().
 
 
-openEBGM v0.2.0
-============
+## v0.2.0
 
 * Minor aesthetic changes to plot(), summary(), and print() methods.
 * Relaxed convergence requirements for exploreHypers() and autoHyper().

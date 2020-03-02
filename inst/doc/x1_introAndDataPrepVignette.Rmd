@@ -110,17 +110,17 @@ to use with generic functions such as `plot()`.
 1. DuMouchel W (1999). "Bayesian Data Mining in Large Frequency
 Tables, With an Application to the FDA Spontaneous Reporting System."
 *The American Statistician*, 53(3), 177-190. 
-<https://doi.org/10.1080/00031305.1999.10474456>{target="_blank"}
+*`https://doi.org/10.1080/00031305.1999.10474456`*
 
 1. DuMouchel W, Pregibon D (2001). "Empirical Bayes Screening for
 Multi-item Associations." In *Proceedings of the Seventh ACM SIGKDD
 International Conference on Knowledge Discovery and Data Mining*, KDD '01,
 pp. 67-76. ACM, New York, NY, USA. ISBN 1-58113-391-X.
-<https://doi.org/10.1145/502512.502526>{target="_blank"}
+*`https://doi.org/10.1145/502512.502526`*
 
 1. Canida T, Ihrie J (2017). "openEBGM: An R Implementation of the Gamma-Poisson
 Shrinker Data Mining Model." *The R Journal*, 9(2), 499-519.
-<https://journal.r-project.org/archive/2017/RJ-2017-063/index.html>{target="_blank"}
+*`https://journal.r-project.org/archive/2017/RJ-2017-063/index.html`*
 
 
 ---------

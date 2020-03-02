@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 
-<meta name="date" content="2019-04-25" />
+<meta name="date" content="2020-03-02" />
 
 <title>Hyperparameter Estimation with openEBGM</title>
 
@@ -19,41 +19,67 @@
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css" data-origin="pandoc">
-div.sourceCode { overflow-x: auto; }
-table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
-  margin: 0; padding: 0; vertical-align: baseline; border: none; }
-table.sourceCode { width: 100%; line-height: 100%; }
-td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
-td.sourceCode { padding-left: 5px; }
-code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code > span.dt { color: #902000; } /* DataType */
-code > span.dv { color: #40a070; } /* DecVal */
-code > span.bn { color: #40a070; } /* BaseN */
-code > span.fl { color: #40a070; } /* Float */
-code > span.ch { color: #4070a0; } /* Char */
-code > span.st { color: #4070a0; } /* String */
-code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code > span.ot { color: #007020; } /* Other */
-code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code > span.fu { color: #06287e; } /* Function */
-code > span.er { color: #ff0000; font-weight: bold; } /* Error */
-code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-code > span.cn { color: #880000; } /* Constant */
-code > span.sc { color: #4070a0; } /* SpecialChar */
-code > span.vs { color: #4070a0; } /* VerbatimString */
-code > span.ss { color: #bb6688; } /* SpecialString */
-code > span.im { } /* Import */
-code > span.va { color: #19177c; } /* Variable */
-code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code > span.op { color: #666666; } /* Operator */
-code > span.bu { } /* BuiltIn */
-code > span.ex { } /* Extension */
-code > span.pp { color: #bc7a00; } /* Preprocessor */
-code > span.at { color: #7d9029; } /* Attribute */
-code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 
 </style>
 <script>
@@ -69,7 +95,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
       if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' || rule.style.backgroundColor === '') continue;
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -80,7 +106,187 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 
-<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
 
 
 
@@ -93,7 +299,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 <h1 class="title toc-ignore">Hyperparameter Estimation with openEBGM</h1>
-<h4 class="date">2019-04-25</h4>
+<h4 class="date">2020-03-02</h4>
 
 
 
@@ -114,9 +320,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div id="references" class="section level3">
 <h3>References</h3>
 <ol style="list-style-type: decimal">
-<li><p>Meng X-L, Rubin D (1993). “Maximum likelihood estimation via the ECM algorithm: A general framework.” <em>Biometrika</em>, 80(2), 267-278. <a href="https://doi.org/10.1093/biomet/80.2.267" class="uri" target="_blank">https://doi.org/10.1093/biomet/80.2.267</a></p></li>
-<li><p>DuMouchel W, Pregibon D (2001). “Empirical Bayes Screening for Multi-item Associations.” In <em>Proceedings of the Seventh ACM SIGKDD International Conference on Knowledge Discovery and Data Mining</em>, KDD ’01, pp. 67-76. ACM, New York, NY, USA. ISBN 1-58113-391-X. <a href="https://doi.org/10.1145/502512.502526" class="uri" target="_blank">https://doi.org/10.1145/502512.502526</a></p></li>
-<li><p>Millar, Russell B (2011). “Maximum Likelihood Estimation and Inference.” <em>John Wiley &amp; Sons, Ltd</em>, 111-112. <a href="https://doi.org/10.1002/9780470094846" class="uri" target="_blank">https://doi.org/10.1002/9780470094846</a></p></li>
+<li><p>Meng X-L, Rubin D (1993). “Maximum likelihood estimation via the ECM algorithm: A general framework.” <em>Biometrika</em>, 80(2), 267-278. <em><code>https://doi.org/10.1093/biomet/80.2.267</code></em></p></li>
+<li><p>DuMouchel W, Pregibon D (2001). “Empirical Bayes Screening for Multi-item Associations.” In <em>Proceedings of the Seventh ACM SIGKDD International Conference on Knowledge Discovery and Data Mining</em>, KDD ’01, pp. 67-76. ACM, New York, NY, USA. ISBN 1-58113-391-X. <em><code>https://doi.org/10.1145/502512.502526</code></em></p></li>
+<li><p>Millar, Russell B (2011). “Maximum Likelihood Estimation and Inference.” <em>John Wiley &amp; Sons, Ltd</em>, 111-112. <em><code>https://doi.org/10.1002/9780470094846</code></em></p></li>
 </ol>
 <hr />
 </div>
@@ -129,89 +335,89 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>The actual counts (<span class="math inline">\(N\)</span>) and expected counts (<span class="math inline">\(E\)</span>) are used to estimate the hyperparameters of the prior distribution. A large contingency table will have many cells, resulting in computational difficulties for the optimization routines needed for estimation. Data squashing (DuMouchel et al., 2001) transforms a set of 2-dimensional points to a smaller number of 3-dimensional points. The idea is to reduce a large number of points <span class="math inline">\((N, E)\)</span> to a smaller number of points <span class="math inline">\((N_k, E_k, W_k)\)</span>, where <span class="math inline">\(k = 1,...,M\)</span> and <span class="math inline">\(W_k\)</span> is the weight of the <span class="math inline">\(k^{th}\)</span> “superpoint”. To minimize information loss, only points close to each other should be squashed.</p>
 <p>For a given <span class="math inline">\(N\)</span>, <code>squashData()</code> combines points with similar <span class="math inline">\(E\)</span>s into bins using a specified bin size and uses the average <span class="math inline">\(E\)</span> within each bin as the <span class="math inline">\(E\)</span> for that bin’s “superpoint”. The new superpoints are weighted by bin size. For example, the points (1, 1.1) and (1, 1.3) could be squashed to the superpoint (1, 1.2, 2).</p>
 <p>An example is given below using unstratified expected counts:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(openEBGM)
-<span class="kw">data</span>(caers)
-
-processed &lt;-<span class="st"> </span><span class="kw">processRaw</span>(caers)
-processed[<span class="dv">1</span><span class="op">:</span><span class="dv">4</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>]
-<span class="co">#&gt;                      var1                  var2 N            E</span>
-<span class="co">#&gt; 1         1-PHENYLALANINE  HEART RATE INCREASED 1 0.0360548272</span>
-<span class="co">#&gt; 2 11 UNSPECIFIED VITAMINS                ASTHMA 1 0.0038736591</span>
-<span class="co">#&gt; 3 11 UNSPECIFIED VITAMINS CARDIAC FUNCTION </span><span class="al">TEST</span><span class="co"> 1 0.0002979738</span>
-<span class="co">#&gt; 4 11 UNSPECIFIED VITAMINS            CHEST PAIN 1 0.0360548272</span>
-
-squashed &lt;-<span class="st"> </span><span class="kw">squashData</span>(processed) <span class="co">#Using defaults</span>
-<span class="kw">head</span>(squashed)
-<span class="co">#&gt;   N            E weight</span>
-<span class="co">#&gt; 1 1 0.0002979738     50</span>
-<span class="co">#&gt; 2 1 0.0002979738     50</span>
-<span class="co">#&gt; 3 1 0.0002979738     50</span>
-<span class="co">#&gt; 4 1 0.0002979738     50</span>
-<span class="co">#&gt; 5 1 0.0002979738     50</span>
-<span class="co">#&gt; 6 1 0.0002979738     50</span>
-
-<span class="kw">nrow</span>(processed)
-<span class="co">#&gt; [1] 17189</span>
-<span class="kw">nrow</span>(squashed)
-<span class="co">#&gt; [1] 1568</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">library</span>(openEBGM)</a>
+<a class="sourceLine" id="cb1-2" title="2"><span class="kw">data</span>(caers)</a>
+<a class="sourceLine" id="cb1-3" title="3"></a>
+<a class="sourceLine" id="cb1-4" title="4">processed &lt;-<span class="st"> </span><span class="kw">processRaw</span>(caers)</a>
+<a class="sourceLine" id="cb1-5" title="5">processed[<span class="dv">1</span><span class="op">:</span><span class="dv">4</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>]</a>
+<a class="sourceLine" id="cb1-6" title="6"><span class="co">#&gt;                      var1                  var2 N            E</span></a>
+<a class="sourceLine" id="cb1-7" title="7"><span class="co">#&gt; 1         1-PHENYLALANINE  HEART RATE INCREASED 1 0.0360548272</span></a>
+<a class="sourceLine" id="cb1-8" title="8"><span class="co">#&gt; 2 11 UNSPECIFIED VITAMINS                ASTHMA 1 0.0038736591</span></a>
+<a class="sourceLine" id="cb1-9" title="9"><span class="co">#&gt; 3 11 UNSPECIFIED VITAMINS CARDIAC FUNCTION </span><span class="al">TEST</span><span class="co"> 1 0.0002979738</span></a>
+<a class="sourceLine" id="cb1-10" title="10"><span class="co">#&gt; 4 11 UNSPECIFIED VITAMINS            CHEST PAIN 1 0.0360548272</span></a>
+<a class="sourceLine" id="cb1-11" title="11"></a>
+<a class="sourceLine" id="cb1-12" title="12">squashed &lt;-<span class="st"> </span><span class="kw">squashData</span>(processed) <span class="co">#Using defaults</span></a>
+<a class="sourceLine" id="cb1-13" title="13"><span class="kw">head</span>(squashed)</a>
+<a class="sourceLine" id="cb1-14" title="14"><span class="co">#&gt;   N            E weight</span></a>
+<a class="sourceLine" id="cb1-15" title="15"><span class="co">#&gt; 1 1 0.0002979738     50</span></a>
+<a class="sourceLine" id="cb1-16" title="16"><span class="co">#&gt; 2 1 0.0002979738     50</span></a>
+<a class="sourceLine" id="cb1-17" title="17"><span class="co">#&gt; 3 1 0.0002979738     50</span></a>
+<a class="sourceLine" id="cb1-18" title="18"><span class="co">#&gt; 4 1 0.0002979738     50</span></a>
+<a class="sourceLine" id="cb1-19" title="19"><span class="co">#&gt; 5 1 0.0002979738     50</span></a>
+<a class="sourceLine" id="cb1-20" title="20"><span class="co">#&gt; 6 1 0.0002979738     50</span></a>
+<a class="sourceLine" id="cb1-21" title="21"></a>
+<a class="sourceLine" id="cb1-22" title="22"><span class="kw">nrow</span>(processed)</a>
+<a class="sourceLine" id="cb1-23" title="23"><span class="co">#&gt; [1] 17189</span></a>
+<a class="sourceLine" id="cb1-24" title="24"><span class="kw">nrow</span>(squashed)</a>
+<a class="sourceLine" id="cb1-25" title="25"><span class="co">#&gt; [1] 1568</span></a></code></pre></div>
 <p>As shown above, the squashed data set has 9.12% of the observations as the full dataset. Using this squashed data, we can then estimate the hyperparameters in a far more efficient manner.</p>
 <p><code>squashData()</code> can be used iteratively for each count (<span class="math inline">\(N\)</span>):</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">squash1 &lt;-<span class="st"> </span><span class="kw">squashData</span>(processed)
-squash2 &lt;-<span class="st"> </span><span class="kw">squashData</span>(squash1, <span class="dt">count =</span> <span class="dv">2</span>, <span class="dt">bin_size =</span> <span class="dv">8</span>)</code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1">squash1 &lt;-<span class="st"> </span><span class="kw">squashData</span>(processed)</a>
+<a class="sourceLine" id="cb2-2" title="2">squash2 &lt;-<span class="st"> </span><span class="kw">squashData</span>(squash1, <span class="dt">count =</span> <span class="dv">2</span>, <span class="dt">bin_size =</span> <span class="dv">8</span>)</a></code></pre></div>
 <p>Or <code>autoSquash()</code> can be used to squash all counts at once:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">squash3 &lt;-<span class="st"> </span><span class="kw">autoSquash</span>(processed)
-<span class="kw">ftable</span>(squash3[, <span class="kw">c</span>(<span class="st">&quot;N&quot;</span>, <span class="st">&quot;weight&quot;</span>)])
-<span class="co">#&gt;    weight   1   2   3   6   8  31</span>
-<span class="co">#&gt; N                                </span>
-<span class="co">#&gt; 1         100   0   0   1   0 514</span>
-<span class="co">#&gt; 2          75   0   1   0  79   0</span>
-<span class="co">#&gt; 3          51  71   0   0   0   0</span>
-<span class="co">#&gt; 4          80   0   0   0   0   0</span>
-<span class="co">#&gt; 5          41   0   0   0   0   0</span>
-<span class="co">#&gt; 6          31   0   0   0   0   0</span>
-<span class="co">#&gt; 7          17   0   0   0   0   0</span>
-<span class="co">#&gt; 8          20   0   0   0   0   0</span>
-<span class="co">#&gt; 9          14   0   0   0   0   0</span>
-<span class="co">#&gt; 10          6   0   0   0   0   0</span>
-<span class="co">#&gt; 11          7   0   0   0   0   0</span>
-<span class="co">#&gt; 12          3   0   0   0   0   0</span>
-<span class="co">#&gt; 13          3   0   0   0   0   0</span>
-<span class="co">#&gt; 14          2   0   0   0   0   0</span>
-<span class="co">#&gt; 16          4   0   0   0   0   0</span>
-<span class="co">#&gt; 17          2   0   0   0   0   0</span>
-<span class="co">#&gt; 18          5   0   0   0   0   0</span>
-<span class="co">#&gt; 19          1   0   0   0   0   0</span>
-<span class="co">#&gt; 21          2   0   0   0   0   0</span>
-<span class="co">#&gt; 22          1   0   0   0   0   0</span>
-<span class="co">#&gt; 23          1   0   0   0   0   0</span>
-<span class="co">#&gt; 24          1   0   0   0   0   0</span>
-<span class="co">#&gt; 27          1   0   0   0   0   0</span>
-<span class="co">#&gt; 28          1   0   0   0   0   0</span>
-<span class="co">#&gt; 42          1   0   0   0   0   0</span>
-<span class="co">#&gt; 53          1   0   0   0   0   0</span>
-<span class="co">#&gt; 54          1   0   0   0   0   0</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">squash3 &lt;-<span class="st"> </span><span class="kw">autoSquash</span>(processed)</a>
+<a class="sourceLine" id="cb3-2" title="2"><span class="kw">ftable</span>(squash3[, <span class="kw">c</span>(<span class="st">&quot;N&quot;</span>, <span class="st">&quot;weight&quot;</span>)])</a>
+<a class="sourceLine" id="cb3-3" title="3"><span class="co">#&gt;    weight   1   2   3   6   8  31</span></a>
+<a class="sourceLine" id="cb3-4" title="4"><span class="co">#&gt; N                                </span></a>
+<a class="sourceLine" id="cb3-5" title="5"><span class="co">#&gt; 1         100   0   0   1   0 514</span></a>
+<a class="sourceLine" id="cb3-6" title="6"><span class="co">#&gt; 2          75   0   1   0  79   0</span></a>
+<a class="sourceLine" id="cb3-7" title="7"><span class="co">#&gt; 3          51  71   0   0   0   0</span></a>
+<a class="sourceLine" id="cb3-8" title="8"><span class="co">#&gt; 4          80   0   0   0   0   0</span></a>
+<a class="sourceLine" id="cb3-9" title="9"><span class="co">#&gt; 5          41   0   0   0   0   0</span></a>
+<a class="sourceLine" id="cb3-10" title="10"><span class="co">#&gt; 6          31   0   0   0   0   0</span></a>
+<a class="sourceLine" id="cb3-11" title="11"><span class="co">#&gt; 7          17   0   0   0   0   0</span></a>
+<a class="sourceLine" id="cb3-12" title="12"><span class="co">#&gt; 8          20   0   0   0   0   0</span></a>
+<a class="sourceLine" id="cb3-13" title="13"><span class="co">#&gt; 9          14   0   0   0   0   0</span></a>
+<a class="sourceLine" id="cb3-14" title="14"><span class="co">#&gt; 10          6   0   0   0   0   0</span></a>
+<a class="sourceLine" id="cb3-15" title="15"><span class="co">#&gt; 11          7   0   0   0   0   0</span></a>
+<a class="sourceLine" id="cb3-16" title="16"><span class="co">#&gt; 12          3   0   0   0   0   0</span></a>
+<a class="sourceLine" id="cb3-17" title="17"><span class="co">#&gt; 13          3   0   0   0   0   0</span></a>
+<a class="sourceLine" id="cb3-18" title="18"><span class="co">#&gt; 14          2   0   0   0   0   0</span></a>
+<a class="sourceLine" id="cb3-19" title="19"><span class="co">#&gt; 16          4   0   0   0   0   0</span></a>
+<a class="sourceLine" id="cb3-20" title="20"><span class="co">#&gt; 17          2   0   0   0   0   0</span></a>
+<a class="sourceLine" id="cb3-21" title="21"><span class="co">#&gt; 18          5   0   0   0   0   0</span></a>
+<a class="sourceLine" id="cb3-22" title="22"><span class="co">#&gt; 19          1   0   0   0   0   0</span></a>
+<a class="sourceLine" id="cb3-23" title="23"><span class="co">#&gt; 21          2   0   0   0   0   0</span></a>
+<a class="sourceLine" id="cb3-24" title="24"><span class="co">#&gt; 22          1   0   0   0   0   0</span></a>
+<a class="sourceLine" id="cb3-25" title="25"><span class="co">#&gt; 23          1   0   0   0   0   0</span></a>
+<a class="sourceLine" id="cb3-26" title="26"><span class="co">#&gt; 24          1   0   0   0   0   0</span></a>
+<a class="sourceLine" id="cb3-27" title="27"><span class="co">#&gt; 27          1   0   0   0   0   0</span></a>
+<a class="sourceLine" id="cb3-28" title="28"><span class="co">#&gt; 28          1   0   0   0   0   0</span></a>
+<a class="sourceLine" id="cb3-29" title="29"><span class="co">#&gt; 42          1   0   0   0   0   0</span></a>
+<a class="sourceLine" id="cb3-30" title="30"><span class="co">#&gt; 53          1   0   0   0   0   0</span></a>
+<a class="sourceLine" id="cb3-31" title="31"><span class="co">#&gt; 54          1   0   0   0   0   0</span></a></code></pre></div>
 </div>
 <div id="likelihood-functions" class="section level2">
 <h2>Likelihood Functions</h2>
 <p>As previously mentioned, the hyperparameters are estimated by minimizing the negative log-likelihood function. There are actually 4 different functions, depending on the use of data squashing and zero counts. All 4 functions, however, are based on the marginal distribution of the counts, which are mixtures of two negative binomial distributions. The hyperparameters are denoted by the vector <span class="math inline">\(\theta=(\alpha_1,\beta_1,\alpha_2,\beta_2,P)\)</span>, where <span class="math inline">\(P\)</span> is the mixture fraction.</p>
 <p>The most commonly used likelihood function is <code>negLLsquash()</code>, which is used when squashing data and not using zero counts. <code>negLLsquash()</code> is not called directly, but rather by some optimization function:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">theta_init &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">alpha1 =</span> <span class="fl">0.2</span>, <span class="dt">beta1 =</span> <span class="fl">0.1</span>, <span class="dt">alpha2 =</span> <span class="dv">2</span>, <span class="dt">beta2 =</span> <span class="dv">4</span>, <span class="dt">p =</span> <span class="dv">1</span><span class="op">/</span><span class="dv">3</span>)
-stats<span class="op">::</span><span class="kw">nlm</span>(negLLsquash, <span class="dt">p =</span> theta_init,
-           <span class="dt">ni =</span> squashed<span class="op">$</span>N, <span class="dt">ei =</span> squashed<span class="op">$</span>E, <span class="dt">wi =</span> squashed<span class="op">$</span>weight, <span class="dt">N_star =</span> <span class="dv">1</span>)
-<span class="co">#&gt; $minimum</span>
-<span class="co">#&gt; [1] 4162.496</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $estimate</span>
-<span class="co">#&gt; [1] 3.25086926 0.39971401 2.02581887 1.90806636 0.06539159</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $gradient</span>
-<span class="co">#&gt; [1]  3.076907e-05 -2.253273e-04 -1.156701e-04  2.452500e-04 -3.937066e-04</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $code</span>
-<span class="co">#&gt; [1] 1</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $iterations</span>
-<span class="co">#&gt; [1] 71</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1">theta_init &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">alpha1 =</span> <span class="fl">0.2</span>, <span class="dt">beta1 =</span> <span class="fl">0.1</span>, <span class="dt">alpha2 =</span> <span class="dv">2</span>, <span class="dt">beta2 =</span> <span class="dv">4</span>, <span class="dt">p =</span> <span class="dv">1</span><span class="op">/</span><span class="dv">3</span>)</a>
+<a class="sourceLine" id="cb4-2" title="2">stats<span class="op">::</span><span class="kw">nlm</span>(negLLsquash, <span class="dt">p =</span> theta_init,</a>
+<a class="sourceLine" id="cb4-3" title="3">           <span class="dt">ni =</span> squashed<span class="op">$</span>N, <span class="dt">ei =</span> squashed<span class="op">$</span>E, <span class="dt">wi =</span> squashed<span class="op">$</span>weight, <span class="dt">N_star =</span> <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb4-4" title="4"><span class="co">#&gt; $minimum</span></a>
+<a class="sourceLine" id="cb4-5" title="5"><span class="co">#&gt; [1] 4162.496</span></a>
+<a class="sourceLine" id="cb4-6" title="6"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb4-7" title="7"><span class="co">#&gt; $estimate</span></a>
+<a class="sourceLine" id="cb4-8" title="8"><span class="co">#&gt; [1] 3.25086926 0.39971401 2.02581887 1.90806636 0.06539159</span></a>
+<a class="sourceLine" id="cb4-9" title="9"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb4-10" title="10"><span class="co">#&gt; $gradient</span></a>
+<a class="sourceLine" id="cb4-11" title="11"><span class="co">#&gt; [1]  3.076907e-05 -2.253273e-04 -1.156701e-04  2.452500e-04 -3.937066e-04</span></a>
+<a class="sourceLine" id="cb4-12" title="12"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb4-13" title="13"><span class="co">#&gt; $code</span></a>
+<a class="sourceLine" id="cb4-14" title="14"><span class="co">#&gt; [1] 1</span></a>
+<a class="sourceLine" id="cb4-15" title="15"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb4-16" title="16"><span class="co">#&gt; $iterations</span></a>
+<a class="sourceLine" id="cb4-17" title="17"><span class="co">#&gt; [1] 71</span></a></code></pre></div>
 <p>The <code>N_star</code> argument allows the user to choose the smallest value of <span class="math inline">\(N\)</span> used for hyperparameter estimation. The user must be careful to match <code>N_star</code> with the actual minimum count in <code>ni</code>. If the user wishes to use a larger value for <code>N_star</code>, the vectors supplied to arguments <code>ni</code>, <code>ei</code>, and <code>wi</code> must be filtered. Here, we are using all counts except zeroes, so no filtering is needed. In general, <code>N_star = 1</code> should be used whenever practical.</p>
 <p>Note that you will likely receive warning messages from the optimization function–use your own judgment to determine whether or not they would likely indicate real problems.</p>
 <p>The other likelihood functions are <code>negLL()</code>, <code>negLLzero()</code>, and <code>negLLzeroSquash()</code>. Make sure to use the appropriate function for your choice of data squashing and use of zero counts.</p>
@@ -219,218 +425,215 @@ stats<span class="op">::</span><span class="kw">nlm</span>(negLLsquash, <span cl
 <div id="hyperparameter-estimation-functions" class="section level2">
 <h2>Hyperparameter Estimation Functions</h2>
 <p>Hyperparameters can be calculated by exploring the parameter space of the likelihood function using either the full data set of <span class="math inline">\(N\)</span>s and <span class="math inline">\(E\)</span>s or the squashed set. The methodology implemented by this package essentially maximizes the likelihood function (or more specifically, minimizes the negative log-likelihood function). Starting points must be chosen to begin the exploration. DuMouchel (1999, 2001) provides a “lightly justified” set of initial hyperparameters. However, <em>openEBGM</em>’s functions support a large set of starting choices to help reach convergence and reduce the chance of false convergence. We begin by defining some starting points:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">theta_init &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">alpha1 =</span> <span class="kw">c</span>(<span class="fl">0.2</span>, <span class="fl">0.1</span>, <span class="fl">0.3</span>),
-                         <span class="dt">beta1  =</span> <span class="kw">c</span>(<span class="fl">0.1</span>, <span class="fl">0.2</span>, <span class="fl">0.5</span>),
-                         <span class="dt">alpha2 =</span> <span class="kw">c</span>(<span class="dv">2</span>,   <span class="dv">10</span>,  <span class="dv">6</span>),
-                         <span class="dt">beta2  =</span> <span class="kw">c</span>(<span class="dv">4</span>,   <span class="dv">10</span>,  <span class="dv">6</span>),
-                         <span class="dt">p      =</span> <span class="kw">c</span>(<span class="dv">1</span><span class="op">/</span><span class="dv">3</span>, <span class="fl">0.2</span>, <span class="fl">0.5</span>)
-                         )</code></pre></div>
-<div id="autohyper" class="section level3">
-<h3><code>autoHyper()</code></h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1">theta_init &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">alpha1 =</span> <span class="kw">c</span>(<span class="fl">0.2</span>, <span class="fl">0.1</span>, <span class="fl">0.3</span>),</a>
+<a class="sourceLine" id="cb5-2" title="2">                         <span class="dt">beta1  =</span> <span class="kw">c</span>(<span class="fl">0.1</span>, <span class="fl">0.2</span>, <span class="fl">0.5</span>),</a>
+<a class="sourceLine" id="cb5-3" title="3">                         <span class="dt">alpha2 =</span> <span class="kw">c</span>(<span class="dv">2</span>,   <span class="dv">10</span>,  <span class="dv">6</span>),</a>
+<a class="sourceLine" id="cb5-4" title="4">                         <span class="dt">beta2  =</span> <span class="kw">c</span>(<span class="dv">4</span>,   <span class="dv">10</span>,  <span class="dv">6</span>),</a>
+<a class="sourceLine" id="cb5-5" title="5">                         <span class="dt">p      =</span> <span class="kw">c</span>(<span class="dv">1</span><span class="op">/</span><span class="dv">3</span>, <span class="fl">0.2</span>, <span class="fl">0.5</span>)</a>
+<a class="sourceLine" id="cb5-6" title="6">)</a></code></pre></div>
+<p>###<code>autoHyper()</code></p>
 <p>Now that the initial guesses for the hyperparameters have been defined, the function <code>autoHyper()</code> can be used to determine the actual hyperparameter estimates. <code>autoHyper()</code> performs a “verification check” by requiring the optimization routine to converge at least twice within the bounds of the parameter space. The estimate corresponding to the smallest negative log-likelihood is chosen as a tentative result. By default, this estimate must be similar to at least one other convergent solution. If the algorithm fails to consistently converge, an error message is returned.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">system.time</span>(
-hyper_estimates_full &lt;-<span class="st"> </span><span class="kw">autoHyper</span>(<span class="dt">data =</span> processed, <span class="dt">theta_init =</span> theta_init, 
-                                  <span class="dt">squashed =</span> <span class="ot">FALSE</span>)
-)
-<span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;   37.72    0.02   37.74</span>
-
-squashed2 &lt;-<span class="st"> </span><span class="kw">squashData</span>(squashed, <span class="dt">count =</span> <span class="dv">2</span>, <span class="dt">bin_size =</span> <span class="dv">10</span>, <span class="dt">keep_pts =</span> <span class="dv">50</span>)
-<span class="kw">system.time</span>(
-hyper_estimates_squashed &lt;-<span class="st"> </span><span class="kw">autoHyper</span>(<span class="dt">data =</span> squashed2, <span class="dt">theta_init =</span> theta_init)
-)
-<span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;    2.12    0.00    2.12</span>
-
-hyper_estimates_full
-<span class="co">#&gt; $method</span>
-<span class="co">#&gt; [1] &quot;nlminb&quot;</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $estimates</span>
-<span class="co">#&gt;     alpha1      beta1     alpha2      beta2          P </span>
-<span class="co">#&gt; 3.25604233 0.39999435 2.02374669 1.90612544 0.06530649 </span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $conf_int</span>
-<span class="co">#&gt; NULL</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $num_close</span>
-<span class="co">#&gt; [1] 2</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $theta_hats</span>
-<span class="co">#&gt;   guess_num   a1_hat    b1_hat   a2_hat   b2_hat      p_hat code converge</span>
-<span class="co">#&gt; 1         1 3.256047 0.3999934 2.023745 1.906122 0.06530617    0     TRUE</span>
-<span class="co">#&gt; 2         2 3.256042 0.3999944 2.023747 1.906125 0.06530649    0     TRUE</span>
-<span class="co">#&gt; 3         3 3.255826 0.3999791 2.023748 1.906136 0.06530847    0     TRUE</span>
-<span class="co">#&gt;   in_bounds  minimum</span>
-<span class="co">#&gt; 1      TRUE 4162.456</span>
-<span class="co">#&gt; 2      TRUE 4162.456</span>
-<span class="co">#&gt; 3      TRUE 4162.456</span>
-
-hyper_estimates_squashed
-<span class="co">#&gt; $method</span>
-<span class="co">#&gt; [1] &quot;nlminb&quot;</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $estimates</span>
-<span class="co">#&gt;     alpha1      beta1     alpha2      beta2          P </span>
-<span class="co">#&gt; 3.25374690 0.39988541 2.02611230 1.90807039 0.06534613 </span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $conf_int</span>
-<span class="co">#&gt; NULL</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $num_close</span>
-<span class="co">#&gt; [1] 2</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $theta_hats</span>
-<span class="co">#&gt;   guess_num   a1_hat    b1_hat   a2_hat   b2_hat      p_hat code converge</span>
-<span class="co">#&gt; 1         1 3.251941 0.3997618 2.026192 1.908226 0.06536607    0     TRUE</span>
-<span class="co">#&gt; 2         2 3.256417 0.4000426 2.025915 1.907763 0.06530856    0     TRUE</span>
-<span class="co">#&gt; 3         3 3.253747 0.3998854 2.026112 1.908070 0.06534613    0     TRUE</span>
-<span class="co">#&gt;   in_bounds minimum</span>
-<span class="co">#&gt; 1      TRUE 4161.93</span>
-<span class="co">#&gt; 2      TRUE 4161.93</span>
-<span class="co">#&gt; 3      TRUE 4161.93</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="kw">system.time</span>(</a>
+<a class="sourceLine" id="cb6-2" title="2">hyper_estimates_full &lt;-<span class="st"> </span><span class="kw">autoHyper</span>(<span class="dt">data =</span> processed, <span class="dt">theta_init =</span> theta_init, </a>
+<a class="sourceLine" id="cb6-3" title="3">                                  <span class="dt">squashed =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb6-4" title="4">)</a>
+<a class="sourceLine" id="cb6-5" title="5"><span class="co">#&gt;    user  system elapsed </span></a>
+<a class="sourceLine" id="cb6-6" title="6"><span class="co">#&gt;   25.85    0.00   25.84</span></a>
+<a class="sourceLine" id="cb6-7" title="7"></a>
+<a class="sourceLine" id="cb6-8" title="8">squashed2 &lt;-<span class="st"> </span><span class="kw">squashData</span>(squashed, <span class="dt">count =</span> <span class="dv">2</span>, <span class="dt">bin_size =</span> <span class="dv">10</span>, <span class="dt">keep_pts =</span> <span class="dv">50</span>)</a>
+<a class="sourceLine" id="cb6-9" title="9"><span class="kw">system.time</span>(</a>
+<a class="sourceLine" id="cb6-10" title="10">hyper_estimates_squashed &lt;-<span class="st"> </span><span class="kw">autoHyper</span>(<span class="dt">data =</span> squashed2, <span class="dt">theta_init =</span> theta_init)</a>
+<a class="sourceLine" id="cb6-11" title="11">)</a>
+<a class="sourceLine" id="cb6-12" title="12"><span class="co">#&gt;    user  system elapsed </span></a>
+<a class="sourceLine" id="cb6-13" title="13"><span class="co">#&gt;    1.33    0.00    1.34</span></a>
+<a class="sourceLine" id="cb6-14" title="14"></a>
+<a class="sourceLine" id="cb6-15" title="15">hyper_estimates_full</a>
+<a class="sourceLine" id="cb6-16" title="16"><span class="co">#&gt; $method</span></a>
+<a class="sourceLine" id="cb6-17" title="17"><span class="co">#&gt; [1] &quot;nlminb&quot;</span></a>
+<a class="sourceLine" id="cb6-18" title="18"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb6-19" title="19"><span class="co">#&gt; $estimates</span></a>
+<a class="sourceLine" id="cb6-20" title="20"><span class="co">#&gt;     alpha1      beta1     alpha2      beta2          P </span></a>
+<a class="sourceLine" id="cb6-21" title="21"><span class="co">#&gt; 3.25604233 0.39999435 2.02374669 1.90612544 0.06530649 </span></a>
+<a class="sourceLine" id="cb6-22" title="22"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb6-23" title="23"><span class="co">#&gt; $conf_int</span></a>
+<a class="sourceLine" id="cb6-24" title="24"><span class="co">#&gt; NULL</span></a>
+<a class="sourceLine" id="cb6-25" title="25"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb6-26" title="26"><span class="co">#&gt; $num_close</span></a>
+<a class="sourceLine" id="cb6-27" title="27"><span class="co">#&gt; [1] 2</span></a>
+<a class="sourceLine" id="cb6-28" title="28"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb6-29" title="29"><span class="co">#&gt; $theta_hats</span></a>
+<a class="sourceLine" id="cb6-30" title="30"><span class="co">#&gt;   guess_num   a1_hat    b1_hat   a2_hat   b2_hat      p_hat code converge</span></a>
+<a class="sourceLine" id="cb6-31" title="31"><span class="co">#&gt; 1         1 3.256047 0.3999934 2.023745 1.906122 0.06530617    0     TRUE</span></a>
+<a class="sourceLine" id="cb6-32" title="32"><span class="co">#&gt; 2         2 3.256042 0.3999944 2.023747 1.906125 0.06530649    0     TRUE</span></a>
+<a class="sourceLine" id="cb6-33" title="33"><span class="co">#&gt; 3         3 3.255826 0.3999791 2.023748 1.906136 0.06530847    0     TRUE</span></a>
+<a class="sourceLine" id="cb6-34" title="34"><span class="co">#&gt;   in_bounds  minimum</span></a>
+<a class="sourceLine" id="cb6-35" title="35"><span class="co">#&gt; 1      TRUE 4162.456</span></a>
+<a class="sourceLine" id="cb6-36" title="36"><span class="co">#&gt; 2      TRUE 4162.456</span></a>
+<a class="sourceLine" id="cb6-37" title="37"><span class="co">#&gt; 3      TRUE 4162.456</span></a>
+<a class="sourceLine" id="cb6-38" title="38"></a>
+<a class="sourceLine" id="cb6-39" title="39">hyper_estimates_squashed</a>
+<a class="sourceLine" id="cb6-40" title="40"><span class="co">#&gt; $method</span></a>
+<a class="sourceLine" id="cb6-41" title="41"><span class="co">#&gt; [1] &quot;nlminb&quot;</span></a>
+<a class="sourceLine" id="cb6-42" title="42"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb6-43" title="43"><span class="co">#&gt; $estimates</span></a>
+<a class="sourceLine" id="cb6-44" title="44"><span class="co">#&gt;     alpha1      beta1     alpha2      beta2          P </span></a>
+<a class="sourceLine" id="cb6-45" title="45"><span class="co">#&gt; 3.25374690 0.39988541 2.02611230 1.90807039 0.06534613 </span></a>
+<a class="sourceLine" id="cb6-46" title="46"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb6-47" title="47"><span class="co">#&gt; $conf_int</span></a>
+<a class="sourceLine" id="cb6-48" title="48"><span class="co">#&gt; NULL</span></a>
+<a class="sourceLine" id="cb6-49" title="49"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb6-50" title="50"><span class="co">#&gt; $num_close</span></a>
+<a class="sourceLine" id="cb6-51" title="51"><span class="co">#&gt; [1] 2</span></a>
+<a class="sourceLine" id="cb6-52" title="52"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb6-53" title="53"><span class="co">#&gt; $theta_hats</span></a>
+<a class="sourceLine" id="cb6-54" title="54"><span class="co">#&gt;   guess_num   a1_hat    b1_hat   a2_hat   b2_hat      p_hat code converge</span></a>
+<a class="sourceLine" id="cb6-55" title="55"><span class="co">#&gt; 1         1 3.251941 0.3997618 2.026192 1.908226 0.06536607    0     TRUE</span></a>
+<a class="sourceLine" id="cb6-56" title="56"><span class="co">#&gt; 2         2 3.256417 0.4000426 2.025915 1.907763 0.06530856    0     TRUE</span></a>
+<a class="sourceLine" id="cb6-57" title="57"><span class="co">#&gt; 3         3 3.253747 0.3998854 2.026112 1.908070 0.06534613    0     TRUE</span></a>
+<a class="sourceLine" id="cb6-58" title="58"><span class="co">#&gt;   in_bounds minimum</span></a>
+<a class="sourceLine" id="cb6-59" title="59"><span class="co">#&gt; 1      TRUE 4161.93</span></a>
+<a class="sourceLine" id="cb6-60" title="60"><span class="co">#&gt; 2      TRUE 4161.93</span></a>
+<a class="sourceLine" id="cb6-61" title="61"><span class="co">#&gt; 3      TRUE 4161.93</span></a></code></pre></div>
 <p>As seen above, the process is much faster when utilizing the squashed data, with estimates that are nearly identical. Of course, the amount of efficiency increase depends on the parameter values used in the call to <code>squashData()</code> and the size of the original data set. Another factor affecting run time is the number of starting points used. In general, you should use five or fewer starting points and limit the number of data points to a maximum of about 20,000 if possible. Notice that we squashed the same data again, which is allowed if we use a different value for <code>count</code> each time.</p>
 <p><code>autoHyper()</code> utilizes multiple minimization techniques to verify convergence. It first attempts the <code>stats::nlminb()</code> function, which implements a quasi-Newton unconstrained optimization technique using PORT routines. If <code>nlminb()</code> fails to consistently converge, <code>autoHyper()</code> next attempts <code>stats::nlm()</code>, which is a non-linear maximization algorithm based on the Newton method. Finally, if the first two approaches fail, a quasi-Newton method (also known as a variable metric algorithm) is used, which “…uses function values and gradients to build up a picture of the surface to be optimized.” (source: R documentation for stats::optim) This routine is implemented by the <code>stats::optim()</code> function with the <code>method = BFGS</code> argument.</p>
 <p><code>autoHyper()</code> can now return standard errors and confidence intervals for the hyperparameter estimates:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">autoHyper</span>(squashed2, <span class="dt">theta_init =</span> theta_init, <span class="dt">conf_ints =</span> <span class="ot">TRUE</span>)<span class="op">$</span>conf_int
-<span class="co">#&gt;        pt_est     SE   LL_95  UL_95</span>
-<span class="co">#&gt; a1_hat 3.2537 2.2876 -1.2298 7.7373</span>
-<span class="co">#&gt; b1_hat 0.3999 0.1439  0.1178 0.6819</span>
-<span class="co">#&gt; a2_hat 2.0261 0.4514  1.1414 2.9108</span>
-<span class="co">#&gt; b2_hat 1.9081 0.4327  1.0599 2.7562</span>
-<span class="co">#&gt; p_hat  0.0653 0.0358 -0.0048 0.1355</span></code></pre></div>
-</div>
-<div id="explorehypers" class="section level3">
-<h3><code>exploreHypers()</code></h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="kw">autoHyper</span>(squashed2, <span class="dt">theta_init =</span> theta_init, <span class="dt">conf_ints =</span> <span class="ot">TRUE</span>)<span class="op">$</span>conf_int</a>
+<a class="sourceLine" id="cb7-2" title="2"><span class="co">#&gt;        pt_est     SE   LL_95  UL_95</span></a>
+<a class="sourceLine" id="cb7-3" title="3"><span class="co">#&gt; a1_hat 3.2537 2.2876 -1.2298 7.7373</span></a>
+<a class="sourceLine" id="cb7-4" title="4"><span class="co">#&gt; b1_hat 0.3999 0.1439  0.1178 0.6819</span></a>
+<a class="sourceLine" id="cb7-5" title="5"><span class="co">#&gt; a2_hat 2.0261 0.4514  1.1414 2.9108</span></a>
+<a class="sourceLine" id="cb7-6" title="6"><span class="co">#&gt; b2_hat 1.9081 0.4327  1.0599 2.7562</span></a>
+<a class="sourceLine" id="cb7-7" title="7"><span class="co">#&gt; p_hat  0.0653 0.0358 -0.0048 0.1355</span></a></code></pre></div>
+<p>###<code>exploreHypers()</code></p>
 <p><code>autoHyper()</code> is a semi-automated (but imperfect) approach to hyperparameter estimation. The user is encouraged to explore various optimization approaches as no single approach will always work (the functions in <em>openEBGM</em> are not the only optimization functions available in R). One way to explore is with <em>openEBGM</em>’s <code>exploreHypers()</code> function, which is actually called by <code>autoHyper()</code> behind-the-scenes. <code>exploreHypers()</code> can now also return standard errors for the hyperparameter estimates:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">exploreHypers</span>(<span class="dt">data =</span> squashed2, <span class="dt">theta_init =</span> theta_init, <span class="dt">std_errors =</span> <span class="ot">TRUE</span>)
-<span class="co">#&gt; $estimates</span>
-<span class="co">#&gt;   guess_num   a1_hat    b1_hat   a2_hat   b2_hat      p_hat code converge</span>
-<span class="co">#&gt; 1         1 3.251941 0.3997618 2.026192 1.908226 0.06536607    0     TRUE</span>
-<span class="co">#&gt; 2         2 3.256417 0.4000426 2.025915 1.907763 0.06530856    0     TRUE</span>
-<span class="co">#&gt; 3         3 3.253747 0.3998854 2.026112 1.908070 0.06534613    0     TRUE</span>
-<span class="co">#&gt;   in_bounds minimum</span>
-<span class="co">#&gt; 1      TRUE 4161.93</span>
-<span class="co">#&gt; 2      TRUE 4161.93</span>
-<span class="co">#&gt; 3      TRUE 4161.93</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $std_errs</span>
-<span class="co">#&gt;   guess_num    a1_se     b1_se     a2_se     b2_se       p_se</span>
-<span class="co">#&gt; 1         1 2.280948 0.1435360 0.4512232 0.4323850 0.03573008</span>
-<span class="co">#&gt; 2         2 2.296069 0.1443749 0.4515448 0.4331314 0.03584047</span>
-<span class="co">#&gt; 3         3 2.287570 0.1439002 0.4513790 0.4327496 0.03578543</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1"><span class="kw">exploreHypers</span>(<span class="dt">data =</span> squashed2, <span class="dt">theta_init =</span> theta_init, <span class="dt">std_errors =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb8-2" title="2"><span class="co">#&gt; $estimates</span></a>
+<a class="sourceLine" id="cb8-3" title="3"><span class="co">#&gt;   guess_num   a1_hat    b1_hat   a2_hat   b2_hat      p_hat code converge</span></a>
+<a class="sourceLine" id="cb8-4" title="4"><span class="co">#&gt; 1         1 3.251941 0.3997618 2.026192 1.908226 0.06536607    0     TRUE</span></a>
+<a class="sourceLine" id="cb8-5" title="5"><span class="co">#&gt; 2         2 3.256417 0.4000426 2.025915 1.907763 0.06530856    0     TRUE</span></a>
+<a class="sourceLine" id="cb8-6" title="6"><span class="co">#&gt; 3         3 3.253747 0.3998854 2.026112 1.908070 0.06534613    0     TRUE</span></a>
+<a class="sourceLine" id="cb8-7" title="7"><span class="co">#&gt;   in_bounds minimum</span></a>
+<a class="sourceLine" id="cb8-8" title="8"><span class="co">#&gt; 1      TRUE 4161.93</span></a>
+<a class="sourceLine" id="cb8-9" title="9"><span class="co">#&gt; 2      TRUE 4161.93</span></a>
+<a class="sourceLine" id="cb8-10" title="10"><span class="co">#&gt; 3      TRUE 4161.93</span></a>
+<a class="sourceLine" id="cb8-11" title="11"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb8-12" title="12"><span class="co">#&gt; $std_errs</span></a>
+<a class="sourceLine" id="cb8-13" title="13"><span class="co">#&gt;   guess_num    a1_se     b1_se     a2_se     b2_se       p_se</span></a>
+<a class="sourceLine" id="cb8-14" title="14"><span class="co">#&gt; 1         1 2.280948 0.1435360 0.4512232 0.4323850 0.03573008</span></a>
+<a class="sourceLine" id="cb8-15" title="15"><span class="co">#&gt; 2         2 2.296069 0.1443749 0.4515448 0.4331314 0.03584047</span></a>
+<a class="sourceLine" id="cb8-16" title="16"><span class="co">#&gt; 3         3 2.287570 0.1439002 0.4513790 0.4327496 0.03578543</span></a></code></pre></div>
 <p><code>exploreHypers()</code> offers three gradient-based optimization methods and is basically just a wrapper around commonly used functions from the <em>stats</em> package mentioned earlier: <code>nlminb()</code> (the default), <code>nlm()</code>, &amp; <code>optim()</code>.</p>
-</div>
-<div id="hyperem" class="section level3">
-<h3><code>hyperEM()</code></h3>
+<p>###<code>hyperEM()</code></p>
 <p><code>hyperEM()</code> implements a version of the EM algorithm referred to by Meng &amp; Rubin (<em>1</em>) as the Expectation/Conditional Maximization (ECM) algorithm. <code>hyperEM()</code> uses a single starting point to find a local maximum likelihood estimate for <span class="math inline">\(\theta\)</span> either by finding roots of the score functions (partial derivatives of the log-likelihood function) or by using <code>stats::nlminb()</code> to directly minimize the negative log-likelihood function. The method described by Millar (<em>3</em>) is used to accelerate the estimate of <span class="math inline">\(\theta\)</span> every 100 iterations of the algorithm.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(caers)
-proc &lt;-<span class="st"> </span><span class="kw">processRaw</span>(caers)
-squashed &lt;-<span class="st"> </span><span class="kw">squashData</span>(proc, <span class="dt">bin_size =</span> <span class="dv">100</span>, <span class="dt">keep_pts =</span> <span class="dv">0</span>)
-squashed &lt;-<span class="st"> </span><span class="kw">squashData</span>(squashed, <span class="dt">count =</span> <span class="dv">2</span>, <span class="dt">bin_size =</span> <span class="dv">12</span>)
-hyperEM_ests &lt;-<span class="st"> </span><span class="kw">hyperEM</span>(squashed, <span class="dt">theta_init_vec =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>, .<span class="dv">3</span>),
-                        <span class="dt">conf_int =</span> <span class="ot">TRUE</span>, <span class="dt">track =</span> <span class="ot">TRUE</span>)
-<span class="co">#&gt; change in LL: 1.15e+00 | theta: 3.12  0.63  1.66  2.101 0.159 </span>
-<span class="co">#&gt; change in LL: 2.88e-01 | theta: 3.364 0.528 2.222 2.281 0.104 </span>
-<span class="co">#&gt; change in LL: 5.67e-02 | theta: 3.46  0.47  2.387 2.263 0.081 </span>
-<span class="co">#&gt; change in LL: 2.04e-02 | theta: 3.458 0.44  2.359 2.188 0.072 </span>
-<span class="co">#&gt; change in LL: 1.27e-02 | theta: 3.41  0.425 2.282 2.113 0.069 </span>
-<span class="co">#&gt;     Current iterations: 50 </span>
-<span class="co">#&gt; change in LL: 7.42e-03 | theta: 3.357 0.416 2.21  2.055 0.068 </span>
-<span class="co">#&gt; change in LL: 3.93e-03 | theta: 3.312 0.411 2.155 2.014 0.067 </span>
-<span class="co">#&gt; change in LL: 1.98e-03 | theta: 3.276 0.407 2.116 1.985 0.067 </span>
-<span class="co">#&gt; change in LL:  9.7e-04 | theta: 3.248 0.404 2.089 1.966 0.067 </span>
-<span class="co">#&gt; change in LL: 1.24e-04 | theta: 3.135 0.395 2.032 1.927 0.067 </span>
-<span class="co">#&gt;     Current iterations: 100 </span>
-<span class="co">#&gt; change in LL: 1.75e-05 | theta: 3.143 0.395 2.032 1.928 0.068 </span>
-<span class="co">#&gt; change in LL:  1.8e-05 | theta: 3.138 0.395 2.033 1.929 0.068 </span>
-<span class="co">#&gt; change in LL: 8.34e-06 | theta: 3.132 0.395 2.034 1.93  0.068 </span>
-<span class="co">#&gt; change in LL: 8.36e-06 | theta: 3.128 0.394 2.035 1.931 0.068 </span>
-<span class="co">#&gt; change in LL: 7.43e-06 | theta: 3.125 0.394 2.036 1.932 0.068 </span>
-<span class="co">#&gt;     Current iterations: 150 </span>
-<span class="co">#&gt; change in LL: 6.08e-06 | theta: 3.121 0.394 2.036 1.933 0.068 </span>
-<span class="co">#&gt; change in LL: 5.56e-06 | theta: 3.118 0.394 2.037 1.933 0.068 </span>
-<span class="co">#&gt; change in LL: 5.15e-06 | theta: 3.115 0.394 2.038 1.934 0.068 </span>
-<span class="co">#&gt; change in LL: 4.79e-06 | theta: 3.112 0.394 2.038 1.935 0.068 </span>
-<span class="co">#&gt; change in LL: 4.45e-06 | theta: 3.109 0.394 2.039 1.936 0.068 </span>
-<span class="co">#&gt;     Current iterations: 200 </span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt;    Iterations used: 203 </span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt;    Timing:  </span>
-<span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;    4.55    0.04    4.58</span>
-<span class="kw">str</span>(hyperEM_ests)
-<span class="co">#&gt; List of 9</span>
-<span class="co">#&gt;  $ estimates : num [1:5] 3.1083 0.3935 2.0392 1.9358 0.0683</span>
-<span class="co">#&gt;  $ conf_int  :'data.frame':  5 obs. of  4 variables:</span>
-<span class="co">#&gt;   ..$ pt_est: num [1:5] 3.1083 0.3935 2.0392 1.9358 0.0683</span>
-<span class="co">#&gt;   ..$ SE    : num [1:5] 1.9646 0.125 0.4645 0.4447 0.0356</span>
-<span class="co">#&gt;   ..$ LL_95 : num [1:5] -0.7422 0.1484 1.1288 1.0642 -0.0014</span>
-<span class="co">#&gt;   ..$ UL_95 : num [1:5] 6.959 0.639 2.95 2.807 0.138</span>
-<span class="co">#&gt;  $ maximum   : num -4164</span>
-<span class="co">#&gt;  $ method    : chr &quot;score&quot;</span>
-<span class="co">#&gt;  $ elapsed   : num 4.58</span>
-<span class="co">#&gt;  $ iters     : num 203</span>
-<span class="co">#&gt;  $ score     : num [1:5] -0.01142 0.03072 0.01033 0.01029 0.00216</span>
-<span class="co">#&gt;  $ score_norm: num 0.0359</span>
-<span class="co">#&gt;  $ tracking  :'data.frame':  204 obs. of  7 variables:</span>
-<span class="co">#&gt;   ..$ iter  : int [1:204] 0 1 2 3 4 5 6 7 8 9 ...</span>
-<span class="co">#&gt;   ..$ logL  : num [1:204] -4328 -4250 -4221 -4200 -4187 ...</span>
-<span class="co">#&gt;   ..$ alpha1: num [1:204] 1 1.89 2.02 2.25 2.49 ...</span>
-<span class="co">#&gt;   ..$ beta1 : num [1:204] 1 0.894 0.821 0.77 0.735 ...</span>
-<span class="co">#&gt;   ..$ alpha2: num [1:204] 2 2.54 2.06 1.74 1.55 ...</span>
-<span class="co">#&gt;   ..$ beta2 : num [1:204] 2 1.93 1.89 1.88 1.89 ...</span>
-<span class="co">#&gt;   ..$ P     : num [1:204] 0.3 0.313 0.283 0.254 0.232 ...</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1"><span class="kw">data</span>(caers)</a>
+<a class="sourceLine" id="cb9-2" title="2">proc &lt;-<span class="st"> </span><span class="kw">processRaw</span>(caers)</a>
+<a class="sourceLine" id="cb9-3" title="3">squashed &lt;-<span class="st"> </span><span class="kw">squashData</span>(proc, <span class="dt">bin_size =</span> <span class="dv">100</span>, <span class="dt">keep_pts =</span> <span class="dv">0</span>)</a>
+<a class="sourceLine" id="cb9-4" title="4">squashed &lt;-<span class="st"> </span><span class="kw">squashData</span>(squashed, <span class="dt">count =</span> <span class="dv">2</span>, <span class="dt">bin_size =</span> <span class="dv">12</span>)</a>
+<a class="sourceLine" id="cb9-5" title="5">hyperEM_ests &lt;-<span class="st"> </span><span class="kw">hyperEM</span>(squashed, <span class="dt">theta_init_vec =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="fl">.3</span>),</a>
+<a class="sourceLine" id="cb9-6" title="6">                        <span class="dt">conf_ints =</span> <span class="ot">TRUE</span>, <span class="dt">track =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb9-7" title="7"><span class="co">#&gt; change in LL: 1.15e+00 | theta: 3.12  0.63  1.66  2.101 0.159 </span></a>
+<a class="sourceLine" id="cb9-8" title="8"><span class="co">#&gt; change in LL: 2.88e-01 | theta: 3.364 0.528 2.222 2.281 0.104 </span></a>
+<a class="sourceLine" id="cb9-9" title="9"><span class="co">#&gt; change in LL: 5.67e-02 | theta: 3.46  0.47  2.387 2.263 0.081 </span></a>
+<a class="sourceLine" id="cb9-10" title="10"><span class="co">#&gt; change in LL: 2.04e-02 | theta: 3.458 0.44  2.359 2.188 0.072 </span></a>
+<a class="sourceLine" id="cb9-11" title="11"><span class="co">#&gt; change in LL: 1.27e-02 | theta: 3.41  0.425 2.282 2.113 0.069 </span></a>
+<a class="sourceLine" id="cb9-12" title="12"><span class="co">#&gt;     Current iterations: 50 </span></a>
+<a class="sourceLine" id="cb9-13" title="13"><span class="co">#&gt; change in LL: 7.42e-03 | theta: 3.357 0.416 2.21  2.055 0.068 </span></a>
+<a class="sourceLine" id="cb9-14" title="14"><span class="co">#&gt; change in LL: 3.93e-03 | theta: 3.312 0.411 2.155 2.014 0.067 </span></a>
+<a class="sourceLine" id="cb9-15" title="15"><span class="co">#&gt; change in LL: 1.98e-03 | theta: 3.276 0.407 2.116 1.985 0.067 </span></a>
+<a class="sourceLine" id="cb9-16" title="16"><span class="co">#&gt; change in LL:  9.7e-04 | theta: 3.248 0.404 2.089 1.966 0.067 </span></a>
+<a class="sourceLine" id="cb9-17" title="17"><span class="co">#&gt; change in LL: 1.24e-04 | theta: 3.135 0.395 2.032 1.927 0.067 </span></a>
+<a class="sourceLine" id="cb9-18" title="18"><span class="co">#&gt;     Current iterations: 100 </span></a>
+<a class="sourceLine" id="cb9-19" title="19"><span class="co">#&gt; change in LL: 1.75e-05 | theta: 3.143 0.395 2.032 1.928 0.068 </span></a>
+<a class="sourceLine" id="cb9-20" title="20"><span class="co">#&gt; change in LL:  1.8e-05 | theta: 3.138 0.395 2.033 1.929 0.068 </span></a>
+<a class="sourceLine" id="cb9-21" title="21"><span class="co">#&gt; change in LL: 8.34e-06 | theta: 3.132 0.395 2.034 1.93  0.068 </span></a>
+<a class="sourceLine" id="cb9-22" title="22"><span class="co">#&gt; change in LL: 8.36e-06 | theta: 3.128 0.394 2.035 1.931 0.068 </span></a>
+<a class="sourceLine" id="cb9-23" title="23"><span class="co">#&gt; change in LL: 7.43e-06 | theta: 3.125 0.394 2.036 1.932 0.068 </span></a>
+<a class="sourceLine" id="cb9-24" title="24"><span class="co">#&gt;     Current iterations: 150 </span></a>
+<a class="sourceLine" id="cb9-25" title="25"><span class="co">#&gt; change in LL: 6.08e-06 | theta: 3.121 0.394 2.036 1.933 0.068 </span></a>
+<a class="sourceLine" id="cb9-26" title="26"><span class="co">#&gt; change in LL: 5.56e-06 | theta: 3.118 0.394 2.037 1.933 0.068 </span></a>
+<a class="sourceLine" id="cb9-27" title="27"><span class="co">#&gt; change in LL: 5.15e-06 | theta: 3.115 0.394 2.038 1.934 0.068 </span></a>
+<a class="sourceLine" id="cb9-28" title="28"><span class="co">#&gt; change in LL: 4.79e-06 | theta: 3.112 0.394 2.038 1.935 0.068 </span></a>
+<a class="sourceLine" id="cb9-29" title="29"><span class="co">#&gt; change in LL: 4.45e-06 | theta: 3.109 0.394 2.039 1.936 0.068 </span></a>
+<a class="sourceLine" id="cb9-30" title="30"><span class="co">#&gt;     Current iterations: 200 </span></a>
+<a class="sourceLine" id="cb9-31" title="31"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb9-32" title="32"><span class="co">#&gt;    Iterations used: 203 </span></a>
+<a class="sourceLine" id="cb9-33" title="33"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb9-34" title="34"><span class="co">#&gt;    Timing:  </span></a>
+<a class="sourceLine" id="cb9-35" title="35"><span class="co">#&gt;    user  system elapsed </span></a>
+<a class="sourceLine" id="cb9-36" title="36"><span class="co">#&gt;       3       0       3</span></a>
+<a class="sourceLine" id="cb9-37" title="37"><span class="kw">str</span>(hyperEM_ests)</a>
+<a class="sourceLine" id="cb9-38" title="38"><span class="co">#&gt; List of 9</span></a>
+<a class="sourceLine" id="cb9-39" title="39"><span class="co">#&gt;  $ estimates : num [1:5] 3.1083 0.3935 2.0392 1.9358 0.0683</span></a>
+<a class="sourceLine" id="cb9-40" title="40"><span class="co">#&gt;  $ conf_int  :&#39;data.frame&#39;:  5 obs. of  4 variables:</span></a>
+<a class="sourceLine" id="cb9-41" title="41"><span class="co">#&gt;   ..$ pt_est: num [1:5] 3.1083 0.3935 2.0392 1.9358 0.0683</span></a>
+<a class="sourceLine" id="cb9-42" title="42"><span class="co">#&gt;   ..$ SE    : num [1:5] 1.9646 0.125 0.4645 0.4447 0.0356</span></a>
+<a class="sourceLine" id="cb9-43" title="43"><span class="co">#&gt;   ..$ LL_95 : num [1:5] -0.7422 0.1484 1.1288 1.0642 -0.0014</span></a>
+<a class="sourceLine" id="cb9-44" title="44"><span class="co">#&gt;   ..$ UL_95 : num [1:5] 6.959 0.639 2.95 2.807 0.138</span></a>
+<a class="sourceLine" id="cb9-45" title="45"><span class="co">#&gt;  $ maximum   : num -4164</span></a>
+<a class="sourceLine" id="cb9-46" title="46"><span class="co">#&gt;  $ method    : chr &quot;score&quot;</span></a>
+<a class="sourceLine" id="cb9-47" title="47"><span class="co">#&gt;  $ elapsed   : num 3</span></a>
+<a class="sourceLine" id="cb9-48" title="48"><span class="co">#&gt;  $ iters     : num 203</span></a>
+<a class="sourceLine" id="cb9-49" title="49"><span class="co">#&gt;  $ score     : num [1:5] -0.01142 0.03072 0.01033 0.01029 0.00216</span></a>
+<a class="sourceLine" id="cb9-50" title="50"><span class="co">#&gt;  $ score_norm: num 0.0359</span></a>
+<a class="sourceLine" id="cb9-51" title="51"><span class="co">#&gt;  $ tracking  :&#39;data.frame&#39;:  204 obs. of  7 variables:</span></a>
+<a class="sourceLine" id="cb9-52" title="52"><span class="co">#&gt;   ..$ iter  : int [1:204] 0 1 2 3 4 5 6 7 8 9 ...</span></a>
+<a class="sourceLine" id="cb9-53" title="53"><span class="co">#&gt;   ..$ logL  : num [1:204] -4328 -4250 -4221 -4200 -4187 ...</span></a>
+<a class="sourceLine" id="cb9-54" title="54"><span class="co">#&gt;   ..$ alpha1: num [1:204] 1 1.89 2.02 2.25 2.49 ...</span></a>
+<a class="sourceLine" id="cb9-55" title="55"><span class="co">#&gt;   ..$ beta1 : num [1:204] 1 0.894 0.821 0.77 0.735 ...</span></a>
+<a class="sourceLine" id="cb9-56" title="56"><span class="co">#&gt;   ..$ alpha2: num [1:204] 2 2.54 2.06 1.74 1.55 ...</span></a>
+<a class="sourceLine" id="cb9-57" title="57"><span class="co">#&gt;   ..$ beta2 : num [1:204] 2 1.93 1.89 1.88 1.89 ...</span></a>
+<a class="sourceLine" id="cb9-58" title="58"><span class="co">#&gt;   ..$ P     : num [1:204] 0.3 0.313 0.283 0.254 0.232 ...</span></a></code></pre></div>
 <p>Setting <code>track = TRUE</code> tracks the log-likelihood and hyperparameter estimates at each iteration, which we can plot to study the behavior of the algorithm:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(ggplot2)
-<span class="kw">library</span>(tidyr)
-pdat &lt;-<span class="st"> </span><span class="kw">gather</span>(hyperEM_ests<span class="op">$</span>tracking, <span class="dt">key =</span> <span class="st">&quot;metric&quot;</span>, <span class="dt">value =</span> <span class="st">&quot;value&quot;</span>, logL<span class="op">:</span>P)
-pdat<span class="op">$</span>metric &lt;-<span class="st"> </span><span class="kw">factor</span>(pdat<span class="op">$</span>metric, <span class="dt">levels =</span> <span class="kw">unique</span>(pdat<span class="op">$</span>metric), <span class="dt">ordered =</span> <span class="ot">TRUE</span>)
-<span class="kw">ggplot</span>(pdat, <span class="kw">aes</span>(<span class="dt">x =</span> iter, <span class="dt">y =</span> value)) <span class="op">+</span>
-<span class="st">  </span><span class="kw">geom_line</span>(<span class="dt">size =</span> <span class="fl">1.1</span>, <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>) <span class="op">+</span>
-<span class="st">  </span><span class="kw">facet_grid</span>(metric <span class="op">~</span><span class="st"> </span>., <span class="dt">scales =</span> <span class="st">&quot;free&quot;</span>) <span class="op">+</span>
-<span class="st">  </span><span class="kw">ggtitle</span>(<span class="st">&quot;Convergence Assessment&quot;</span>,
-          <span class="dt">sub =</span> <span class="st">&quot;Dashed red line indicates accelerated estimate&quot;</span>) <span class="op">+</span>
-<span class="st">  </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="st">&quot;Iteration Count&quot;</span>, <span class="dt">y =</span> <span class="st">&quot;Estimate&quot;</span>) <span class="op">+</span>
-<span class="st">  </span><span class="kw">geom_vline</span>(<span class="dt">xintercept =</span> <span class="kw">c</span>(<span class="dv">100</span>, <span class="dv">200</span>), <span class="dt">size =</span> <span class="dv">1</span>, <span class="dt">linetype =</span> <span class="dv">2</span>, <span class="dt">col =</span> <span class="st">&quot;red&quot;</span>)</code></pre></div>
-<p><img src="data:image/png;base64,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" /><!-- --></p>
-</div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1"><span class="kw">library</span>(ggplot2)</a>
+<a class="sourceLine" id="cb10-2" title="2"><span class="kw">library</span>(tidyr)</a>
+<a class="sourceLine" id="cb10-3" title="3">pdat &lt;-<span class="st"> </span><span class="kw">gather</span>(hyperEM_ests<span class="op">$</span>tracking, <span class="dt">key =</span> <span class="st">&quot;metric&quot;</span>, <span class="dt">value =</span> <span class="st">&quot;value&quot;</span>, logL<span class="op">:</span>P)</a>
+<a class="sourceLine" id="cb10-4" title="4">pdat<span class="op">$</span>metric &lt;-<span class="st"> </span><span class="kw">factor</span>(pdat<span class="op">$</span>metric, <span class="dt">levels =</span> <span class="kw">unique</span>(pdat<span class="op">$</span>metric), <span class="dt">ordered =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb10-5" title="5"><span class="kw">ggplot</span>(pdat, <span class="kw">aes</span>(<span class="dt">x =</span> iter, <span class="dt">y =</span> value)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb10-6" title="6"><span class="st">  </span><span class="kw">geom_line</span>(<span class="dt">size =</span> <span class="fl">1.1</span>, <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb10-7" title="7"><span class="st">  </span><span class="kw">facet_grid</span>(metric <span class="op">~</span><span class="st"> </span>., <span class="dt">scales =</span> <span class="st">&quot;free&quot;</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb10-8" title="8"><span class="st">  </span><span class="kw">ggtitle</span>(<span class="st">&quot;Convergence Assessment&quot;</span>,</a>
+<a class="sourceLine" id="cb10-9" title="9">          <span class="dt">subtitle =</span> <span class="st">&quot;Dashed red line indicates accelerated estimate&quot;</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb10-10" title="10"><span class="st">  </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="st">&quot;Iteration Count&quot;</span>, <span class="dt">y =</span> <span class="st">&quot;Estimate&quot;</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb10-11" title="11"><span class="st">  </span><span class="kw">geom_vline</span>(<span class="dt">xintercept =</span> <span class="kw">c</span>(<span class="dv">100</span>, <span class="dv">200</span>), <span class="dt">size =</span> <span class="dv">1</span>, <span class="dt">linetype =</span> <span class="dv">2</span>, <span class="dt">col =</span> <span class="st">&quot;red&quot;</span>)</a></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
 <div id="deoptim-package" class="section level3">
 <h3><em>DEoptim</em> package</h3>
 <p>Other packages, such as <a href="https://cran.r-project.org/package=DEoptim" target="_blank">DEoptim</a>, can alternatively be used to estimate the hyperparameters:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(DEoptim)
-<span class="kw">set.seed</span>(<span class="dv">123456</span>)
-theta_hat &lt;-<span class="st"> </span><span class="kw">DEoptim</span>(negLLsquash,
-                     <span class="dt">lower =</span> <span class="kw">c</span>(<span class="kw">rep</span>(<span class="fl">1e-05</span>, <span class="dv">4</span>), .<span class="dv">001</span>),
-                     <span class="dt">upper =</span> <span class="kw">c</span>(<span class="kw">rep</span>(<span class="dv">5</span>, <span class="dv">4</span>), <span class="dv">1</span> <span class="op">-</span><span class="st"> </span>.<span class="dv">001</span>),
-                     <span class="dt">control =</span> <span class="kw">DEoptim.control</span>(
-                       <span class="dt">itermax =</span> <span class="dv">2000</span>,
-                       <span class="dt">reltol  =</span> <span class="fl">1e-04</span>,
-                       <span class="dt">steptol =</span> <span class="dv">200</span>,
-                       <span class="dt">NP      =</span> <span class="dv">100</span>,
-                       <span class="dt">CR      =</span> <span class="fl">0.85</span>,
-                       <span class="dt">F       =</span> <span class="fl">0.75</span>,
-                       <span class="dt">trace   =</span> <span class="dv">25</span>
-                     ),
-                     <span class="dt">ni =</span> squashed<span class="op">$</span>N, <span class="dt">ei =</span> squashed<span class="op">$</span>E, <span class="dt">wi =</span> squashed<span class="op">$</span>weight
-)
-<span class="co">#&gt; Iteration: 25 bestvalit: 4165.801982 bestmemit:    3.422317    0.420197    2.321294    2.046197    0.072780</span>
-<span class="co">#&gt; Iteration: 50 bestvalit: 4163.993567 bestmemit:    3.132083    0.401064    2.046266    1.935360    0.069050</span>
-<span class="co">#&gt; Iteration: 75 bestvalit: 4163.975114 bestmemit:    3.093758    0.392458    2.051624    1.945084    0.068382</span>
-<span class="co">#&gt; Iteration: 100 bestvalit: 4163.974353 bestmemit:    3.067418    0.391168    2.045820    1.943878    0.069060</span>
-<span class="co">#&gt; Iteration: 125 bestvalit: 4163.974343 bestmemit:    3.063852    0.391105    2.047033    1.945090    0.069152</span>
-<span class="co">#&gt; Iteration: 150 bestvalit: 4163.974343 bestmemit:    3.063464    0.391089    2.047299    1.945344    0.069157</span>
-<span class="co">#&gt; Iteration: 175 bestvalit: 4163.974343 bestmemit:    3.063485    0.391089    2.047268    1.945317    0.069156</span>
-<span class="co">#&gt; Iteration: 200 bestvalit: 4163.974343 bestmemit:    3.063492    0.391090    2.047261    1.945312    0.069156</span>
-<span class="co">#&gt; Iteration: 225 bestvalit: 4163.974343 bestmemit:    3.063488    0.391090    2.047258    1.945309    0.069156</span>
-(theta_hat &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(theta_hat<span class="op">$</span>optim<span class="op">$</span>bestmem))
-<span class="co">#&gt; [1] 3.06348827 0.39108968 2.04725750 1.94530893 0.06915639</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1"><span class="kw">library</span>(DEoptim)</a>
+<a class="sourceLine" id="cb11-2" title="2"><span class="kw">set.seed</span>(<span class="dv">123456</span>)</a>
+<a class="sourceLine" id="cb11-3" title="3">theta_hat &lt;-<span class="st"> </span><span class="kw">DEoptim</span>(negLLsquash,</a>
+<a class="sourceLine" id="cb11-4" title="4">                     <span class="dt">lower =</span> <span class="kw">c</span>(<span class="kw">rep</span>(<span class="fl">1e-05</span>, <span class="dv">4</span>), <span class="fl">.001</span>),</a>
+<a class="sourceLine" id="cb11-5" title="5">                     <span class="dt">upper =</span> <span class="kw">c</span>(<span class="kw">rep</span>(<span class="dv">5</span>, <span class="dv">4</span>), <span class="dv">1</span> <span class="op">-</span><span class="st"> </span><span class="fl">.001</span>),</a>
+<a class="sourceLine" id="cb11-6" title="6">                     <span class="dt">control =</span> <span class="kw">DEoptim.control</span>(</a>
+<a class="sourceLine" id="cb11-7" title="7">                       <span class="dt">itermax =</span> <span class="dv">2000</span>,</a>
+<a class="sourceLine" id="cb11-8" title="8">                       <span class="dt">reltol  =</span> <span class="fl">1e-04</span>,</a>
+<a class="sourceLine" id="cb11-9" title="9">                       <span class="dt">steptol =</span> <span class="dv">200</span>,</a>
+<a class="sourceLine" id="cb11-10" title="10">                       <span class="dt">NP      =</span> <span class="dv">100</span>,</a>
+<a class="sourceLine" id="cb11-11" title="11">                       <span class="dt">CR      =</span> <span class="fl">0.85</span>,</a>
+<a class="sourceLine" id="cb11-12" title="12">                       <span class="dt">F       =</span> <span class="fl">0.75</span>,</a>
+<a class="sourceLine" id="cb11-13" title="13">                       <span class="dt">trace   =</span> <span class="dv">25</span></a>
+<a class="sourceLine" id="cb11-14" title="14">                     ),</a>
+<a class="sourceLine" id="cb11-15" title="15">                     <span class="dt">ni =</span> squashed<span class="op">$</span>N, <span class="dt">ei =</span> squashed<span class="op">$</span>E, <span class="dt">wi =</span> squashed<span class="op">$</span>weight</a>
+<a class="sourceLine" id="cb11-16" title="16">)</a>
+<a class="sourceLine" id="cb11-17" title="17"><span class="co">#&gt; Iteration: 25 bestvalit: 4165.801982 bestmemit:    3.422317    0.420197    2.321294    2.046197    0.072780</span></a>
+<a class="sourceLine" id="cb11-18" title="18"><span class="co">#&gt; Iteration: 50 bestvalit: 4163.993567 bestmemit:    3.132083    0.401064    2.046266    1.935360    0.069050</span></a>
+<a class="sourceLine" id="cb11-19" title="19"><span class="co">#&gt; Iteration: 75 bestvalit: 4163.975114 bestmemit:    3.093758    0.392458    2.051624    1.945084    0.068382</span></a>
+<a class="sourceLine" id="cb11-20" title="20"><span class="co">#&gt; Iteration: 100 bestvalit: 4163.974353 bestmemit:    3.067418    0.391168    2.045820    1.943878    0.069060</span></a>
+<a class="sourceLine" id="cb11-21" title="21"><span class="co">#&gt; Iteration: 125 bestvalit: 4163.974343 bestmemit:    3.063852    0.391105    2.047033    1.945090    0.069152</span></a>
+<a class="sourceLine" id="cb11-22" title="22"><span class="co">#&gt; Iteration: 150 bestvalit: 4163.974343 bestmemit:    3.063464    0.391089    2.047299    1.945344    0.069157</span></a>
+<a class="sourceLine" id="cb11-23" title="23"><span class="co">#&gt; Iteration: 175 bestvalit: 4163.974343 bestmemit:    3.063485    0.391089    2.047268    1.945317    0.069156</span></a>
+<a class="sourceLine" id="cb11-24" title="24"><span class="co">#&gt; Iteration: 200 bestvalit: 4163.974343 bestmemit:    3.063492    0.391090    2.047261    1.945312    0.069156</span></a>
+<a class="sourceLine" id="cb11-25" title="25"><span class="co">#&gt; Iteration: 225 bestvalit: 4163.974343 bestmemit:    3.063488    0.391090    2.047258    1.945309    0.069156</span></a>
+<a class="sourceLine" id="cb11-26" title="26">(theta_hat &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(theta_hat<span class="op">$</span>optim<span class="op">$</span>bestmem))</a>
+<a class="sourceLine" id="cb11-27" title="27"><span class="co">#&gt; [1] 3.06348827 0.39108968 2.04725750 1.94530893 0.06915639</span></a></code></pre></div>
 <p>Although the user is encouraged to explore various approaches for maximum likelihood hyperparameter estimation, <code>autoHyper()</code> will often give reasonable results with minimal effort. Once the hyperparameters have been estimated, they can be used in the calculation of the <span class="math inline">\(EBGM\)</span> and quantile scores by applying them to the posterior distribution. This process can be found in the <a href="https://cran.r-project.org/package=openEBGM/vignettes/x4_posteriorCalculationVignette.html" target="_blank"><em>Empirical Bayes Metrics with openEBGM</em></a> vignette.</p>
 </div>
 </div>
 </div>
 
+
+
+<!-- code folding -->
 
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

@@ -4,8 +4,14 @@
 \alias{processRaw}
 \title{Process raw data}
 \usage{
-processRaw(data, stratify = FALSE, zeroes = FALSE, digits = 2,
-  max_cats = 10, list_ids = FALSE)
+processRaw(
+  data,
+  stratify = FALSE,
+  zeroes = FALSE,
+  digits = 2,
+  max_cats = 10,
+  list_ids = FALSE
+)
 }
 \arguments{
 \item{data}{A data frame containing columns named: \emph{id}, \emph{var1},
@@ -78,13 +84,15 @@ Any columns in \code{data} containing the substring \emph{'strat'} in the
 }
 
 \examples{
+var1 <- c("product_A", rep("product_B", 3), "product_C",
+           rep("product_A", 2), rep("product_B", 2), "product_C")
+var2 <- c("event_1", rep("event_2", 2), rep("event_3", 2),
+           "event_2", rep("event_3", 3), "event_1")
+strat1 <- c(rep("Male", 5), rep("Female", 3), rep("Male", 2))
+strat2 <- c(rep("age_cat1", 5), rep("age_cat1", 3), rep("age_cat2", 2))
 dat <- data.frame(
-  var1 = c("product_A", rep("product_B", 3), "product_C",
-           rep("product_A", 2), rep("product_B", 2), "product_C"),
-  var2 = c("event_1", rep("event_2", 2), rep("event_3", 2),
-           "event_2", rep("event_3", 3), "event_1"),
-  strat1 = c(rep("Male", 5), rep("Female", 3), rep("Male", 2)),
-  strat2 = c(rep("age_cat1", 5), rep("age_cat1", 3), rep("age_cat2", 2))
+  var1 = var1, var2 = var2, strat1 = strat1, strat2 = strat2,
+  stringsAsFactors = FALSE
 )
 dat$id <- 1:nrow(dat)
 processRaw(dat)

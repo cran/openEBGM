@@ -26,7 +26,7 @@ dat_no_id    <- dat[, !grepl("id", names(dat))]
 dat_missing1 <- dat
 dat_missing1[3, "var1"] <- ""
 dat_missing2 <- dat
-dat_missing2[1, "var2"] <- ""
+dat_missing2[1, "var2"] <- NA
 dat_missing3 <- dat
 dat_missing3[2, "id"] <- NA
 dat_missing4 <- dat
@@ -144,9 +144,13 @@ var1s    <- sort(unique(dat$var1))
 var2s    <- sort(unique(dat$var2))
 num_var1 <- length(var1s)
 num_var2 <- length(var2s)
+# dat_man <- data.frame(
+#   matrix(data = NA, nrow = num_var1 * num_var2, ncol = ncol(results_unstr))
+#   )
 dat_man <- data.frame(
-  matrix(data = NA, nrow = num_var1 * num_var2, ncol = ncol(results_unstr))
-  )
+  matrix(data = NA, nrow = num_var1 * num_var2, ncol = ncol(results_unstr)),
+  stringsAsFactors = FALSE
+)
 colnames(dat_man) <- colnames(results_unstr)
 dat_man$var1 <- sort(rep(var1s, num_var2))
 dat_man$var2 <- rep(sort(var2s), num_var1)
@@ -165,8 +169,10 @@ for (i in var1s) {
 }
 dat_man$RR   <- round(dat_man$N / dat_man$E, 3)
 dat_man$RR   <- ifelse(is.nan(dat_man$RR), 0, dat_man$RR)
-dat_man$var1 <- as.factor(dat_man$var1)
-dat_man$var2 <- as.factor(dat_man$var2)
+#dat_man$var1 <- as.factor(dat_man$var1)
+dat_man$var1 <- factor(dat_man$var1, levels = sort(unique(dat_man$var1)))
+#dat_man$var2 <- as.factor(dat_man$var2)
+dat_man$var2 <- factor(dat_man$var2, levels = sort(unique(dat_man$var2)))
 
 dat_man_no_zero <- dat_man[dat_man$N !=0, ]
 rownames(dat_man_no_zero) <- NULL
@@ -179,7 +185,9 @@ num_strat2 <- length(strat2s)
 num_strats <- num_strat1 * num_strat2
 num_rows   <- num_var1 * num_var2 * num_strat1 * num_strat2
 cols <- c("strat1", "strat2", "var1", "var2", "N", "E")
-dat_man2 <- data.frame(matrix(data = NA, nrow = num_rows, ncol = length(cols)))
+#dat_man2 <- data.frame(matrix(data = NA, nrow = num_rows, ncol = length(cols)))
+dat_man2 <- data.frame(matrix(data = NA, nrow = num_rows, ncol = length(cols)),
+                       stringsAsFactors = FALSE)
 colnames(dat_man2) <- cols
 dat_man2$strat1 <- sort(rep(strat1s, num_strat2 * num_var1 * num_var2))
 dat_man2$strat2 <- rep(sort(rep(strat2s, num_var1 * num_var2)), num_strat1)
@@ -210,8 +218,10 @@ dat_man2_E   <- aggregate(E ~ var1 + var2, data = dat_man2, FUN = sum)
 dat_man2_all <- merge(dat_man2_N, dat_man2_E, by = c("var1", "var2"))
 dat_man2_all$RR   <- round(dat_man2_all$N / dat_man2_all$E, 3)
 dat_man2_all$RR   <- ifelse(is.nan(dat_man2_all$RR), 0, dat_man2_all$RR)
-dat_man2_all$var1 <- as.factor(dat_man2_all$var1)
-dat_man2_all$var2 <- as.factor(dat_man2_all$var2)
+# dat_man2_all$var1 <- as.factor(dat_man2_all$var1)
+dat_man2_all$var1 <- factor(dat_man2_all$var1, levels = sort(unique(dat_man2_all$var1)))
+# dat_man2_all$var2 <- as.factor(dat_man2_all$var2)
+dat_man2_all$var2 <- factor(dat_man2_all$var2, levels = sort(unique(dat_man2_all$var2)))
 
 dat_man2_all_no_zero <- dat_man2_all[dat_man2_all$N !=0, ]
 rownames(dat_man2_all_no_zero) <- NULL
@@ -232,7 +242,8 @@ testthat::test_that("does processRaw() give the expected results?", {
 })
 
 dat_table <- data.table::as.data.table(dat)
-dat_tib <- dplyr::as_data_frame(dat)
+# dat_tib <- dplyr::as_data_frame(dat)
+dat_tib <- dplyr::as_tibble(dat)
 
 testthat::test_that("does processRaw() work with data.tables and tibble_dfs?", {
     expect_equal(processRaw(dat), processRaw(dat_table))
@@ -249,24 +260,43 @@ testthat::test_that("does processRaw() work with data.tables and tibble_dfs?", {
 })
 
 #Test to see if simple example gives expected results from hand calculation
+# dat2 <- data.frame(var1 = c("product_A", rep("product_B", 3), "product_C",
+#                             rep("product_A", 2), rep("product_B", 2), "product_C"),
+#                    var2 = c("event_1", rep("event_2", 2), rep("event_3", 2),
+#                             "event_2", rep("event_3", 3), "event_1"),
+#                    strat1 = c(rep("Male", 5), rep("Female", 3), rep("Male", 2)),
+#                    strat2 = c(rep("age_cat1", 5), rep("age_cat1", 3),
+#                               rep("age_cat2", 2))
+#                    )
 dat2 <- data.frame(var1 = c("product_A", rep("product_B", 3), "product_C",
                             rep("product_A", 2), rep("product_B", 2), "product_C"),
                    var2 = c("event_1", rep("event_2", 2), rep("event_3", 2),
                             "event_2", rep("event_3", 3), "event_1"),
                    strat1 = c(rep("Male", 5), rep("Female", 3), rep("Male", 2)),
                    strat2 = c(rep("age_cat1", 5), rep("age_cat1", 3),
-                              rep("age_cat2", 2))
-                   )
+                              rep("age_cat2", 2)),
+                   stringsAsFactors = FALSE
+)
 dat2$id <- 1:nrow(dat2)
 
-hand <- data.frame(var1 = c(rep("product_A", 3), rep("product_B", 3),
-                            rep("product_C", 3)),
-                   var2 = c(rep(c("event_1", "event_2", "event_3"), 3)),
+# hand <- data.frame(var1 = c(rep("product_A", 3), rep("product_B", 3),
+#                             rep("product_C", 3)),
+#                    var2 = c(rep(c("event_1", "event_2", "event_3"), 3)),
+#                    N    = c(1, 1, 1, 0, 2, 3, 1, 0, 1),
+#                    E    = c(0.6, 0.9, 1.5, 1, 1.5, 2.5, 0.4, 0.6, 1),
+#                    RR   = c(1.6667, 1.1111, 0.6667, 0, 1.3333, 1.2, 2.5, 0, 1),
+#                    PRR  = c(2.3333, 1.1667, 0.5833, 0, 2, 1.5, 4, 0, 1)
+#                    )
+var1_hand <- c(rep("product_A", 3), rep("product_B", 3), rep("product_C", 3))
+var2_hand <- c(rep(c("event_1", "event_2", "event_3"), 3))
+hand <- data.frame(var1 = factor(var1_hand, levels = sort(unique(var1_hand))),
+                   var2 = factor(var2_hand, levels = sort(unique(var2_hand))),
                    N    = c(1, 1, 1, 0, 2, 3, 1, 0, 1),
                    E    = c(0.6, 0.9, 1.5, 1, 1.5, 2.5, 0.4, 0.6, 1),
                    RR   = c(1.6667, 1.1111, 0.6667, 0, 1.3333, 1.2, 2.5, 0, 1),
-                   PRR  = c(2.3333, 1.1667, 0.5833, 0, 2, 1.5, 4, 0, 1)
-                   )
+                   PRR  = c(2.3333, 1.1667, 0.5833, 0, 2, 1.5, 4, 0, 1),
+                   stringsAsFactors = FALSE
+)
 
 testthat::test_that("results match hand calculations, unstratified", {
   expect_equal(processRaw(dat2, stratify = FALSE, zeroes = TRUE, digits = 4),
@@ -275,13 +305,24 @@ testthat::test_that("results match hand calculations, unstratified", {
                hand[hand$N != 0, ])
 })
 
+# hand_s <- data.frame(
+#   var1 = c(rep("product_A", 3), rep("product_B", 3), rep("product_C", 3)),
+#   var2 = c(rep(c("event_1", "event_2", "event_3"), 3)),
+#   N    = c(1, 1, 1, 0, 2, 3, 1, 0, 1),
+#   E    = c(0.2, 0.4+2/3, 0.4+4/3, 1.1, 1.2+1/3, 1.7+2/3, 0.7, 0.4, 0.9),
+#   RR   = c(5, 0.9375, 0.5769, 0, 1.3043, 1.2676, 1.4286, 0, 1.1111),
+#   PRR  = c(2.3333, 1.1667, 0.5833, 0, 2, 1.5, 4, 0, 1)
+# )
+var1_hand_s <- c(rep("product_A", 3), rep("product_B", 3), rep("product_C", 3))
+var2_hand_s <- c(rep(c("event_1", "event_2", "event_3"), 3))
 hand_s <- data.frame(
-  var1 = c(rep("product_A", 3), rep("product_B", 3), rep("product_C", 3)),
-  var2 = c(rep(c("event_1", "event_2", "event_3"), 3)),
+  var1 = factor(var1_hand_s, levels = sort(unique(var1_hand_s))),
+  var2 = factor(var2_hand_s, levels = sort(unique(var2_hand_s))),
   N    = c(1, 1, 1, 0, 2, 3, 1, 0, 1),
   E    = c(0.2, 0.4+2/3, 0.4+4/3, 1.1, 1.2+1/3, 1.7+2/3, 0.7, 0.4, 0.9),
   RR   = c(5, 0.9375, 0.5769, 0, 1.3043, 1.2676, 1.4286, 0, 1.1111),
-  PRR  = c(2.3333, 1.1667, 0.5833, 0, 2, 1.5, 4, 0, 1)
+  PRR  = c(2.3333, 1.1667, 0.5833, 0, 2, 1.5, 4, 0, 1),
+  stringsAsFactors = FALSE
 )
 
 testthat::test_that("results match hand calculations, stratified", {

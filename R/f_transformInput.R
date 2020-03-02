@@ -55,13 +55,15 @@
 #'   do not have any extraneous columns with that substring.
 #'
 #' @examples
+#' var1 <- c("product_A", rep("product_B", 3), "product_C",
+#'            rep("product_A", 2), rep("product_B", 2), "product_C")
+#' var2 <- c("event_1", rep("event_2", 2), rep("event_3", 2),
+#'            "event_2", rep("event_3", 3), "event_1")
+#' strat1 <- c(rep("Male", 5), rep("Female", 3), rep("Male", 2))
+#' strat2 <- c(rep("age_cat1", 5), rep("age_cat1", 3), rep("age_cat2", 2))
 #' dat <- data.frame(
-#'   var1 = c("product_A", rep("product_B", 3), "product_C",
-#'            rep("product_A", 2), rep("product_B", 2), "product_C"),
-#'   var2 = c("event_1", rep("event_2", 2), rep("event_3", 2),
-#'            "event_2", rep("event_3", 3), "event_1"),
-#'   strat1 = c(rep("Male", 5), rep("Female", 3), rep("Male", 2)),
-#'   strat2 = c(rep("age_cat1", 5), rep("age_cat1", 3), rep("age_cat2", 2))
+#'   var1 = var1, var2 = var2, strat1 = strat1, strat2 = strat2,
+#'   stringsAsFactors = FALSE
 #' )
 #' dat$id <- 1:nrow(dat)
 #' processRaw(dat)
@@ -110,7 +112,6 @@ processRaw <- function(data, stratify = FALSE, zeroes = FALSE, digits = 2,
     counts <- merge(actual, v1_marg, by = "var1", all.x = zeroes, sort = FALSE)
     counts <- merge(counts, v2_marg, by = "var2", all.x = zeroes, sort = FALSE)
     counts[, N_tot := .countUnique(data$id)]
-    #counts[, E := N_v1 * N_v2 / N_tot]  #v0.8.1
     counts[, E := (N_v1 / N_tot) * N_v2]
   } else {
     data <- .checkStrata_processRaw(data, max_cats)  #adds 'stratum' column
@@ -127,7 +128,6 @@ processRaw <- function(data, stratify = FALSE, zeroes = FALSE, digits = 2,
     counts[is.na(N_v2_str), N_v2_str := 0L]
     counts <- merge(counts, strat_tot, by = "stratum",
                     all.x = zeroes, sort = FALSE)
-    #counts[, E := N_v1_str * N_v2_str / N_tot_str]  #v0.8.1
     counts[, E := (N_v1_str / N_tot_str) * N_v2_str]
     counts <- counts[, j = list(E = sum(E, na.rm = TRUE)), by = .(var1, var2)]
     counts <- merge(actual, counts, by = c("var1", "var2"),
@@ -149,8 +149,10 @@ processRaw <- function(data, stratify = FALSE, zeroes = FALSE, digits = 2,
     counts <- counts[, .(var1, var2, N, E, RR, PRR)]
   }
   counts[is.nan(PRR), PRR := Inf]
-  counts[, var1 := as.factor(var1)]
-  counts[, var2 := as.factor(var2)]
+  #counts[, var1 := as.factor(var1)]
+  counts[, var1 := factor(var1, levels = sort(unique(var1)))]
+  #counts[, var2 := as.factor(var2)]
+  counts[, var2 := factor(var2, levels = sort(unique(var2)))]
   data.table::setorder(counts, var1, var2)
   data.table::setDF(counts)
   counts

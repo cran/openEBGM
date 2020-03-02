@@ -32,7 +32,8 @@ theta_init <- data.frame(alpha1 = c(0.2, 0.1, 0.3, 0.5, 0.2),
                          beta1  = c(0.1, 0.1, 0.5, 0.3, 0.2),
                          alpha2 = c(2,   10,  6,   12,  5),
                          beta2  = c(4,   10,  6,   12,  5),
-                         p      = c(1/3, 0.2, 0.5, 0.8, 0.4))
+                         p      = c(1/3, 0.2, 0.5, 0.8, 0.4)
+)
 hyper_estimate <- autoHyper(squashed, theta_init = theta_init, 
                             zeroes = FALSE, squashed = TRUE, N_star = 1)
 ```
@@ -144,8 +145,9 @@ plot(ebout, plot.type = "shrinkage", event = "CHOKING")
 
 *openEBGM* was designed to give the user a high level of control over data 
 analysis choices (stratification, data squashing, etc.) using DuMouchel's 
-Gamma-Poisson Shrinkage (GPS) method ([1999](https://doi.org/10.1080/00031305.1999.10474456){target="_blank"},
-[2001](https://doi.org/10.1145/502512.502526){target="_blank"}).
+Gamma-Poisson Shrinkage (GPS) method
+(*1999, `https://doi.org/10.1080/00031305.1999.10474456`*),
+(*2001, `https://doi.org/10.1145/502512.502526`*).
 The GPS method applies to any large contingency table, so *openEBGM* can be used
 to mine a variety of databases in which the rate of co-occurrence of two
 variables or items is of interest (sometimes known as the "market basket

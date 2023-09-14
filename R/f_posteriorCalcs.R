@@ -24,20 +24,19 @@
 #' }
 #'
 #' @examples
+#' data.table::setDTthreads(2)  #only needed for CRAN checks
 #' theta_init <- data.frame(
-#'   alpha1 = c(0.2, 0.1),
-#'   beta1  = c(0.1, 0.1),
-#'   alpha2 = c(2,   10),
-#'   beta2  = c(4,   10),
-#'   p      = c(1/3, 0.2)
+#'   alpha1 = c(0.5, 1),
+#'   beta1  = c(0.5, 1),
+#'   alpha2 = c(2,   3),
+#'   beta2  = c(2,   3),
+#'   p      = c(0.1, 0.2)
 #' )
 #' data(caers)
 #' proc <- processRaw(caers)
-#' squashed <- squashData(proc, bin_size = 100, keep_pts = 100)
-#' squashed <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 20)
-#' suppressWarnings(
-#'   theta_hat <- autoHyper(data = squashed, theta_init = theta_init)$estimates
-#' )
+#' squashed <- squashData(proc, bin_size = 300, keep_pts = 10)
+#' squashed <- squashData(squashed, count = 2, bin_size = 13, keep_pts = 10)
+#' theta_hat <- autoHyper(data = squashed, theta_init = theta_init)$estimates
 #' qn <- Qn(theta_hat, N = proc$N, E = proc$E)
 #' head(qn)
 #'
@@ -54,18 +53,14 @@
 #' @importFrom stats dnbinom
 #' @export
 Qn <- function(theta_hat, N, E) {
-
   .checkInputs_Qn(theta_hat, N, E)
-
   prob_f1 <- theta_hat[2] / (theta_hat[2] + E)  #beta1 / (beta1 + E)
   prob_f2 <- theta_hat[4] / (theta_hat[4] + E)  #beta2 / (beta2 + E)
-  f1_NB   <- dnbinom(N, size = theta_hat[1], prob = prob_f1)  #Eq.5 (1999)
-  f2_NB   <- dnbinom(N, size = theta_hat[3], prob = prob_f2)
-
-  P_hat  <- theta_hat[5]
+  f1_NB <- dnbinom(N, size = theta_hat[1], prob = prob_f1)  #Eq.5 (1999)
+  f2_NB <- dnbinom(N, size = theta_hat[3], prob = prob_f2)
+  P_hat <- theta_hat[5]
   Qn_num <- P_hat * f1_NB
   Qn_den <- (P_hat * f1_NB) + ((1 - P_hat) * f2_NB)
-
   Qn_num / Qn_den  #Eq. 6 (1999)
 }
 
@@ -96,20 +91,19 @@ Qn <- function(theta_hat, N, E) {
 #' }
 #'
 #' @examples
+#' data.table::setDTthreads(2)  #only needed for CRAN checks
 #' theta_init <- data.frame(
-#'   alpha1 = c(0.2, 0.1),
-#'   beta1  = c(0.1, 0.1),
-#'   alpha2 = c(2,   10),
-#'   beta2  = c(4,   10),
-#'   p      = c(1/3, 0.2)
+#'   alpha1 = c(0.5, 1),
+#'   beta1  = c(0.5, 1),
+#'   alpha2 = c(2,   3),
+#'   beta2  = c(2,   3),
+#'   p      = c(0.1, 0.2)
 #' )
 #' data(caers)
 #' proc <- processRaw(caers)
-#' squashed <- squashData(proc, bin_size = 100, keep_pts = 100)
-#' squashed <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 20)
-#' suppressWarnings(
-#'   theta_hat <- autoHyper(data = squashed, theta_init = theta_init)$estimates
-#' )
+#' squashed <- squashData(proc, bin_size = 300, keep_pts = 10)
+#' squashed <- squashData(squashed, count = 2, bin_size = 13, keep_pts = 10)
+#' theta_hat <- autoHyper(data = squashed, theta_init = theta_init)$estimates
 #' qn <- Qn(theta_hat, N = proc$N, E = proc$E)
 #' proc$EBGM <- ebgm(theta_hat, N = proc$N, E = proc$E, qn = qn)
 #' head(proc)
@@ -127,17 +121,13 @@ Qn <- function(theta_hat, N, E) {
 #' @seealso \code{\link{Qn}} for finding mixture fractions.
 #' @export
 ebgm <- function(theta_hat, N, E, qn, digits = 2) {
-
   .checkInputs_ebgm(theta_hat, N, E, qn, digits)
-
-  #If X ~ gamma(alpha, beta), then E[X] = alpha / beta
-  #Also, E[ln(X)] = digamma(alpha) - ln(beta)
+  # If X ~ gamma(alpha, beta), then E[X] = alpha / beta
+  # Also, E[ln(X)] = digamma(alpha) - ln(beta)
   expectation1 <- digamma(theta_hat[1] + N) - log(theta_hat[2] + E)  #Eq.9
   expectation2 <- digamma(theta_hat[3] + N) - log(theta_hat[4] + E)
-
   exp_log_lamda <- (qn * expectation1) + ((1 - qn) * expectation2)  #Eq.9 (1999)
   EBlog2        <- exp_log_lamda / log(2)  #Eq.10 (1999)
-
   EBGM <- 2 ^ EBlog2  #Eq.11 (1999)
   round(EBGM, digits)
 }
@@ -180,25 +170,24 @@ ebgm <- function(theta_hat, N, E, qn, digits = 2) {
 #'   time.
 #'
 #' @examples
+#' data.table::setDTthreads(2)  #only needed for CRAN checks
 #' theta_init <- data.frame(
-#'   alpha1 = c(0.2, 0.1),
-#'   beta1  = c(0.1, 0.1),
-#'   alpha2 = c(2,   10),
-#'   beta2  = c(4,   10),
-#'   p      = c(1/3, 0.2)
+#'   alpha1 = c(0.5, 1),
+#'   beta1  = c(0.5, 1),
+#'   alpha2 = c(2,   3),
+#'   beta2  = c(2,   3),
+#'   p      = c(0.1, 0.2)
 #' )
 #' data(caers)
 #' proc <- processRaw(caers)
-#' squashed <- squashData(proc, bin_size = 100, keep_pts = 100)
-#' squashed <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 20)
-#' suppressWarnings(
-#'   theta_hat <- autoHyper(data = squashed, theta_init = theta_init)$estimates
-#' )
+#' squashed <- squashData(proc, bin_size = 300, keep_pts = 10)
+#' squashed <- squashData(squashed, count = 2, bin_size = 13, keep_pts = 10)
+#' theta_hat <- autoHyper(data = squashed, theta_init = theta_init)$estimates
 #' qn <- Qn(theta_hat, N = proc$N, E = proc$E)
 #' proc$QUANT_05 <- quantBisect(percent = 5, theta = theta_hat, N = proc$N,
 #'                              E = proc$E, qn = qn)
-#' proc$QUANT_95 <- quantBisect(percent = 95, theta = theta_hat, N = proc$N,
-#'                              E = proc$E, qn = qn)
+#' \dontrun{proc$QUANT_95 <- quantBisect(percent = 95, theta = theta_hat,
+#'                                       N = proc$N, E = proc$E, qn = qn)}
 #' head(proc)
 #'
 #' @family posterior distribution functions
@@ -214,18 +203,14 @@ ebgm <- function(theta_hat, N, E, qn, digits = 2) {
 #' @export
 quantBisect <- function(percent, theta_hat, N, E, qn, digits = 2,
                         limits = c(-100000, 100000), max_iter = 2000) {
-
-  .checkInputs_quantBisect(percent, theta_hat, N, E, qn, digits, limits,
-                           max_iter)
-
+  .checkInputs_quantBisect(percent, theta_hat, N, E, qn, digits, limits, max_iter)
   cdf_error <- function(guess, cut_point, qn, theta_hat, N, E) {
-    #Difference between F(x) & the "cut point" (e.g. 0.05 for 5th percentile)
+    # Difference between F(x) & the "cut point" (e.g. 0.05 for 5th percentile)
     cdf1 <- pgamma(guess, shape = theta_hat[1] + N, rate = theta_hat[2] + E)
     cdf2 <- pgamma(guess, shape = theta_hat[3] + N, rate = theta_hat[4] + E)
     post_cdf  <- (qn * cdf1) + ((1 - qn) * cdf2)
     post_cdf - cut_point
   }
-
   tol        <- 0.5 * (10 ^ (-digits))
   cut_point  <- percent / 100
   num_pts    <- length(N)
@@ -236,7 +221,6 @@ quantBisect <- function(percent, theta_hat, N, E, qn, digits = 2,
   right      <- rep(limits[2], num_pts)
   left       <- ifelse(is_too_big, left, guess_init)
   right      <- ifelse(is_too_big, guess_init, right)
-
   iter_count <- 1L
   while (iter_count <= max_iter) {
       mid_pt <- (left + right) / 2

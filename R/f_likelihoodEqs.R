@@ -44,17 +44,13 @@
 #' @importFrom stats dnbinom
 #' @export
 negLLzero <- function(theta, N, E) {
-
   .checkInputs_negLLzero(theta, N, E)
-
   size_f1 <- theta[1]  #alpha1
   prob_f1 <- theta[2] / (theta[2] + E)  #beta1 / (beta1 + E)
   size_f2 <- theta[3]  #alpha2
   prob_f2 <- theta[4] / (theta[4] + E)  #beta2 / (beta2 + E)
-
   f1 <- dnbinom(N, size = size_f1, prob = prob_f1)
   f2 <- dnbinom(N, size = size_f2, prob = prob_f2)
-
   P <- theta[5]
   L <- (P * f1) + ((1 - P) * f2)
   sum(-log(L))
@@ -112,17 +108,13 @@ negLLzero <- function(theta, N, E) {
 #' @importFrom stats dnbinom
 #' @export
 negLLzeroSquash <- function(theta, ni, ei, wi) {
-
   .checkInputs_negLLzeroSquash(theta, ni, ei, wi)
-
   size_f1 <- theta[1]  #alpha1
   prob_f1 <- theta[2] / (theta[2] + ei)  #beta1 / (beta1 + E)
   size_f2 <- theta[3]  #alpha2
   prob_f2 <- theta[4] / (theta[4] + ei)  #beta2 / (beta2 + E)
-
   f1 <- dnbinom(ni, size = size_f1, prob = prob_f1)
   f2 <- dnbinom(ni, size = size_f2, prob = prob_f2)
-
   P <- theta[5]
   logL <- wi * (log((P * f1) + ((1 - P) * f2)))
   sum(-logL)
@@ -177,23 +169,18 @@ negLLzeroSquash <- function(theta, ni, ei, wi) {
 #' @importFrom stats pnbinom
 #' @export
 negLL <- function(theta, N, E, N_star = 1) {
-
   .checkInputs_negLL(theta, N, E, N_star)
-
   size_f1 <- theta[1]  #alpha1
   prob_f1 <- theta[2] / (theta[2] + E)  #beta1 / (beta1 + E)
   size_f2 <- theta[3]  #alpha2
   prob_f2 <- theta[4] / (theta[4] + E)  #beta2 / (beta2 + E)
-
   f1 <- dnbinom(N, size = size_f1, prob = prob_f1)
   f2 <- dnbinom(N, size = size_f2, prob = prob_f2)
-
   sum_limit <- N_star - 1
   f1_cumul  <- pnbinom(sum_limit, size = size_f1, prob = prob_f1)
   f2_cumul  <- pnbinom(sum_limit, size = size_f2, prob = prob_f2)
   f_star1   <- f1 / (1 - f1_cumul)
   f_star2   <- f2 / (1 - f2_cumul)
-
   P <- theta[5]
   L <- (P * f_star1) + ((1 - P) * f_star2)
   sum(-log(L))
@@ -238,11 +225,12 @@ negLL <- function(theta, N, E, N_star = 1) {
 #'   before using this function.
 #'
 #' @examples
-#' theta_init <- c(0.2, 0.1, 2, 4, 1/3)  #initial guess
+#' data.table::setDTthreads(2)  #only needed for CRAN checks
+#' theta_init <- c(1, 1, 3, 3, .2)  #initial guess
 #' data(caers)
 #' proc <- processRaw(caers)
-#' squashed <- squashData(proc, count = 1, bin_size = 100, keep_pts = 100)
-#' squashed <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 20)
+#' squashed <- squashData(proc, bin_size = 300, keep_pts = 10)
+#' squashed <- squashData(squashed, count = 2, bin_size = 13, keep_pts = 10)
 #' negLLsquash(theta = theta_init, ni = squashed$N, ei = squashed$E,
 #'             wi = squashed$weight)
 #' #For hyperparameter estimation...
@@ -262,23 +250,18 @@ negLL <- function(theta, N, E, N_star = 1) {
 #' @importFrom stats pnbinom
 #' @export
 negLLsquash <- function(theta, ni, ei, wi, N_star = 1) {
-
   .checkInputs_negLLsquash(theta, ni, ei, wi, N_star)
-
   size_f1 <- theta[1]  #alpha1
   prob_f1 <- theta[2] / (theta[2] + ei)  #beta1 / (beta1 + E)
   size_f2 <- theta[3]  #alpha2
   prob_f2 <- theta[4] / (theta[4] + ei)  #beta2 / (beta2 + E)
-
   f1 <- dnbinom(ni, size = size_f1, prob = prob_f1)
   f2 <- dnbinom(ni, size = size_f2, prob = prob_f2)
-
   sum_limit <- N_star - 1
   f1_cumul  <- pnbinom(sum_limit, size = size_f1, prob = prob_f1)
   f2_cumul  <- pnbinom(sum_limit, size = size_f2, prob = prob_f2)
   f_star1   <- f1 / (1 - f1_cumul)
   f_star2   <- f2 / (1 - f2_cumul)
-
   P <- theta[5]
   logL <- wi * log((P * f_star1) + ((1 - P) * f_star2))
   sum(-logL)

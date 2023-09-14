@@ -1,5 +1,7 @@
 context("Object-oriented Features")
 
+data.table::setDTthreads(2)  #only needed for CRAN checks
+
 data(caers)
 proc <- processRaw(caers)
 

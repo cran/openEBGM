@@ -4,7 +4,8 @@
 \name{caers_raw}
 \alias{caers_raw}
 \title{Raw CAERS data}
-\format{A data frame with 117 rows and 6 variables:
+\format{
+A data frame with 117 rows and 6 variables:
 \describe{
   \item{\code{RA_Report..}}{CAERS report identification number.}
   \item{\code{PRI_Reported.Brand.Product.Name}}{The verbatim brands and/or
@@ -21,14 +22,15 @@
   \item{\code{SYM_One.Row.Coded.Symptoms}}{The symptom(s) experienced by the
     injured consumer as specified by the reporter and coded by FDA according
     to the Medical Data Dictionary for Regulatory Activities (MedDRA).}
-}}
+}
+}
 \source{
 CFSAN Adverse Event Reporting System (FDA Center for Food Safety and
   Nutrition)
 
-\url{https://www.fda.gov/Food/ComplianceEnforcement}
+\url{https://www.fda.gov/food/compliance-enforcement-food}
 
-\url{https://www.fda.gov/downloads/Food/ComplianceEnforcement/UCM494019.pdf}
+\url{https://www.fda.gov/media/97035/download}
 }
 \usage{
 caers_raw

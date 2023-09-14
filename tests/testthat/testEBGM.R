@@ -1,5 +1,7 @@
 context("Posterior Estimation")
 
+data.table::setDTthreads(2)  #only needed for CRAN checks
+
 data(caers)
 proc_dat_ustrat <- processRaw(data = caers, stratify = FALSE)
 N <- proc_dat_ustrat$N

@@ -4,20 +4,22 @@
 \name{caers}
 \alias{caers}
 \title{Dietary supplement reports and products}
-\format{A data frame with 20156 rows and 4 variables:
+\format{
+A data frame with 20156 rows and 4 variables:
 \describe{
   \item{\code{id}}{Identification number}
   \item{\code{var1}}{Name of the product}
   \item{\code{var2}}{Name of the symptom/event category}
   \item{\code{strat1}}{Gender of the patient associated with report}
-}}
+}
+}
 \source{
 CFSAN Adverse Event Reporting System (FDA Center for Food Safety and
   Nutrition)
 
-\url{https://www.fda.gov/Food/ComplianceEnforcement}
+\url{https://www.fda.gov/food/compliance-enforcement-food}
 
-\url{https://www.fda.gov/downloads/Food/ComplianceEnforcement/UCM494019.pdf}
+\url{https://www.fda.gov/media/97035/download}
 }
 \usage{
 caers

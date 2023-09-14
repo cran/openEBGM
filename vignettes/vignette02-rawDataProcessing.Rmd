@@ -14,9 +14,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 
 -------
 
-# Initial Calculations
-
-##Using `processRaw()`
+## Using `processRaw()`
 
 The `processRaw()` function calculates actual counts $(N)$ of each
 product-symptom combination, expected counts $(E)$ under the row/column
@@ -45,7 +43,7 @@ We can calculate $N$, $E$, $RR$, and $PRR$ for the product-symptom pairs:
 processRaw(data = dat, stratify = FALSE, zeroes = FALSE)
 ```
 
-##Using stratification
+## Using Stratification
 
 Stratification can help control for confounding variables. For instance, food,
 cosmetics, and dietary supplements are often consumed at different rates by
@@ -101,7 +99,6 @@ estimating hyperparameters but before calculating $EBGM$ and quantile scores.
 processRaw(data = dat, stratify = FALSE, zeroes = TRUE)
 ```
 
-Next, the
-[*Hyperparameter Estimation with openEBGM*](https://cran.r-project.org/package=openEBGM/vignettes/x3_hyperParameterVignette.html){target="_blank"}
+Next, the *Hyperparameter Estimation with openEBGM*
 vignette will demonstrate how to estimate the hyperparameters of the prior
 distribution.

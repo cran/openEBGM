@@ -63,11 +63,12 @@ This function will not need to be called directly if using
 }
 
 \examples{
-theta_init <- c(0.2, 0.1, 2, 4, 1/3)  #initial guess
+data.table::setDTthreads(2)  #only needed for CRAN checks
+theta_init <- c(1, 1, 3, 3, .2)  #initial guess
 data(caers)
 proc <- processRaw(caers)
-squashed <- squashData(proc, count = 1, bin_size = 100, keep_pts = 100)
-squashed <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 20)
+squashed <- squashData(proc, bin_size = 300, keep_pts = 10)
+squashed <- squashData(squashed, count = 2, bin_size = 13, keep_pts = 10)
 negLLsquash(theta = theta_init, ni = squashed$N, ei = squashed$E,
             wi = squashed$weight)
 #For hyperparameter estimation...

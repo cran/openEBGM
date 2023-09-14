@@ -29,39 +29,38 @@
 #'   large datasets, or when the EBGM score is the only metric of interest.
 #'
 #' @examples
-#' theta_init <- data.frame(alpha1 = c(0.2, 0.1),
-#'                          beta1  = c(0.1, 0.1),
-#'                          alpha2 = c(2,   10),
-#'                          beta2  = c(4,   10),
-#'                          p      = c(1/3, 0.2)
+#' data.table::setDTthreads(2)  #only needed for CRAN checks
+#' theta_init <- data.frame(
+#'   alpha1 = c(0.5, 1),
+#'   beta1  = c(0.5, 1),
+#'   alpha2 = c(2,   3),
+#'   beta2  = c(2,   3),
+#'   p      = c(0.1, 0.2)
 #' )
 #' data(caers)
 #' proc <- processRaw(caers)
-#' squashed <- squashData(proc, bin_size = 100, keep_pts = 100)
-#' squashed <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 20)
+#' squashed <- squashData(proc, bin_size = 300, keep_pts = 10)
+#' squashed <- squashData(squashed, count = 2, bin_size = 13, keep_pts = 10)
 #' suppressWarnings(
 #'   hypers <- autoHyper(data = squashed, theta_init = theta_init)
 #' )
-#' obj <- ebScores(processed = proc, hyper_estimate = hypers,
-#'                 quantiles = c(10, 90))
+#' obj <- ebScores(processed = proc, hyper_estimate = hypers, quantiles = 5)
+#' print(obj)
 #'
 #' @keywords openEBGM
 #' @export
 
-ebScores <- function(processed, hyper_estimate, quantiles = c(5, 95),
-                     digits = 2) {
-
+ebScores <- function(processed, hyper_estimate, quantiles = c(5, 95), digits = 2) {
   .checkInputs_ebScores(processed, hyper_estimate, quantiles, digits)
-
   theta <- hyper_estimate$estimates
   N <- processed$N
   E <- processed$E
   q_n <- Qn(theta_hat = theta, N = N, E = E)
   EBGM <- ebgm(theta_hat = theta, N = N, E = E, qn = q_n, digits = digits)
-  #Check to see if EBGM is already in the data, if so, don't duplicate column
+  # Check to see if EBGM is already in the data, if so, don't duplicate column
   EBGM_sort <- EBGM[order(EBGM, decreasing = TRUE)]
   compare_func <- function(num_vec, EBGM_sort) {
-    if(class(num_vec) == "numeric") {
+    if (inherits(num_vec, what = "numeric")) {
       num_vec <- num_vec[order(num_vec, decreasing = TRUE)]
       if(identical(EBGM_sort, num_vec)) {
         return(TRUE)
@@ -76,7 +75,6 @@ ebScores <- function(processed, hyper_estimate, quantiles = c(5, 95),
   if(any(compare_vars)) {
     names(processed)[compare_vars] <- "EBGM"
   }
-  ##End check
   if(!is.null(quantiles)) {
     quant_calcs <- lapply(quantiles, quantBisect, theta_hat = theta,
                           N = N, E = E, qn = q_n, digits = digits)

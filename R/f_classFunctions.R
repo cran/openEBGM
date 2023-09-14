@@ -140,7 +140,7 @@ plot.openEBGM <- function(x, y = NULL, event = NULL, plot.type = "bar", ...) {
         ylab(paste(quant_min_name, quant_max_name, sep = " - EBGM - ")) +
         xlab("var1 observation") +
         ggtitle(ifelse(is.null(event), "EBGM Barplot", paste("EBGM Barplot with Event=", event, sep = ""))) +
-        #Note that themes are applied *after* the coord_flip()
+        # Note that themes are applied *after* the coord_flip()
         theme(axis.title.x = element_text(face = "bold"),
               axis.title.y = element_text(face = "bold"),
               panel.grid = element_blank(),
@@ -165,7 +165,7 @@ plot.openEBGM <- function(x, y = NULL, event = NULL, plot.type = "bar", ...) {
         theme_bw() +
         ylab("EBGM") + xlab("var1 observation") +
         ggtitle(ifelse(is.null(event), "EBGM Barplot", paste("EBGM Barplot with Event=", event, sep = ""))) +
-        #Note that themes are applied *after* the coord_flip()
+        # Note that themes are applied *after* the coord_flip()
         theme(axis.title.x = element_text(face = "bold"),
               axis.title.y = element_text(face = "bold"),
               panel.grid = element_blank(),
@@ -180,7 +180,7 @@ plot.openEBGM <- function(x, y = NULL, event = NULL, plot.type = "bar", ...) {
     if(!is.null(event)) {
       tmp <- tmp[tmp$var2 == event,]
     }
-    #Need to get the N column into colors
+    # Need to get the N column into colors
     tmp$N_col <- ifelse(tmp$N == 1, 1,
                  ifelse(tmp$N == 2, 2,
                  ifelse(tmp$N == 3, 3,
@@ -218,6 +218,7 @@ plot.openEBGM <- function(x, y = NULL, event = NULL, plot.type = "bar", ...) {
             plot.title = element_text(face = "bold"))
   }
 }
+
 #' Summarize an openEBGM object
 #'
 #' @param object An openEBGM object constructed by \code{\link{ebScores}}
@@ -239,23 +240,25 @@ plot.openEBGM <- function(x, y = NULL, event = NULL, plot.type = "bar", ...) {
 #'          (DuMouchel).
 #'
 #' @examples
-#' theta_init <- data.frame(alpha1 = c(0.2, 0.1),
-#'                          beta1  = c(0.1, 0.1),
-#'                          alpha2 = c(2,   10),
-#'                          beta2  = c(4,   10),
-#'                          p      = c(1/3, 0.2)
-#'                          )
+#' data.table::setDTthreads(2)  #only needed for CRAN checks
+#' theta_init <- data.frame(
+#'   alpha1 = c(0.5, 1),
+#'   beta1  = c(0.5, 1),
+#'   alpha2 = c(2,   3),
+#'   beta2  = c(2,   3),
+#'   p      = c(0.1, 0.2)
+#' )
 #' data(caers)
 #' proc <- processRaw(caers)
-#' squashed <- squashData(proc, bin_size = 100, keep_pts = 100)
-#' squashed <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 20)
+#' squashed <- squashData(proc, bin_size = 300, keep_pts = 10)
+#' squashed <- squashData(squashed, count = 2, bin_size = 13, keep_pts = 10)
 #' suppressWarnings(
 #'   hypers <- autoHyper(data = squashed, theta_init = theta_init)
 #' )
-#' ebout <- ebScores(processed = proc, hyper_estimate = hypers)
+#' ebout <- ebScores(processed = proc, hyper_estimate = hypers, quantiles = 5)
 #' summary(ebout)
-#' summary(ebout, plot.out = FALSE)
-#' summary(ebout, log.trans = TRUE)
+#' \dontrun{summary(ebout, plot.out = FALSE)}
+#' \dontrun{summary(ebout, log.trans = TRUE)}
 #'
 #' @references DuMouchel W (1999). "Bayesian Data Mining in Large Frequency
 #'   Tables, With an Application to the FDA Spontaneous Reporting System."
@@ -266,7 +269,6 @@ summary.openEBGM <- function(object, plot.out = TRUE, log.trans = FALSE, ...) {
   if(any(grepl("QUANT", names(object$data)))) {
     tmp <- object$data[,grep("EB|QUANT", names(object$data))]
   } else {
-    #tmp <- as.data.frame(object$data$EBGM)
     tmp <- as.data.frame(object$data$EBGM, stringsAsFactors = TRUE)
     names(tmp) <- "EBGM"
   }
@@ -281,7 +283,7 @@ summary.openEBGM <- function(object, plot.out = TRUE, log.trans = FALSE, ...) {
   print(ebsummary)
 }
 
-#Hack to trick 'R CMD check'
+# From examples in the utils package: '?utils::globalVariables'
 if (getRversion() >= "2.15.1") {
   utils::globalVariables(c("cor", "head", "hist", "var1var2", "EBGM", "EBGM_fuzzy",
                            "N_col"))

@@ -55,10 +55,11 @@
 #'   do not have any extraneous columns with that substring.
 #'
 #' @examples
+#' data.table::setDTthreads(2)  #only needed for CRAN checks
 #' var1 <- c("product_A", rep("product_B", 3), "product_C",
-#'            rep("product_A", 2), rep("product_B", 2), "product_C")
+#'           rep("product_A", 2), rep("product_B", 2), "product_C")
 #' var2 <- c("event_1", rep("event_2", 2), rep("event_3", 2),
-#'            "event_2", rep("event_3", 3), "event_1")
+#'           "event_2", rep("event_3", 3), "event_1")
 #' strat1 <- c(rep("Male", 5), rep("Female", 3), rep("Male", 2))
 #' strat2 <- c(rep("age_cat1", 5), rep("age_cat1", 3), rep("age_cat2", 2))
 #' dat <- data.frame(
@@ -84,30 +85,24 @@
 #' @export
 processRaw <- function(data, stratify = FALSE, zeroes = FALSE, digits = 2,
                        max_cats = 10, list_ids = FALSE) {
-
   .checkInputs_processRaw(data, stratify, zeroes, list_ids)
-
   data <- data.table::as.data.table(data)
-
-  #Actual var1/var2 combination counts
+  # Actual var1/var2 combination counts
   if (list_ids) {
     actual <- data[, j = list(ids = paste(id, collapse = "|"),
                               N = .countUnique(id)), by = .(var1, var2)]
   } else {
     actual <- data[, j = list(N = .countUnique(id)), by = .(var1, var2)]
   }
-
   if (zeroes) {
     data.table::setkeyv(actual, c("var1", "var2"))
     actual <- actual[data.table::CJ(unique(var1), unique(var2))]
     actual[is.na(N), N := 0L]
   }
-
-  #Unstratified marginal counts
+  # Unstratified marginal counts
   v1_marg <- data[, j = list(N_v1 = .countUnique(id)), by = .(var1)]
   v2_marg <- data[, j = list(N_v2 = .countUnique(id)), by = .(var2)]
-
-  #Expected counts
+  # Expected counts
   if (!stratify) {
     counts <- merge(actual, v1_marg, by = "var1", all.x = zeroes, sort = FALSE)
     counts <- merge(counts, v2_marg, by = "var2", all.x = zeroes, sort = FALSE)
@@ -136,8 +131,7 @@ processRaw <- function(data, stratify = FALSE, zeroes = FALSE, digits = 2,
     counts <- merge(counts, v2_marg, by = "var2", all.x = zeroes, sort = FALSE)
     counts[, N_tot := .countUnique(data$id)]
   }
-
-  #Add disproportionality measures
+  # Add disproportionality measures
   counts[, RR := round(N / E, digits)]
   counts[is.nan(RR), RR := 0]
   counts[, PRR_num := N / N_v1]
@@ -149,16 +143,14 @@ processRaw <- function(data, stratify = FALSE, zeroes = FALSE, digits = 2,
     counts <- counts[, .(var1, var2, N, E, RR, PRR)]
   }
   counts[is.nan(PRR), PRR := Inf]
-  #counts[, var1 := as.factor(var1)]
   counts[, var1 := factor(var1, levels = sort(unique(var1)))]
-  #counts[, var2 := as.factor(var2)]
   counts[, var2 := factor(var2, levels = sort(unique(var2)))]
   data.table::setorder(counts, var1, var2)
   data.table::setDF(counts)
   counts
 }
 
-#Hack to trick 'R CMD check'
+# From examples in the utils package: '?utils::globalVariables'
 if (getRversion() >= "2.15.1") {
   utils::globalVariables(c(".", "id", "var1", "var2", "N", "stratum",
                            "N_v1_str", "N_v2_str", "E", "N_tot", "N_v1",

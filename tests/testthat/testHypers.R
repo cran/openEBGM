@@ -2,6 +2,8 @@ context("Hyperparameter Estimation")
 #For testing if the functions that explore the hyperparameter space are
 #functioning correctly
 
+data.table::setDTthreads(2)  #only needed for CRAN checks
+
 dat <- data.frame(
   var1 = c("product_A", rep("product_B", 3), "product_C",
            rep("product_A", 2), rep("product_B", 2), "product_C"),

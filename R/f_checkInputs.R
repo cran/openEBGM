@@ -1,11 +1,10 @@
-#Helper functions to check if actual argument values make sense
+# Helper functions to check if actual argument values make sense
 
 #*******************************************************************************
 #************************  General Functions  **********************************
 #*******************************************************************************
 
 .checkInputs_processed_data <- function(data) {
-
   if (!is.data.frame(data)) {
     stop("'data' must be a data frame")
   }
@@ -18,7 +17,6 @@
 }
 
 .checkInputs_squashed_zeroes <- function(data, squashed, zeroes) {
-
   if (!is.logical(squashed) || !is.logical(zeroes)) {
     stop("'squashed' and 'zeroes' must be logical values")
   }
@@ -37,7 +35,6 @@
 }
 
 .checkInputs_Nstar <- function(data, zeroes, N_star) {
-
   if (zeroes && !is.null(N_star)) {
     stop("if zeroes are used, 'N_star' should be NULL")
   }
@@ -56,7 +53,6 @@
 }
 
 .checkInputs_theta_init <- function(theta_init) {
-
   if (ncol(theta_init) != 5) {
     stop("'theta_init' must contain 5 columns")
   }
@@ -69,7 +65,6 @@
 }
 
 .checkInputs_theta_hat <- function(theta_hat) {
-
   if (length(theta_hat) != 5) {
     stop("'theta_hat' must contain 5 values")
   }
@@ -85,7 +80,6 @@
 }
 
 .checkInputs_theta_init_vec <- function(theta_init_vec) {
-
   if (length(theta_init_vec) != 5) {
     stop("'theta_init_vec' must contain 5 elements")
   }
@@ -101,14 +95,12 @@
 }
 
 .checkInputs_score <- function(N_star) {
-
   if (N_star != 1 && !is.null(N_star)) {
     stop("if 'method' is 'score', N_star must be 1 or NULL")
   }
 }
 
 .checkInputs_LL_converge <- function(LL_tol, consecutive, max_iter) {
-
   if (!is.numeric(LL_tol) || LL_tol <= 0) {
     stop("'LL_tol' must be a positive numeric value")
   }
@@ -121,7 +113,6 @@
 }
 
 .checkInputs_param_lower_upper <- function(param_lower, param_upper) {
-
   if (!is.numeric(param_lower) || param_lower <= 0) {
     stop("'param_lower' must be a positive numeric value")
   }
@@ -134,14 +125,12 @@
 }
 
 .checkInputs_print_level <- function(print_level) {
-
   if (!print_level %in% 0:2) {
     stop("'print_level' must be 0, 1, or 2")
   }
 }
 
 .checkInputs_N_E <- function(N, E) {
-
   if (length(N) != length(E)) {
     stop("'N' and 'E' must have the same length")
   }
@@ -151,7 +140,6 @@
 }
 
 .checkInputs_N_E_qn <- function(N, E, qn) {
-
   if (length(N) != length(E) || length(N) != length(qn)) {
     stop("'N', 'E', and 'qn' must have the same length")
   }
@@ -166,7 +154,6 @@
 
 #processRaw() ------------------------------------------------------------------
 .checkInputs_processRaw <- function(data, stratify, zeroes, list_ids) {
-
   if (!is.data.frame(data)) {
     stop("'data' must be a data frame")
   }
@@ -183,8 +170,7 @@
 }
 
 .checkStrata_processRaw <- function(data, max_cats) {
-
-  #Also prints messages and adds 'stratum' column to 'data'
+  # Also prints messages and adds 'stratum' column to 'data'
   strat_vars <- colnames(data)[grepl("strat", colnames(data))]
   if (length(strat_vars) == 0) {
     stop("no stratification variables found")
@@ -193,7 +179,6 @@
                 MARGIN = 2, FUN = .isMissing_str))) {
     stop("missing values are not allowed for stratification variables")
   }
-
   message(paste("stratification variables used:",
                 paste(strat_vars, collapse = ", ")), sep = " ")
   if (max(apply(data[, strat_vars, with = FALSE], MARGIN = 2,
@@ -203,7 +188,6 @@
     error3 <- "\n  if you really need more categories, increase 'max_cats'"
     stop(paste0(error1, max_cats, " categories --", error2, error3))
   }
-
   data$stratum <- do.call(paste, c(data[, strat_vars, with = FALSE], sep = "-"))
   unique_strata <- sort(unique(data$stratum))
   unique_strata_str <- paste(unique_strata, collapse = ", ")
@@ -213,15 +197,13 @@
   if (min(data[, .countUnique(id), by = .(stratum)]$V1) < 50) {
     warning("at least one stratum contains less than 50 unique IDs")
   }
-
   data
 }
 
 #squashData() ------------------------------------------------------------------
 .checkInputs_squashData <- function(data, count, bin_size, keep_pts,
                                     min_bin, min_pts) {
-
-  #Also coerces data frame to data table.
+  # Also coerces data frame to data table.
   .checkInputs_processed_data(data)
   count    <- as.integer(count)
   bin_size <- as.integer(bin_size)
@@ -231,7 +213,6 @@
   data <- data.table::as.data.table(data)
   data[, N := as.integer(N)]
   data[, E := as.numeric(E)]
-
   if (.isMissing_num(data[, N]) | .isMissing_num(data[, E])) {
     stop("missing values for 'N' or 'E' are not allowed")
   }
@@ -244,8 +225,7 @@
   if (keep_pts < 0) {
     stop("'keep_pts' must be non-negative")
   }
-
-  #In case we want to run the function iteratively (count = 1, then 2, etc.)
+  # In case we want to run the function iteratively (count = 1, then 2, etc.)
   weight_exists <- any(grepl("weight", colnames(data)))
   if (weight_exists) {
     if (max(data[N == count, weight], na.rm = TRUE) > 1) {
@@ -254,7 +234,6 @@
   } else {
     data[, weight := 1L]
   }
-
   num_pts <- nrow(data[N == count, ])
   if (num_pts < min_pts) {
     stop("not enough points for squashing")
@@ -262,13 +241,11 @@
   if (num_pts / bin_size < min_bin) {
     stop("not enough bins -- reduce 'bin_size'")
   }
-
   data
 }
 
 #autoSquash() ------------------------------------------------------------------
 .checkInputs_autoSquash <- function(data, keep_pts, cut_offs, num_super_pts) {
-
   .checkInputs_processed_data(data)
   if ("weight" %in% colnames(data)) {
     stop("'data' has already been squashed")
@@ -294,7 +271,6 @@
 #*******************************************************************************
 
 .checkInputs_negLLzero <- function(theta, N, E) {
-
   if (length(N) != length(E)) {
     stop("'N' & 'E' must be the same length")
   }
@@ -304,7 +280,6 @@
 }
 
 .checkInputs_negLLzeroSquash <- function(theta, ni, ei, wi) {
-
   ni_len <- length(ni)
   if (ni_len != length(ei) || ni_len != length(wi)) {
     stop("'ni', 'ei', & 'wi' must be the same length")
@@ -315,7 +290,6 @@
 }
 
 .checkInputs_negLL <- function(theta, N, E, N_star) {
-
   if (length(N) != length(E)) {
     stop("'N' & 'E' must be the same length")
   }
@@ -325,7 +299,6 @@
 }
 
 .checkInputs_negLLsquash <- function(theta, ni, ei, wi, N_star) {
-
   ni_len <- length(ni)
   if (ni_len != length(ei) || ni_len != length(wi)) {
     stop("'ni', 'ei', & 'wi' must be the same length")
@@ -344,7 +317,6 @@
 .checkInputs_exploreHypers <- function(data, theta_init, squashed, zeroes,
                                        N_star, method, param_limit, max_pts,
                                        std_errors) {
-
   .checkInputs_processed_data(data)
   .checkInputs_theta_init(theta_init)
   .checkInputs_squashed_zeroes(data, squashed, zeroes)
@@ -362,7 +334,6 @@
 
 #autoHyper() -------------------------------------------------------------------
 .checkInputs_autoHyper <- function(tol, min_conv, theta_init, conf_ints) {
-
   if (length(tol) != 5) {
     stop("'tol' must have a length of 5")
   }
@@ -383,7 +354,6 @@
   function(data, theta_init_vec, squashed, zeroes, N_star, method, LL_tol,
            consecutive, param_lower, param_upper, print_level, max_iter,
            conf_ints, track) {
-
     .checkInputs_processed_data(data)
     .checkInputs_theta_init_vec(theta_init_vec)
     .checkInputs_squashed_zeroes(data, squashed, zeroes)
@@ -406,14 +376,12 @@
 
 #Qn() --------------------------------------------------------------------------
 .checkInputs_Qn <- function(theta_hat, N, E) {
-
   .checkInputs_theta_hat(theta_hat)
   .checkInputs_N_E(N, E)
 }
 
 #ebgm() ------------------------------------------------------------------------
 .checkInputs_ebgm <- function(theta_hat, N, E, qn, digits) {
-
   .checkInputs_theta_hat(theta_hat)
   .checkInputs_N_E_qn(N, E, qn)
 }
@@ -421,7 +389,6 @@
 #quantBisect() -----------------------------------------------------------------
 .checkInputs_quantBisect <- function(percent, theta_hat, N, E, qn, digits,
                                      limits, max_iter) {
-
   if (percent < 1 || percent > 99) {
     stop("'percent' must be a value between 1 and 99 (inclusive)")
   }
@@ -432,7 +399,6 @@
 #ebScores() --------------------------------------------------------------------
 .checkInputs_ebScores <- function(processed, hyper_estimate, quantiles,
                                   digits) {
-
   if(!is.null(quantiles) & !is.numeric(quantiles)) {
     stop("'quantiles' must be NULL or a numeric vector of quantiles")
   }

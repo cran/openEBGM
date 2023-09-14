@@ -1,15 +1,4 @@
-#' \pkg{openEBGM}: EBGM Scores for Mining Large Contingency Tables
-#'
-#' \pkg{openEBGM} is a Bayesian data mining package for calculating Empirical
-#' Bayes scores based on the \emph{Gamma-Poisson Shrinker} (\emph{GPS}) model
-#' for large, sparse contingency (frequency) tables. \pkg{openEBGM} includes
-#' several important functions implementing DuMouchel's (1999, 2001) methods for
-#' calculating the EBGM (Empirical Bayes Geometric Mean) score and the quantile
-#' scores used to create credibility intervals. Some simple disproportionality
-#' scores (relative report rate and proportional reporting ratio) are also
-#' included. Adverse event report data are used as an example application. Much
-#' of \pkg{openEBGM}'s code is derived from the \pkg{PhViD} and \pkg{mederrRank}
-#' packages.
+#' @keywords internal
 #'
 #' @section Data preparation & squashing functions:
 #' The data preparation function, \code{\link{processRaw}}, converts raw data
@@ -70,8 +59,9 @@
 #'   483-486.
 #'
 #' @references FDA (2017). "CFSAN Adverse Event Reporting System (CAERS)."
-#'   URL \url{https://www.fda.gov/Food/ComplianceEnforcement/ucm494015.htm}.
-#'
-#' @docType package
-#' @name openEBGM
+#'   URL \url{https://www.fda.gov/food/compliance-enforcement-food/cfsan-adverse-event-reporting-system-caers}.
+"_PACKAGE"
+
+## usethis namespace: start
+## usethis namespace: end
 NULL

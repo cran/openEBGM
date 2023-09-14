@@ -29,7 +29,7 @@
 #'
 #' @source CFSAN Adverse Event Reporting System (FDA Center for Food Safety and
 #'   Nutrition)
-#' @source \url{https://www.fda.gov/Food/ComplianceEnforcement}
+#' @source \url{https://www.fda.gov/food/compliance-enforcement-food}
 #' @source
-#'   \url{https://www.fda.gov/downloads/Food/ComplianceEnforcement/UCM494019.pdf}
+#'   \url{https://www.fda.gov/media/97035/download}
 "caers_raw"

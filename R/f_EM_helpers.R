@@ -6,8 +6,8 @@
 .hyperEMmessage <- function(message = c("A", "B", "C"), print_level,
                             iter = NULL, delta_LL = NULL, theta = NULL,
                             elapsed = NULL) {
-  #Print theta & change in LL for every 10th iteration.
-  #Print iteration count every 50th iteration.
+  # Print theta & change in LL for every 10th iteration.
+  # Print iteration count every 50th iteration.
   if (message == "A") {
     if (print_level == 2) {
       if (iter %% 10 == 0) {
@@ -21,7 +21,7 @@
         }
       }
     }
-  #Print iteration count & time elapsed in seconds.
+  # Print iteration count & time elapsed in seconds.
   } else if (message == "B") {
     if (print_level %in% 1:2) {
       cat("\n   Iterations used:", iter, "\n")
@@ -29,7 +29,7 @@
       print(elapsed)
       cat("\n")
     }
-  #Print initial value used for theta (row number).
+  # Print initial value used for theta (row number).
   } else if (message == "C") {
     if (print_level %in% 1:2) {
       start_pt <- c("\n    ******  ", "Starting point:", iter, "  ******\n\n")
@@ -46,7 +46,7 @@
 # ------------------------------------------------------------------------------
 
 .deltaLL <- function(theta, old_theta, N, E, W, squashed, zeroes, N_star = 1) {
-  #Change in log-likelihood
+  # Change in log-likelihood
   if (zeroes) {
     if (squashed) {
       old_LL <- -negLLzeroSquash(old_theta, N, E, W)
@@ -65,7 +65,6 @@
     }
   }
   delta <- abs(LL - old_LL)
-
   list(delta = delta, LL = LL)
 }
 
@@ -75,7 +74,7 @@
 # ------------------------------------------------------------------------------
 
 .checkRatios <- function(theta_eb_df, ratio_limit) {
-  #Check if ratios are "good"
+  # Check if ratios are "good"
   theta_eb_df <- theta_eb_df[, 2:6]
   max_ratio <- function(estimate) {
     max(estimate, na.rm = TRUE) / min(estimate, na.rm = TRUE)
@@ -84,6 +83,5 @@
   if (max(theta_eb_ratio) > ratio_limit) {
     warning("at least one starting point led to a different estimate")
   }
-
   theta_eb_ratio
 }

@@ -1,6 +1,8 @@
 context("Likelihood Functions")
 #For testing if the likelihood functions work properly
 
+data.table::setDTthreads(2)  #only needed for CRAN checks
+
 #Create some counts data -------------------------------------------------------
 datN <- data.frame(N = c(rep(0, 5), rep(1, 4), rep(2, 6), rep(3, 2)),
                    E = 1:17)

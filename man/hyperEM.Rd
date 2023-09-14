@@ -143,11 +143,13 @@ Asymptotic normal confidence intervals, if requested, use standard
   in DuMouchel (1999).
 }
 \examples{
+data.table::setDTthreads(2)  #only needed for CRAN checks
 data(caers)
 proc <- processRaw(caers)
-squashed <- squashData(proc, bin_size = 100, keep_pts = 0)
-squashed <- squashData(squashed, count = 2, bin_size = 12, keep_pts = 24)
-hyperEM(squashed, theta_init_vec = c(1, 1, 2, 2, .3), consecutive = 10)
+squashed <- squashData(proc, bin_size = 300, keep_pts = 10)
+squashed <- squashData(squashed, count = 2, bin_size = 13, keep_pts = 10)
+hypers <- hyperEM(squashed, theta_init_vec = c(1, 1, 2, 2, .3),
+                  consecutive = 10, LL_tol = 1e-03)
 
 }
 \references{

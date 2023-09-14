@@ -73,11 +73,12 @@ model (2001), is currently being used by the U.S. Food and Drug Administration
 (FDA) to find higher-than-expected reporting of adverse events associated with 
 food, drugs, etc. For instance, FDA's Center for Food Safety and Applied 
 Nutrition (CFSAN) uses the MGPS model to mine data from the CFSAN Adverse Events
-Reporting System (CAERS): <https://www.fda.gov/Food/ComplianceEnforcement>{target="_blank"}. (The 
-variables forming the rows and columns of the contingency table are *product*
-and *adverse event*.) MGPS allows for product interactions, unlike the GPS model
-implemented in *openEBGM* (*3*), which can only use individual product-event
-pairs.
+Reporting System (CAERS): 
+<https://www.fda.gov/food/compliance-enforcement-food>{target="_blank"}.
+(The variables forming the rows and columns of the contingency table are
+*product* and *adverse event*.) MGPS allows for product interactions, unlike the
+GPS model implemented in *openEBGM* (*3*), which can only use individual
+product-event pairs.
 
 ## Purpose
 
@@ -105,31 +106,28 @@ Bayes metrics ($EBGM$ and quantile scores) based on the posterior distribution.
 * **Object-oriented features:** Create objects of a special class (*openEBGM*)
 to use with generic functions such as `plot()`.
 
-### References
+## References
 
 1. DuMouchel W (1999). "Bayesian Data Mining in Large Frequency
 Tables, With an Application to the FDA Spontaneous Reporting System."
 *The American Statistician*, 53(3), 177-190. 
-*`https://doi.org/10.1080/00031305.1999.10474456`*
 
 1. DuMouchel W, Pregibon D (2001). "Empirical Bayes Screening for
 Multi-item Associations." In *Proceedings of the Seventh ACM SIGKDD
 International Conference on Knowledge Discovery and Data Mining*, KDD '01,
 pp. 67-76. ACM, New York, NY, USA. ISBN 1-58113-391-X.
-*`https://doi.org/10.1145/502512.502526`*
 
 1. Canida T, Ihrie J (2017). "openEBGM: An R Implementation of the Gamma-Poisson
 Shrinker Data Mining Model." *The R Journal*, 9(2), 499-519.
-*`https://journal.r-project.org/archive/2017/RJ-2017-063/index.html`*
 
 
 ---------
 
-# Preparing Your Data
+## Preparing Your Data
 
 *openEBGM* requires the input data to be a data frame of a particular form.
 
-## Data form
+### Data form
 
 Data must be in tidy format (one column per variable and one observation per
 row). The columns can be of type factor, character, integer, or numeric. Missing
@@ -137,7 +135,7 @@ values are not allowed - either replace NAs and empty strings with appropriate
 values or remove them from the data.
 
 
-## Column names
+### Column names
 
 The input data frame must contain certain column names: *var1*, *var2*, and 
 *id*.  *var1* and *var2* are simply the row and column variables of the 
@@ -155,10 +153,10 @@ variable.
 
 Other columns are allowed, but will be ignored.
 
-## CAERS example
+### CAERS example
 
-Here is a small subset of raw data from the publicly available [CAERS data](https://www.fda.gov/Food/ComplianceEnforcement){target="_blank"} described
-above:
+Here is a small subset of raw data from the publicly available [CAERS data](<https://www.fda.gov/food/compliance-enforcement-food>){target="_blank"}
+described above:
 
 ```{r Load data}
 library(openEBGM)
@@ -213,7 +211,7 @@ vars <- c("id", "var1", "var2", "strat_gender", "strat_age")
 dat[1:5, vars]
 ```
 
-Next, the [*Processing Raw Data with openEBGM*](https://cran.r-project.org/package=openEBGM/vignettes/x2_rawDataProcessingVignette.html){target="_blank"}
+Next, the *Processing Raw Data with openEBGM*
 vignette will demonstrate how to use data in this general form to find counts
 and simple disproportionality measures--$RR$ and $PRR$ (proportional reporting
 ratio).

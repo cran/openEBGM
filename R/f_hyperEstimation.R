@@ -77,18 +77,19 @@
 #'   Fisher information matrix as discussed in DuMouchel (1999).
 #'
 #' @examples
+#' data.table::setDTthreads(2)  #only needed for CRAN checks
 #' #Start with 2 or more guesses
 #' theta_init <- data.frame(
-#'   alpha1 = c(0.2, 0.1),
-#'   beta1  = c(0.1, 0.1),
-#'   alpha2 = c(2,   10),
-#'   beta2  = c(4,   10),
-#'   p      = c(1/3, 0.2)
+#'   alpha1 = c(0.5, 1),
+#'   beta1  = c(0.5, 1),
+#'   alpha2 = c(2,   3),
+#'   beta2  = c(2,   3),
+#'   p      = c(0.1, 0.2)
 #' )
 #' data(caers)
 #' proc <- processRaw(caers)
-#' squashed <- squashData(proc, bin_size = 100, keep_pts = 100)
-#' squashed <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 20)
+#' squashed <- squashData(proc, bin_size = 300, keep_pts = 10)
+#' squashed <- squashData(squashed, count = 2, bin_size = 13, keep_pts = 10)
 #' suppressWarnings(
 #'   exploreHypers(squashed, theta_init = theta_init)
 #' )
@@ -110,11 +111,9 @@ exploreHypers <-
   function(data, theta_init, squashed = TRUE, zeroes = FALSE, N_star = 1,
            method = c("nlminb", "nlm", "bfgs"), param_limit = 100,
            max_pts = 20000, std_errors = FALSE) {
-
   .checkInputs_exploreHypers(data, theta_init, squashed, zeroes, N_star,
                              method, param_limit, max_pts, std_errors)
   method <- match.arg(method)
-
   results <- data.frame(guess_num = 1:nrow(theta_init), a1_hat = NA,
                         b1_hat = NA, a2_hat = NA, b2_hat = NA, p_hat = NA,
                         code = NA, converge = NA, in_bounds = NA, minimum = NA)
@@ -123,8 +122,7 @@ exploreHypers <-
     std_errs <- data.frame(guess_num = 1:nrow(theta_init), a1_se = NA,
                            b1_se = NA, a2_se = NA, b2_se = NA, p_se = NA)
   }
-
-  #Choose the proper arguments for the optimization function
+  # Choose the proper arguments for the optimization function
   arg_theta     <- "as.numeric(theta_init[i, ]), "
   arg_squ_pts   <- "ni = data$N, ei = data$E, wi = data$weight"
   arg_unsqu_pts <- "N = data$N, E = data$E"
@@ -145,8 +143,7 @@ exploreHypers <-
       lik_fun <- "negLL, "
     }
   }
-
-  #Run optimization and store results
+  # Run optimization and store results
   for (i in 1:nrow(theta_init)) {
     try({
       if (method == "nlminb") {
@@ -164,7 +161,7 @@ exploreHypers <-
         results[i, "minimum"]  <- guess_i$minimum
         results[i, "code"]     <- guess_i$code
         results[i, "converge"] <- guess_i$code == 1 || guess_i$code == 2
-        #Check if within low & high bounds
+        # Check if within low & high bounds
         ab_low <- all(guess_i$estimate[1:4] > 0)
         ab_hi  <- all(guess_i$estimate[1:4] < param_limit)
         p_low  <- guess_i$estimate[5] > 0
@@ -259,21 +256,23 @@ exploreHypers <-
 #'   in DuMouchel (1999).
 #'
 #' @examples
+#' data.table::setDTthreads(2)  #only needed for CRAN checks
 #' #Start with 2 or more guesses
 #' theta_init <- data.frame(
-#'   alpha1 = c(0.2, 0.1),
-#'   beta1  = c(0.1, 0.1),
-#'   alpha2 = c(2,   10),
-#'   beta2  = c(4,   10),
-#'   p      = c(1/3, 0.2)
+#'   alpha1 = c(0.5, 1),
+#'   beta1  = c(0.5, 1),
+#'   alpha2 = c(2,   3),
+#'   beta2  = c(2,   3),
+#'   p      = c(0.1, 0.2)
 #' )
 #' data(caers)
 #' proc <- processRaw(caers)
-#' squashed <- squashData(proc, bin_size = 100, keep_pts = 100)
-#' squashed <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 20)
+#' squashed <- squashData(proc, bin_size = 300, keep_pts = 10)
+#' squashed <- squashData(squashed, count = 2, bin_size = 13, keep_pts = 10)
 #' suppressWarnings(
-#'   autoHyper(squashed, theta_init = theta_init)
+#'   hypers <- autoHyper(squashed, theta_init = theta_init)
 #' )
+#' print(hypers)
 #'
 #' @references DuMouchel W (1999). "Bayesian Data Mining in Large Frequency
 #'   Tables, With an Application to the FDA Spontaneous Reporting System."
@@ -291,25 +290,20 @@ autoHyper <-
            tol = c(0.05, 0.05, 0.2, 0.2, 0.025), min_conv = 1,
            param_limit = 100, max_pts = 20000, conf_ints = FALSE,
            conf_level = c("95", "80", "90", "99")) {
-
   .checkInputs_autoHyper(tol, min_conv, theta_init, conf_ints)
   conf_level <- match.arg(conf_level)
-
   conf_int <- NULL
   estimate_names <- c("a1_hat", "b1_hat", "a2_hat", "b2_hat", "p_hat")
-
   for (i in c("nlminb", "nlm", "bfgs")) {
     theta_hats <-
       exploreHypers(data = data, theta_init = theta_init, squashed = squashed,
                     zeroes = zeroes, N_star = N_star, method = i,
                     param_limit = param_limit, max_pts = max_pts)$estimates
-
-    #Only care about convergent results within parameter space
+    # Only care about convergent results within parameter space
     conv          <- theta_hats$converge == TRUE & !is.na(theta_hats$converge)
     within_bounds <- theta_hats$in_bounds == TRUE & !is.na(theta_hats$in_bounds)
     theta_conv    <- theta_hats[conv & within_bounds, ]
-
-    #Candidate must be "close" to at least 'min_conv' other estimates
+    # Candidate must be "close" to at least 'min_conv' other estimates
     if (nrow(theta_conv) >= min_conv + 1) {
       candidate <- theta_conv[theta_conv$minimum == min(theta_conv$minimum), ]
       other     <- theta_hats[theta_hats$guess_num != candidate$guess_num, ]

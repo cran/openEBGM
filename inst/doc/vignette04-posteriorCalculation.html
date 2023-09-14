@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+<meta name="date" content="2023-09-14" />
+
+<title>Empirical Bayes Metrics with openEBGM</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Empirical Bayes Metrics with openEBGM</h1>
+<h4 class="date">2023-09-14</h4>
+
+
+
+<div id="background" class="section level2">
+<h2>Background</h2>
+<p>In Bayesian statistics, the gamma distribution is the conjugate prior
+distribution for a Poisson likelihood. ‘<em>Conjugate</em>’ means that
+the posterior distribution will follow the same general form as the
+prior distribution. DuMouchel (1999) used a model with a Poisson(<span class="math inline">\(\mu_{ij}\)</span>) likelihood for the counts (for
+row <em>i</em> and column <em>j</em> of the contingency table). We are
+interested in the ratio <span class="math inline">\(\lambda_{ij}=\frac{\mu_{ij}}{E_{ij}}\)</span>,
+where <span class="math inline">\(E_{ij}\)</span> are the expected
+counts. The <span class="math inline">\(\lambda_{ij}\)</span>s are
+considered random draws from a mixture of two gamma distributions (our
+prior) with hyperparameter <span class="math inline">\(\theta=(\alpha_1,\beta_1,\alpha_2,\beta_2,P)\)</span>,
+where <span class="math inline">\(P\)</span> is the prior probability
+that <span class="math inline">\(\lambda\)</span> came from the first
+component of the prior mixture (i.e., the mixture fraction). The prior
+is a single distribution that models all the cells in the table;
+however, there is a separate posterior distribution for each cell in the
+table. The posterior distribution of <span class="math inline">\(\lambda\)</span>, given count <span class="math inline">\(N=n\)</span>, is a mixture of two gamma
+distributions with parameters <span class="math inline">\(\theta=(\alpha_1+n,\beta_1+E,\alpha_2+n,\beta_2+E,Q_n)\)</span>
+(subscripts suppressed for clarity), where <span class="math inline">\(Q_n\)</span> is the probability that <span class="math inline">\(\lambda\)</span> came from the first component of
+the posterior, given <span class="math inline">\(N=n\)</span> (i.e., the
+mixture fraction).</p>
+<p>The posterior distribution, in a sense, is a Bayesian representation
+of the relative reporting ratio, <span class="math inline">\(RR\)</span>
+(note the similarity in the equations <span class="math inline">\(RR_{ij}=\frac{N_{ij}}{E_{ij}}\)</span> and <span class="math inline">\(\lambda_{ij}=\frac{\mu_{ij}}{E_{ij}}\)</span>).
+The Empirical Bayes (EB) metrics are taken from the posterior
+distribution. The Empirical Bayes Geometric Mean <span class="math inline">\((EBGM)\)</span> is the antilog of the mean of the
+log<sub>2</sub>-transformed posterior distribution. The <span class="math inline">\(EBGM\)</span> is therefore a measure of central
+tendency of the posterior distribution. The 5% and 95% quantiles of the
+posterior distributions can be used to create two-sided 90% credibility
+intervals for <span class="math inline">\(\lambda_{ij}\)</span>, given
+<span class="math inline">\(N_{ij}\)</span> (i.e, our “sort of” RR).
+Alternatively, since we are most interested in the lower bound, we could
+ignore the upper bound and create a one-sided 95% credibility
+interval.</p>
+<p>Due to Bayesian shrinkage (please see the <strong>Background</strong>
+section of the <em>Introduction to openEBGM</em> vignette), the EB
+scores are much more stable than <span class="math inline">\(RR\)</span>
+for small counts.</p>
+<hr />
+</div>
+<div id="calculating-the-eb-scores" class="section level2">
+<h2>Calculating the EB-Scores</h2>
+<p>Once the product/event combinations have been counted and the
+hyperparameters have been estimated, we can calculate the EB scores:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(openEBGM)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">data</span>(caers)  <span class="co">#subset of publicly available CAERS data</span></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>processed <span class="ot">&lt;-</span> <span class="fu">processRaw</span>(caers, <span class="at">stratify =</span> <span class="cn">FALSE</span>, <span class="at">zeroes =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>squashed <span class="ot">&lt;-</span> <span class="fu">squashData</span>(processed)</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>squashed2 <span class="ot">&lt;-</span> <span class="fu">squashData</span>(squashed, <span class="at">count =</span> <span class="dv">2</span>, <span class="at">bin_size =</span> <span class="dv">10</span>, <span class="at">keep_pts =</span> <span class="dv">50</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>theta_init <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">alpha1 =</span> <span class="fu">c</span>(<span class="fl">0.2</span>, <span class="fl">0.1</span>, <span class="fl">0.3</span>, <span class="fl">0.5</span>, <span class="fl">0.2</span>),</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>                         <span class="at">beta1  =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.3</span>, <span class="fl">0.2</span>),</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>                         <span class="at">alpha2 =</span> <span class="fu">c</span>(<span class="dv">2</span>,   <span class="dv">10</span>,  <span class="dv">6</span>,   <span class="dv">12</span>,  <span class="dv">5</span>),</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>                         <span class="at">beta2  =</span> <span class="fu">c</span>(<span class="dv">4</span>,   <span class="dv">10</span>,  <span class="dv">6</span>,   <span class="dv">12</span>,  <span class="dv">5</span>),</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>                         <span class="at">p      =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="fl">0.2</span>, <span class="fl">0.5</span>, <span class="fl">0.8</span>, <span class="fl">0.4</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>)</span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>hyper_estimates <span class="ot">&lt;-</span> <span class="fu">autoHyper</span>(squashed2, <span class="at">theta_init =</span> theta_init)</span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a>(theta_hat <span class="ot">&lt;-</span> hyper_estimates<span class="sc">$</span>estimates)</span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="co">#&gt;     alpha1      beta1     alpha2      beta2          P </span></span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a><span class="co">#&gt; 3.25379356 0.39988854 2.02612692 1.90807970 0.06534557</span></span></code></pre></div>
+<div id="qn" class="section level3">
+<h3><code>Qn()</code></h3>
+<p>The <code>Qn()</code> function calculates the mixture fractions for
+the posterior distributions. The values returned by <code>Qn()</code>
+correspond to the probability that <span class="math inline">\(\lambda\)</span> came from the first component of
+the posterior mixture distribution, given <span class="math inline">\(N=n\)</span> (recall there is a <span class="math inline">\(\lambda|N=n\)</span> for each cell in the table,
+but that each <span class="math inline">\(\lambda\)</span> comes from a
+common distribution). Thus, the output from <code>Qn()</code> returns a
+numeric vector of length equal to the total number of product-symptom
+combinations, which is also the number of rows in the data frame
+returned by <code>processRaw()</code>. When calculating the <span class="math inline">\(Q_n\)</span>s, be sure to use the full data set
+from <code>processRaw()</code> – not the squashed data set or the raw
+data.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>qn <span class="ot">&lt;-</span> <span class="fu">Qn</span>(theta_hat, <span class="at">N =</span> processed<span class="sc">$</span>N, <span class="at">E =</span> processed<span class="sc">$</span>E)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">head</span>(qn)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#&gt; [1] 0.2819737 0.3409653 0.3482317 0.2819737 0.2226356 0.2556670</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="fu">identical</span>(<span class="fu">length</span>(qn), <span class="fu">nrow</span>(processed))</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="fu">summary</span>(qn)</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt;      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. </span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt; 0.0001205 0.2340248 0.3089649 0.2846021 0.3397685 0.9999997</span></span></code></pre></div>
+</div>
+<div id="ebgm" class="section level3">
+<h3><code>ebgm()</code></h3>
+<p>The <code>ebgm()</code> function calculates the Empirical Bayes
+Geometric Mean <span class="math inline">\((EBGM)\)</span> scores. <span class="math inline">\(EBGM\)</span> is a measure of central tendency of
+the posterior distributions, <span class="math inline">\(\lambda_{ij}|N=n\)</span>. Scores much larger than
+one indicate product/adverse event pairs that are reported at an
+unusually high rate.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>processed<span class="sc">$</span>ebgm <span class="ot">&lt;-</span> <span class="fu">ebgm</span>(theta_hat, <span class="at">N =</span> processed<span class="sc">$</span>N, <span class="at">E =</span> processed<span class="sc">$</span>E, <span class="at">qn  =</span> qn)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">head</span>(processed)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co">#&gt;                      var1                  var2 N            E      RR    PRR</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt; 1         1-PHENYLALANINE  HEART RATE INCREASED 1 0.0360548272   27.74  27.96</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; 2 11 UNSPECIFIED VITAMINS                ASTHMA 1 0.0038736591  258.15 279.58</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; 3 11 UNSPECIFIED VITAMINS CARDIAC FUNCTION </span><span class="al">TEST</span><span class="co"> 1 0.0002979738 3356.00    Inf</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt; 4 11 UNSPECIFIED VITAMINS            CHEST PAIN 1 0.0360548272   27.74  27.96</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt; 5 11 UNSPECIFIED VITAMINS              DYSPNOEA 1 0.0765792610   13.06  13.11</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; 6 11 UNSPECIFIED VITAMINS      HYPERSENSITIVITY 1 0.0527413588   18.96  19.06</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt;   ebgm</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt; 1 2.23</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; 2 2.58</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#&gt; 3 2.63</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt; 4 2.23</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; 5 1.92</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt; 6 2.09</span></span></code></pre></div>
+</div>
+<div id="quantbisect" class="section level3">
+<h3><code>quantBisect()</code></h3>
+<p>The <code>quantBisect()</code> function calculates quantiles of the
+posterior distribution using the bisection method.
+<code>quantBisect()</code> can calculate any quantile of the posterior
+distribution between 1 and 99%, and these quantiles can be used as
+limits for credibility intervals. Below, <em>QUANT_05</em> is the
+5<sup>th</sup> percentile; <em>QUANT_95</em> is the 95<sup>th</sup>
+percentile. These form the lower and upper bounds of 90% credibility
+intervals for the Empirical Bayes (EB) scores.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>processed<span class="sc">$</span>QUANT_05 <span class="ot">&lt;-</span> <span class="fu">quantBisect</span>(<span class="dv">5</span>, <span class="at">theta_hat =</span> theta_hat,</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>                                  <span class="at">N =</span> processed<span class="sc">$</span>N, <span class="at">E =</span> processed<span class="sc">$</span>E, <span class="at">qn =</span> qn)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>processed<span class="sc">$</span>QUANT_95 <span class="ot">&lt;-</span> <span class="fu">quantBisect</span>(<span class="dv">95</span>, <span class="at">theta_hat =</span> theta_hat,</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>                                  <span class="at">N =</span> processed<span class="sc">$</span>N, <span class="at">E =</span> processed<span class="sc">$</span>E, <span class="at">qn =</span> qn)</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="fu">head</span>(processed)</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt;                      var1                  var2 N            E      RR    PRR</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; 1         1-PHENYLALANINE  HEART RATE INCREASED 1 0.0360548272   27.74  27.96</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; 2 11 UNSPECIFIED VITAMINS                ASTHMA 1 0.0038736591  258.15 279.58</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; 3 11 UNSPECIFIED VITAMINS CARDIAC FUNCTION </span><span class="al">TEST</span><span class="co"> 1 0.0002979738 3356.00    Inf</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; 4 11 UNSPECIFIED VITAMINS            CHEST PAIN 1 0.0360548272   27.74  27.96</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; 5 11 UNSPECIFIED VITAMINS              DYSPNOEA 1 0.0765792610   13.06  13.11</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; 6 11 UNSPECIFIED VITAMINS      HYPERSENSITIVITY 1 0.0527413588   18.96  19.06</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt;   ebgm QUANT_05 QUANT_95</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; 1 2.23     0.49    13.85</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt; 2 2.58     0.52    15.78</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt; 3 2.63     0.52    16.02</span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt; 4 2.23     0.49    13.85</span></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co">#&gt; 5 1.92     0.47    11.77</span></span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="co">#&gt; 6 2.09     0.48    12.95</span></span></code></pre></div>
+<hr />
+</div>
+</div>
+<div id="analysis-of-eb-scores" class="section level2">
+<h2>Analysis of EB-Scores</h2>
+<p>The EB-scores (<span class="math inline">\(EBGM\)</span> and quantile
+scores) can be used to look for “signals” in the data. As stated in the
+<strong>Background</strong> section of the <em>Introduction to
+openEBGM</em> vignette, Bayesian shrinkage causes the EB-scores to be
+far more stable than their <span class="math inline">\(RR\)</span>
+counterparts, which allows for better separation between signal and
+noise. One could, for example, look at all product-symptom combinations
+where <em>QUANT_05</em> (the lower part of the 90% two-sided credibility
+interval) is 2 or greater. This is often used as a conservative
+alternative to <span class="math inline">\(EBGM\)</span> since
+<em>QUANT_05</em> scores are naturally smaller than <span class="math inline">\(EBGM\)</span> scores. We can say with high
+confidence that the “true relative reporting ratios” of product/adverse
+event combinations above this threshold are much greater than 1, so
+those combinations are truly reported more than expected. The value of 2
+is arbitrarily chosen, and depends on the context. Below is an example
+of how one may identify product-symptom combinations that require
+further investigation based on the EB-scores.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>suspicious <span class="ot">&lt;-</span> processed[processed<span class="sc">$</span>QUANT_05 <span class="sc">&gt;=</span> <span class="dv">2</span>, ]</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">nrow</span>(suspicious); <span class="fu">nrow</span>(processed); <span class="fu">nrow</span>(suspicious)<span class="sc">/</span><span class="fu">nrow</span>(processed)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co">#&gt; [1] 131</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">#&gt; [1] 17189</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt; [1] 0.007621153</span></span></code></pre></div>
+<p>From above we see that less than 1% of product-symptom pairs are
+suspect based on the <em>QUANT_05</em> score. One may look more closely
+at these product-symptom combinations to ascertain which products may
+need further investigation. Subject matter knowledge is required to
+determine which signals might identify a possible causal relationship.
+The EB-scores find statistical associations – not necessarily causal
+relationships.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>suspicious <span class="ot">&lt;-</span> suspicious[<span class="fu">order</span>(suspicious<span class="sc">$</span>QUANT_05, <span class="at">decreasing =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>                         <span class="fu">c</span>(<span class="st">&quot;var1&quot;</span>, <span class="st">&quot;var2&quot;</span>, <span class="st">&quot;N&quot;</span>, <span class="st">&quot;E&quot;</span>, <span class="st">&quot;QUANT_05&quot;</span>, <span class="st">&quot;ebgm&quot;</span>, </span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>                           <span class="st">&quot;QUANT_95&quot;</span>)]</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="fu">head</span>(suspicious, <span class="dv">5</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt;                                           var1                        var2  N</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt; 13924                            REUMOFAN PLUS            WEIGHT INCREASED 16</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt; 8187  HYDROXYCUT REGULAR RAPID RELEASE CAPLETS          EMOTIONAL DISTRESS 19</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt; 13886                            REUMOFAN PLUS                    IMMOBILE  6</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co">#&gt; 7793              HYDROXYCUT HARDCORE CAPSULES CARDIO-RESPIRATORY DISTRESS  8</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt; 8220  HYDROXYCUT REGULAR RAPID RELEASE CAPLETS                      INJURY 11</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt;                E QUANT_05  ebgm QUANT_95</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt; 13924 0.40643623    15.68 23.26    33.48</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt; 8187  0.89690107    11.65 16.78    23.55</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt; 13886 0.07866508    10.16 18.28    30.83</span></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt; 7793  0.30482718     9.00 15.25    24.52</span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt; 8220  0.56317044     8.98 14.28    21.78</span></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a>tabbed <span class="ot">&lt;-</span> <span class="fu">table</span>(suspicious<span class="sc">$</span>var1)</span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="fu">head</span>(tabbed[<span class="fu">order</span>(tabbed, <span class="at">decreasing =</span> <span class="cn">TRUE</span>)])</span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="co">#&gt; HYDROXYCUT REGULAR RAPID RELEASE CAPLETS </span></span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="co">#&gt;                                       26 </span></span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="co">#&gt;             HYDROXYCUT HARDCORE CAPSULES </span></span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a><span class="co">#&gt;                                       13 </span></span>
+<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="co">#&gt;                            REUMOFAN PLUS </span></span>
+<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a><span class="co">#&gt;                                        8 </span></span>
+<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a><span class="co">#&gt;                      HYDROXYCUT CAPSULES </span></span>
+<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a><span class="co">#&gt;                                        5 </span></span>
+<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a><span class="co">#&gt;               HYDROXYCUT MAX LIQUID CAPS </span></span>
+<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a><span class="co">#&gt;                                        5 </span></span>
+<span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a><span class="co">#&gt;         HYDROXYCUT CAFFEINE FREE CAPLETS </span></span>
+<span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a><span class="co">#&gt;                                        4</span></span></code></pre></div>
+<p>The output above suggests some products which may require further
+investigation.</p>
+<p>Next, the <em>openEBGM Objects and Class Functions</em> vignette will
+demonstrate the object-oriented features of the <em>openEBGM</em>
+package.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

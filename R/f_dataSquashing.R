@@ -38,11 +38,11 @@
 #'   should typically be at least as large as the default values.
 #' @examples
 #' set.seed(483726)
-#' dat <- data.frame(var1 = letters[1:26], var2 = LETTERS[1:26],
-#'                   N = c(rep(0, 11), rep(1, 10), rep(2, 4), rep(3, 1)),
-#'                   E = round(abs(c(rnorm(11, 0), rnorm(10, 1), rnorm(4, 2),
-#'                             rnorm(1, 3))), 3),
-#'                   stringsAsFactors = FALSE
+#' dat <- data.frame(
+#'   var1 = letters[1:26], var2 = LETTERS[1:26],
+#'   N = c(rep(0, 11), rep(1, 10), rep(2, 4), rep(3, 1)),
+#'   E = round(abs(c(rnorm(11, 0), rnorm(10, 1), rnorm(4, 2), rnorm(1, 3))), 3),
+#'   stringsAsFactors = FALSE
 #' )
 #' (zeroes <- squashData(dat, count = 0, bin_size = 3, keep_pts = 1,
 #'                       min_bin = 2, min_pts = 2))
@@ -72,8 +72,7 @@
 #' @export
 squashData <- function(data, count = 1, bin_size = 50, keep_pts = 100,
                        min_bin = 50, min_pts = 500) {
-
-  #Check inputs & coerce to data table
+  # Check inputs & coerce to data table
   data <- .checkInputs_squashData(data, count, bin_size, keep_pts, min_bin,
                                   min_pts)
 
@@ -82,7 +81,7 @@ squashData <- function(data, count = 1, bin_size = 50, keep_pts = 100,
   data.table::setorder(maybe_squash, E)  #need similar Es in same bin
   num_maybe_squash <- nrow(maybe_squash)
 
-  #Largest values are most variable, so keep (i.e., do not squash)
+  # Largest values are most variable, so keep (i.e., do not squash)
   num_squash <- num_maybe_squash - keep_pts
   if (num_squash < bin_size) {
     stop("reduce 'bin_size' or 'keep_pts'")
@@ -91,7 +90,7 @@ squashData <- function(data, count = 1, bin_size = 50, keep_pts = 100,
   keep       <- maybe_squash[(num_squash + 1):num_maybe_squash, ]
   num_remain <- num_squash %% bin_size  #partial bin count
 
-  #Create bin indices and squash points
+  # Create bin indices and squash points
   if (num_remain == 0) {
     num_bins <- num_squash / bin_size
     squash[, bin_index := rep(1:num_bins, each = bin_size)]
@@ -123,7 +122,7 @@ squashData <- function(data, count = 1, bin_size = 50, keep_pts = 100,
   results
 }
 
-#Hack to trick 'R CMD check'
+# From examples in the utils package: '?utils::globalVariables'
 if (getRversion() >= "2.15.1") {
   utils::globalVariables(c(".", "weight", "bin_index"))
 }
@@ -162,6 +161,7 @@ if (getRversion() >= "2.15.1") {
 #'   squashed, then those points are squashed to 50 "super points".
 #'
 #' @examples
+#' data.table::setDTthreads(2)  #only needed for CRAN checks
 #' data(caers)
 #' proc <- processRaw(caers)
 #' table(proc$N)
@@ -169,14 +169,15 @@ if (getRversion() >= "2.15.1") {
 #' squash1 <- autoSquash(proc)
 #' ftable(squash1[, c("N", "weight")])
 #'
-#' squash2 <- autoSquash(proc, keep_pts = c(50, 5))
-#' ftable(squash2[, c("N", "weight")])
+#' \dontrun{squash2 <- autoSquash(proc, keep_pts = c(50, 5))}
+#' \dontrun{ftable(squash2[, c("N", "weight")])}
 #'
-#' squash3 <- autoSquash(proc, keep_pts = 100,
-#'                       cut_offs = c(250, 500),
-#'                       num_super_pts = c(20, 60, 125)
-#' )
-#' ftable(squash3[, c("N", "weight")])
+#' \dontrun{
+#'   squash3 <- autoSquash(proc, keep_pts = 100,
+#'                         cut_offs = c(250, 500),
+#'                         num_super_pts = c(20, 60, 125))
+#' }
+#' \dontrun{ftable(squash3[, c("N", "weight")])}
 #'
 #' @references DuMouchel W, Pregibon D (2001). "Empirical Bayes Screening for
 #'   Multi-item Associations." In \emph{Proceedings of the Seventh ACM SIGKDD
@@ -190,40 +191,34 @@ autoSquash <-
   function(data, keep_pts = c(100, 75, 50, 25),
            cut_offs = c(500, 1e+03, 1e+04, 1e+05, 5e+05, 1e+06, 5e+06),
            num_super_pts = c(50, 75, 150, 500, 750, 1e+03, 2e+03, 5e+03)) {
-  #Automatically squashes data for all counts
-
+  # This function automatically squashes data for all counts
   .checkInputs_autoSquash(data, keep_pts, cut_offs, num_super_pts)
-
   len_keep_pts  <- length(keep_pts)
   last_keep_pts <- keep_pts[len_keep_pts]
   len_cut_offs  <- length(cut_offs)
   last_num_super_pts <- num_super_pts[length(num_super_pts)]
-
   numKeepPts <- function(count_position) {
-    #Finds number of points to keep unsquashed for a given count
+    # Finds number of points to keep unsquashed for a given count
     if (count_position <= len_keep_pts) {
       return(keep_pts[count_position])
     } else {
       return(last_keep_pts)
     }
   }
-
   numSuperPts <- function(num_original, count_position) {
-    #Finds number of "super points" for a given count
+    # Finds number of "super points" for a given count
     keep_pts_val  <- numKeepPts(count_position)
     pts_to_squash <- num_original - keep_pts_val
     cut_off_index <- which(pts_to_squash < c(cut_offs, Inf))[1]
     num_super_pts[cut_off_index]
   }
-
   binSize <- function(num_original, count_position) {
-    #Finds bin size for a given count
+    # Finds bin size for a given count
     keep_pts_val      <- numKeepPts(count_position)
     num_super_pts_val <- numSuperPts(num_original, count_position)
     bin_size <- (num_original - keep_pts_val) / num_super_pts_val
     max(floor(bin_size), 2L)
   }
-
   data$weight <- 1L  #in case no squashing occurs
   count_table <- table(data$N)
   count_table <- count_table[count_table > max(keep_pts) + 1]

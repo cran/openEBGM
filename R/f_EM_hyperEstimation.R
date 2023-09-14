@@ -95,11 +95,13 @@
 #'   in DuMouchel (1999).
 #'
 #' @examples
+#' data.table::setDTthreads(2)  #only needed for CRAN checks
 #' data(caers)
 #' proc <- processRaw(caers)
-#' squashed <- squashData(proc, bin_size = 100, keep_pts = 0)
-#' squashed <- squashData(squashed, count = 2, bin_size = 12, keep_pts = 24)
-#' hyperEM(squashed, theta_init_vec = c(1, 1, 2, 2, .3), consecutive = 10)
+#' squashed <- squashData(proc, bin_size = 300, keep_pts = 10)
+#' squashed <- squashData(squashed, count = 2, bin_size = 13, keep_pts = 10)
+#' hypers <- hyperEM(squashed, theta_init_vec = c(1, 1, 2, 2, .3),
+#'                   consecutive = 10, LL_tol = 1e-03)
 #'
 #' @references DuMouchel W (1999). "Bayesian Data Mining in Large Frequency
 #'   Tables, With an Application to the FDA Spontaneous Reporting System."
@@ -126,15 +128,13 @@ hyperEM <-
            consecutive = 100, param_lower = 1e-05, param_upper = 20,
            print_level = 2, max_iter = 5000, conf_ints = FALSE,
            conf_level = c("95", "80", "90", "99"), track = FALSE) {
-
   method  <- match.arg(method)
   profile <- match.arg(profile)
   conf_level <- match.arg(conf_level)
   .checkInputs_hyperEM(data, theta_init_vec, squashed, zeroes, N_star, method,
                        LL_tol, consecutive, param_lower, param_upper,
                        print_level, max_iter, conf_ints, track)
-
-  #A lot of initialization
+  # Initializations
   start_time <- proc.time()
   N <- data$N; E <- data$E; W <- NULL
   if (squashed) W <- data$weight
@@ -146,22 +146,18 @@ hyperEM <-
   theta       <- theta_init_vec
   count_iter  <- count_converge <- count_iter_acc <- count_stuck_all <- 0L
   count_stuck <- rep.int(0L, 5); conf_int <- NULL
-
-  #Responsibilities (E-step)
+  # Responsibilities (E-step)
   if (method == "score") {
     marg_dens <- .marginalDensity(theta, N, E, zeroes)
     PQ        <- .updateProbs(theta, marg_dens$f1, marg_dens$f2)
   }
-
   while(count_converge <= consecutive &&
         count_stuck_all < 20L &&
         count_iter < max_iter) {
-
     count_iter     <- count_iter + 1
     count_iter_acc <- count_iter_acc + 1
     old_theta      <- theta
-
-    #M-step
+    # M-step
     if (method == "score") {
       theta <- .updateTheta(old_theta, PQ$P_vec, PQ$Q_vec, N, E, W, squashed,
                             zeroes, param_lower, param_upper)
@@ -178,15 +174,13 @@ hyperEM <-
                                  param_lower, param_upper)
       }
     }
-
-    #Check if all hyper estimates are "stuck"
+    # Check if all hyper estimates are "stuck"
     if (all(theta == old_theta)) {
       count_stuck_all <- count_stuck_all + 1
     } else {
       count_stuck_all <- 0L
     }
-
-    #Accelerate estimation every 100 iterations
+    # Accelerate estimation every 100 iterations
     if (count_iter_acc == 98L) theta_98 <- theta
     if (count_iter_acc == 99L) theta_99 <- theta
     if (count_iter_acc == 100L) {
@@ -195,14 +189,12 @@ hyperEM <-
                                 param_lower, param_upper)
       count_iter_acc <- 0L
     }
-
-    #E-step
+    # E-step
     if (method == "score") {
       marg_dens <- .marginalDensity(theta, N, E, zeroes)
       PQ        <- .updateProbs(theta, marg_dens$f1, marg_dens$f2)
     }
-
-    #Convergence check
+    # Convergence check
     delta_LL <- .deltaLL(theta, old_theta, N, E, W, squashed, zeroes, N_star)
     .hyperEMmessage("A", print_level, count_iter, delta_LL$delta, theta)
     if (delta_LL$delta < LL_tol) {
@@ -210,8 +202,7 @@ hyperEM <-
     } else {
       count_converge <- 0L
     }
-
-    #Track hyperparameter estimates for plotting
+    # Track hyperparameter estimates for plotting
     if (track) {
       tracking_position <- count_iter + 1
       track_LL[tracking_position] <- delta_LL$LL
@@ -222,11 +213,9 @@ hyperEM <-
       track_P[tracking_position]  <- theta[5]
     }
   }
-
   if (count_iter >= max_iter) stop("exceeded maximum number of iterations")
   if (count_stuck_all >= 20) stop("estimate seems to be stuck")
-
-  #Finish up
+  # Finish up
   elapsed <- proc.time() - start_time
   if (conf_ints) {
     conf_int <- .hyperConfInts(data, theta, zeroes, squashed, N_star,
@@ -238,7 +227,6 @@ hyperEM <-
   tracking <- data.frame(iter = track_iters, logL = track_LL, alpha1 = track_a1,
                          beta1 = track_b1, alpha2 = track_a2, beta2 = track_b2,
                          P = track_P)
-
   list(estimates = theta, conf_int = conf_int, maximum = delta_LL$LL,
        method = method, elapsed = elapsed[[3]], iters = count_iter,
        score = score$score_vec, score_norm = score$score_norm,

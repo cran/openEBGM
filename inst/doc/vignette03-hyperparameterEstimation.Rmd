@@ -24,7 +24,7 @@ methods. One process by which this can occur involves maximizing the likelihood
 function of the marginal distributions of the counts (or in our case, minimizing
 the negative log-likelihood function).
 
-### Optimization
+## Optimization
 
 Global optimization is a broad field. There are many existing R packages with
 minimization routines which may be used in the estimation of these 
@@ -45,25 +45,20 @@ of optimization approaches because the accuracy of a global optimization result
 is extremely difficult to verify and other approaches might work better in some
 cases.
 
-### References
+## References
 
 1. Meng X-L, Rubin D (1993). "Maximum likelihood estimation via the ECM
 algorithm: A general framework." *Biometrika*, 80(2), 267-278.
-*`https://doi.org/10.1093/biomet/80.2.267`*
 
 1. DuMouchel W, Pregibon D (2001). "Empirical Bayes Screening for
 Multi-item Associations." In *Proceedings of the Seventh ACM SIGKDD
 International Conference on Knowledge Discovery and Data Mining*, KDD '01,
 pp. 67-76. ACM, New York, NY, USA. ISBN 1-58113-391-X.
-*`https://doi.org/10.1145/502512.502526`*
 
 1. Millar, Russell B (2011). "Maximum Likelihood Estimation and Inference."
 *John Wiley & Sons, Ltd*, 111-112.
-*`https://doi.org/10.1002/9780470094846`*
 
 --------
-
-# Estimating the Hyperparameters
 
 ## Data Squashing
 
@@ -158,7 +153,7 @@ The other likelihood functions are `negLL()`, `negLLzero()`, and
 `negLLzeroSquash()`. Make sure to use the appropriate function for your choice
 of data squashing and use of zero counts.
 
-## Hyperparameter Estimation Functions
+## Special Wrapper Functions
 
 Hyperparameters can be calculated by exploring the parameter space of the 
 likelihood function using either the full data set of $N$s and $E$s or the 
@@ -179,7 +174,7 @@ theta_init <- data.frame(alpha1 = c(0.2, 0.1, 0.3),
 )
 ```
 
-###`autoHyper()`
+### `autoHyper()`
 
 Now that the initial guesses for the hyperparameters have been defined, the 
 function `autoHyper()` can be used to determine the actual hyperparameter 
@@ -233,7 +228,7 @@ hyperparameter estimates:
 autoHyper(squashed2, theta_init = theta_init, conf_ints = TRUE)$conf_int
 ```
 
-###`exploreHypers()`
+### `exploreHypers()`
 
 `autoHyper()` is a semi-automated (but imperfect) approach to hyperparameter 
 estimation. The user is encouraged to explore various optimization approaches as
@@ -251,7 +246,7 @@ exploreHypers(data = squashed2, theta_init = theta_init, std_errors = TRUE)
 basically just a wrapper around commonly used functions from the *stats* package
 mentioned earlier: `nlminb()` (the default), `nlm()`, & `optim()`.
 
-###`hyperEM()`
+## Expectation-Maximization Approach with `hyperEM()`
 
 `hyperEM()` implements a version of the EM algorithm referred to by Meng & Rubin
 (*1*) as the Expectation/Conditional Maximization (ECM) algorithm. `hyperEM()`
@@ -289,10 +284,10 @@ ggplot(pdat, aes(x = iter, y = value)) +
   geom_vline(xintercept = c(100, 200), size = 1, linetype = 2, col = "red")
 ```
 
-### *DEoptim* package
+## Specialized Optimization Packages
 
-Other packages, such as
-[DEoptim](https://cran.r-project.org/package=DEoptim){target="_blank"},
+Other packages that specialize in optimization, such as
+[DEoptim](<https://cran.r-project.org/package=DEoptim>){target="_blank"},
 can alternatively be used to estimate the hyperparameters:
 
 ```{r DEoptim example, warning = FALSE, message = FALSE}
@@ -320,5 +315,5 @@ likelihood hyperparameter estimation, `autoHyper()` will often give
 reasonable results with minimal effort. Once the hyperparameters have been
 estimated, they can be used in the calculation of the $EBGM$ and quantile scores
 by applying them to the posterior distribution. This process can be found in the
-[*Empirical Bayes Metrics with openEBGM*](https://cran.r-project.org/package=openEBGM/vignettes/x4_posteriorCalculationVignette.html){target="_blank"}
+*Empirical Bayes Metrics with openEBGM*
 vignette.

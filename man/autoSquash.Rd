@@ -52,6 +52,7 @@ For counts that are squashed, \code{cut_offs} and
   squashed, then those points are squashed to 50 "super points".
 }
 \examples{
+data.table::setDTthreads(2)  #only needed for CRAN checks
 data(caers)
 proc <- processRaw(caers)
 table(proc$N)
@@ -59,14 +60,15 @@ table(proc$N)
 squash1 <- autoSquash(proc)
 ftable(squash1[, c("N", "weight")])
 
-squash2 <- autoSquash(proc, keep_pts = c(50, 5))
-ftable(squash2[, c("N", "weight")])
+\dontrun{squash2 <- autoSquash(proc, keep_pts = c(50, 5))}
+\dontrun{ftable(squash2[, c("N", "weight")])}
 
-squash3 <- autoSquash(proc, keep_pts = 100,
-                      cut_offs = c(250, 500),
-                      num_super_pts = c(20, 60, 125)
-)
-ftable(squash3[, c("N", "weight")])
+\dontrun{
+  squash3 <- autoSquash(proc, keep_pts = 100,
+                        cut_offs = c(250, 500),
+                        num_super_pts = c(20, 60, 125))
+}
+\dontrun{ftable(squash3[, c("N", "weight")])}
 
 }
 \references{

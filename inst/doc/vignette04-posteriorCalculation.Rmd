@@ -50,7 +50,7 @@ $RR$ for small counts.
 
 -----
 
-# Calculating the EB-Scores
+## Calculating the EB-Scores
 
 Once the product/event combinations have been counted and the hyperparameters 
 have been estimated, we can calculate the EB scores:
@@ -73,7 +73,7 @@ hyper_estimates <- autoHyper(squashed2, theta_init = theta_init)
 (theta_hat <- hyper_estimates$estimates)
 ```
 
-###`Qn()`
+### `Qn()`
 
 The `Qn()` function calculates the mixture fractions for the posterior 
 distributions. The values returned by `Qn()` correspond to the probability that 
@@ -92,7 +92,7 @@ identical(length(qn), nrow(processed))
 summary(qn)
 ```
 
-###`ebgm()`
+### `ebgm()`
 
 The `ebgm()` function calculates the Empirical Bayes Geometric Mean $(EBGM)$ 
 scores. $EBGM$ is a measure of central tendency of the posterior distributions, 
@@ -104,7 +104,7 @@ processed$ebgm <- ebgm(theta_hat, N = processed$N, E = processed$E, qn  = qn)
 head(processed)
 ```
 
-###`quantBisect()`
+### `quantBisect()`
 
 The `quantBisect()` function calculates quantiles of the posterior distribution 
 using the bisection method. `quantBisect()` can calculate any quantile of the 
@@ -124,7 +124,7 @@ head(processed)
 
 --------
 
-# Analysis of EB-Scores
+## Analysis of EB-Scores
 
 The EB-scores ($EBGM$ and quantile scores) can be used to look for "signals" in 
 the data. As stated in the **Background** section of the *Introduction to 
@@ -165,7 +165,6 @@ head(tabbed[order(tabbed, decreasing = TRUE)])
 
 The output above suggests some products which may require further investigation.
 
-Next, the
-[*openEBGM Objects and Class Functions*](https://cran.r-project.org/package=openEBGM/vignettes/x5_openEBGMObjectVignette.html){target="_blank"}
+Next, the *openEBGM Objects and Class Functions*
 vignette will demonstrate the object-oriented features of the *openEBGM*
 package.

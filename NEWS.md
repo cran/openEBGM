@@ -1,6 +1,19 @@
 **openEBGM** version history
 ============================
 
+## v0.10.0
+* Improved numerical stability of hyperparameter calculations.
+* Now requires 'numDeriv' package for calculating Hessian matrices.
+* Removed 'param_lower' and 'param_upper' arguments from hyperEM().
+* Added 'transformed' argument to the likelihood functions to allow for
+  optimization on the log & logit scales.
+* Added 'min_theta' & 'max_theta' arguments to Qn(), ebgm(), quantBisect(), &
+  ebScores(). Alpha values now must also be between one half & twice the value
+  of the corresponding beta values. Values outside these ranges are replaced by
+  the limits.
+* Updates to vignettes, data, examples, etc.
+* Fixed NOTES regarding documentation.
+
 ## v0.9.1
 * Ensured that no more than two threads are used for CRAN checks.
 * Optimized examples for speed.

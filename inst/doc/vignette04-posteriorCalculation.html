@@ -11,7 +11,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
 
-<meta name="date" content="2023-09-14" />
+<meta name="date" content="2026-09-03" />
 
 <title>Empirical Bayes Metrics with openEBGM</title>
 
@@ -50,7 +50,7 @@ overflow: visible;
 </style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -61,7 +61,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -338,7 +338,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 <h1 class="title toc-ignore">Empirical Bayes Metrics with openEBGM</h1>
-<h4 class="date">2023-09-14</h4>
+<h4 class="date">2026-09-03</h4>
 
 
 
@@ -388,21 +388,31 @@ for small counts.</p>
 <p>Once the product/event combinations have been counted and the
 hyperparameters have been estimated, we can calculate the EB scores:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(openEBGM)</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">data</span>(caers)  <span class="co">#subset of publicly available CAERS data</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">data</span>(caers)  <span class="co">#subset of publicly available HFCS (formerly CAERS) data</span></span>
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>processed <span class="ot">&lt;-</span> <span class="fu">processRaw</span>(caers, <span class="at">stratify =</span> <span class="cn">FALSE</span>, <span class="at">zeroes =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>squashed <span class="ot">&lt;-</span> <span class="fu">squashData</span>(processed)</span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>squashed2 <span class="ot">&lt;-</span> <span class="fu">squashData</span>(squashed, <span class="at">count =</span> <span class="dv">2</span>, <span class="at">bin_size =</span> <span class="dv">10</span>, <span class="at">keep_pts =</span> <span class="dv">50</span>)</span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>theta_init <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">alpha1 =</span> <span class="fu">c</span>(<span class="fl">0.2</span>, <span class="fl">0.1</span>, <span class="fl">0.3</span>, <span class="fl">0.5</span>, <span class="fl">0.2</span>),</span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>                         <span class="at">beta1  =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.3</span>, <span class="fl">0.2</span>),</span>
-<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>                         <span class="at">alpha2 =</span> <span class="fu">c</span>(<span class="dv">2</span>,   <span class="dv">10</span>,  <span class="dv">6</span>,   <span class="dv">12</span>,  <span class="dv">5</span>),</span>
-<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>                         <span class="at">beta2  =</span> <span class="fu">c</span>(<span class="dv">4</span>,   <span class="dv">10</span>,  <span class="dv">6</span>,   <span class="dv">12</span>,  <span class="dv">5</span>),</span>
-<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>                         <span class="at">p      =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="fl">0.2</span>, <span class="fl">0.5</span>, <span class="fl">0.8</span>, <span class="fl">0.4</span>)</span>
-<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>)</span>
-<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>hyper_estimates <span class="ot">&lt;-</span> <span class="fu">autoHyper</span>(squashed2, <span class="at">theta_init =</span> theta_init)</span>
-<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a>(theta_hat <span class="ot">&lt;-</span> hyper_estimates<span class="sc">$</span>estimates)</span>
-<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="co">#&gt;     alpha1      beta1     alpha2      beta2          P </span></span>
-<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a><span class="co">#&gt; 3.25379356 0.39988854 2.02612692 1.90807970 0.06534557</span></span></code></pre></div>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>squashed <span class="ot">&lt;-</span> <span class="fu">squashData</span>(squashed, <span class="at">count =</span> <span class="dv">2</span>, <span class="at">bin_size =</span> <span class="dv">10</span>, <span class="at">keep_pts =</span> <span class="dv">50</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>theta_init <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>  <span class="at">alpha1 =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>),</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>  <span class="at">beta1 =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>),</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>  <span class="at">alpha2 =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">5</span>),</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>  <span class="at">beta2 =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">5</span>),</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>  <span class="at">p =</span> <span class="fu">c</span>(.<span class="dv">1</span>, <span class="fl">0.2</span>, <span class="fl">0.3</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>)</span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a>theta_init</span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="co">#&gt;   alpha1 beta1 alpha2 beta2   p</span></span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a><span class="co">#&gt; 1      1     1      2     2 0.1</span></span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a><span class="co">#&gt; 2      2     2      4     4 0.2</span></span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a><span class="co">#&gt; 3      3     3      5     5 0.3</span></span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a>hyper_estimates <span class="ot">&lt;-</span> <span class="fu">autoHyper</span>(squashed, <span class="at">theta_init =</span> theta_init)</span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a><span class="co">#&gt; Trying method &#39;nlminb&#39;...</span></span>
+<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a><span class="co">#&gt;   Working on initial guess number 1 of 3...</span></span>
+<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a><span class="co">#&gt;   Working on initial guess number 2 of 3...</span></span>
+<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a><span class="co">#&gt;   Working on initial guess number 3 of 3...</span></span>
+<span id="cb1-24"><a href="#cb1-24" tabindex="-1"></a>(theta_hat <span class="ot">&lt;-</span> hyper_estimates<span class="sc">$</span>estimates)</span>
+<span id="cb1-25"><a href="#cb1-25" tabindex="-1"></a><span class="co">#&gt;     alpha1      beta1     alpha2      beta2          P </span></span>
+<span id="cb1-26"><a href="#cb1-26" tabindex="-1"></a><span class="co">#&gt; 3.77699506 0.51388202 3.73820989 3.64892019 0.04817177</span></span></code></pre></div>
 <div id="qn" class="section level3">
 <h3><code>Qn()</code></h3>
 <p>The <code>Qn()</code> function calculates the mixture fractions for
@@ -418,12 +428,12 @@ from <code>processRaw()</code> – not the squashed data set or the raw
 data.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>qn <span class="ot">&lt;-</span> <span class="fu">Qn</span>(theta_hat, <span class="at">N =</span> processed<span class="sc">$</span>N, <span class="at">E =</span> processed<span class="sc">$</span>E)</span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">head</span>(qn)</span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#&gt; [1] 0.2819737 0.3409653 0.3482317 0.2819737 0.2226356 0.2556670</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#&gt; [1] 0.08983976 0.06931687 0.08191145 0.08945196 0.08830893 0.08596848</span></span>
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="fu">identical</span>(<span class="fu">length</span>(qn), <span class="fu">nrow</span>(processed))</span>
 <span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span>
 <span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="fu">summary</span>(qn)</span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt;      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. </span></span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt; 0.0001205 0.2340248 0.3089649 0.2846021 0.3397685 0.9999997</span></span></code></pre></div>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt; 0.02279 0.07659 0.08540 0.08566 0.08884 0.99978</span></span></code></pre></div>
 </div>
 <div id="ebgm" class="section level3">
 <h3><code>ebgm()</code></h3>
@@ -434,20 +444,20 @@ one indicate product/adverse event pairs that are reported at an
 unusually high rate.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>processed<span class="sc">$</span>ebgm <span class="ot">&lt;-</span> <span class="fu">ebgm</span>(theta_hat, <span class="at">N =</span> processed<span class="sc">$</span>N, <span class="at">E =</span> processed<span class="sc">$</span>E, <span class="at">qn  =</span> qn)</span>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">head</span>(processed)</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co">#&gt;                      var1                  var2 N            E      RR    PRR</span></span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt; 1         1-PHENYLALANINE  HEART RATE INCREASED 1 0.0360548272   27.74  27.96</span></span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; 2 11 UNSPECIFIED VITAMINS                ASTHMA 1 0.0038736591  258.15 279.58</span></span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; 3 11 UNSPECIFIED VITAMINS CARDIAC FUNCTION </span><span class="al">TEST</span><span class="co"> 1 0.0002979738 3356.00    Inf</span></span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt; 4 11 UNSPECIFIED VITAMINS            CHEST PAIN 1 0.0360548272   27.74  27.96</span></span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt; 5 11 UNSPECIFIED VITAMINS              DYSPNOEA 1 0.0765792610   13.06  13.11</span></span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; 6 11 UNSPECIFIED VITAMINS      HYPERSENSITIVITY 1 0.0527413588   18.96  19.06</span></span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt;   ebgm</span></span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt; 1 2.23</span></span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; 2 2.58</span></span>
-<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#&gt; 3 2.63</span></span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt; 4 2.23</span></span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; 5 1.92</span></span>
-<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt; 6 2.09</span></span></code></pre></div>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co">#&gt;                                             var1                     var2 N</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt; 1  7 ZEN 7-HYDROXYMITRAGYNINE CHEWABLE TABLETS            ACUTE PSYCHOSIS 1</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; 2  7 ZEN 7-HYDROXYMITRAGYNINE CHEWABLE TABLETS            HOSPITALISATION 1</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; 3               7-HYDROXYMITRAGYNINE 7-OH KRATOM                    DEATH 1</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt; 4                                     ARTRI KING  BLOOD PRESSURE ABNORMAL 1</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt; 5                                     ARTRI KING CEREBROVASCULAR ACCIDENT 1</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; 6                                     ARTRI KING                 SWELLING 1</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt;              E      RR    PRR ebgm</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt; 1 0.0003602305 2776.00    Inf 1.27</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; 2 0.1253602305    7.98   8.00 1.19</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#&gt; 3 0.0407060519   24.57  24.78 1.24</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt; 4 0.0021613833  462.67 555.00 1.27</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; 5 0.0075648415  132.19 138.75 1.26</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt; 6 0.0190922190   52.38  53.37 1.25</span></span></code></pre></div>
 </div>
 <div id="quantbisect" class="section level3">
 <h3><code>quantBisect()</code></h3>
@@ -460,24 +470,26 @@ limits for credibility intervals. Below, <em>QUANT_05</em> is the
 percentile. These form the lower and upper bounds of 90% credibility
 intervals for the Empirical Bayes (EB) scores.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>processed<span class="sc">$</span>QUANT_05 <span class="ot">&lt;-</span> <span class="fu">quantBisect</span>(<span class="dv">5</span>, <span class="at">theta_hat =</span> theta_hat,</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>                                  <span class="at">N =</span> processed<span class="sc">$</span>N, <span class="at">E =</span> processed<span class="sc">$</span>E, <span class="at">qn =</span> qn)</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>processed<span class="sc">$</span>QUANT_95 <span class="ot">&lt;-</span> <span class="fu">quantBisect</span>(<span class="dv">95</span>, <span class="at">theta_hat =</span> theta_hat,</span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>                                  <span class="at">N =</span> processed<span class="sc">$</span>N, <span class="at">E =</span> processed<span class="sc">$</span>E, <span class="at">qn =</span> qn)</span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="fu">head</span>(processed)</span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt;                      var1                  var2 N            E      RR    PRR</span></span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; 1         1-PHENYLALANINE  HEART RATE INCREASED 1 0.0360548272   27.74  27.96</span></span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; 2 11 UNSPECIFIED VITAMINS                ASTHMA 1 0.0038736591  258.15 279.58</span></span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; 3 11 UNSPECIFIED VITAMINS CARDIAC FUNCTION </span><span class="al">TEST</span><span class="co"> 1 0.0002979738 3356.00    Inf</span></span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; 4 11 UNSPECIFIED VITAMINS            CHEST PAIN 1 0.0360548272   27.74  27.96</span></span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; 5 11 UNSPECIFIED VITAMINS              DYSPNOEA 1 0.0765792610   13.06  13.11</span></span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; 6 11 UNSPECIFIED VITAMINS      HYPERSENSITIVITY 1 0.0527413588   18.96  19.06</span></span>
-<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt;   ebgm QUANT_05 QUANT_95</span></span>
-<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; 1 2.23     0.49    13.85</span></span>
-<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt; 2 2.58     0.52    15.78</span></span>
-<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt; 3 2.63     0.52    16.02</span></span>
-<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt; 4 2.23     0.49    13.85</span></span>
-<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co">#&gt; 5 1.92     0.47    11.77</span></span>
-<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="co">#&gt; 6 2.09     0.48    12.95</span></span></code></pre></div>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="at">N =</span> processed<span class="sc">$</span>N, <span class="at">E =</span> processed<span class="sc">$</span>E, <span class="at">qn =</span> qn</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>)</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>processed<span class="sc">$</span>QUANT_95 <span class="ot">&lt;-</span> <span class="fu">quantBisect</span>(<span class="dv">95</span>, <span class="at">theta_hat =</span> theta_hat,</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  <span class="at">N =</span> processed<span class="sc">$</span>N, <span class="at">E =</span> processed<span class="sc">$</span>E, <span class="at">qn =</span> qn</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>)</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="fu">head</span>(processed)</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt;                                             var1                     var2 N</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; 1  7 ZEN 7-HYDROXYMITRAGYNINE CHEWABLE TABLETS            ACUTE PSYCHOSIS 1</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; 2  7 ZEN 7-HYDROXYMITRAGYNINE CHEWABLE TABLETS            HOSPITALISATION 1</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; 3               7-HYDROXYMITRAGYNINE 7-OH KRATOM                    DEATH 1</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; 4                                     ARTRI KING  BLOOD PRESSURE ABNORMAL 1</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt; 5                                     ARTRI KING CEREBROVASCULAR ACCIDENT 1</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; 6                                     ARTRI KING                 SWELLING 1</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt;              E      RR    PRR ebgm QUANT_05 QUANT_95</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt; 1 0.0003602305 2776.00    Inf 1.27     0.50     3.31</span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt; 2 0.1253602305    7.98   8.00 1.19     0.48     2.75</span></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co">#&gt; 3 0.0407060519   24.57  24.78 1.24     0.50     3.05</span></span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="co">#&gt; 4 0.0021613833  462.67 555.00 1.27     0.50     3.29</span></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="co">#&gt; 5 0.0075648415  132.19 138.75 1.26     0.50     3.26</span></span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="co">#&gt; 6 0.0190922190   52.38  53.37 1.25     0.50     3.18</span></span></code></pre></div>
 <hr />
 </div>
 </div>
@@ -502,9 +514,9 @@ of how one may identify product-symptom combinations that require
 further investigation based on the EB-scores.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>suspicious <span class="ot">&lt;-</span> processed[processed<span class="sc">$</span>QUANT_05 <span class="sc">&gt;=</span> <span class="dv">2</span>, ]</span>
 <span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">nrow</span>(suspicious); <span class="fu">nrow</span>(processed); <span class="fu">nrow</span>(suspicious)<span class="sc">/</span><span class="fu">nrow</span>(processed)</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co">#&gt; [1] 131</span></span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">#&gt; [1] 17189</span></span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt; [1] 0.007621153</span></span></code></pre></div>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co">#&gt; [1] 24</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">#&gt; [1] 13441</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt; [1] 0.001785581</span></span></code></pre></div>
 <p>From above we see that less than 1% of product-symptom pairs are
 suspect based on the <em>QUANT_05</em> score. One may look more closely
 at these product-symptom combinations to ascertain which products may
@@ -516,35 +528,35 @@ relationships.</p>
 <span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>                         <span class="fu">c</span>(<span class="st">&quot;var1&quot;</span>, <span class="st">&quot;var2&quot;</span>, <span class="st">&quot;N&quot;</span>, <span class="st">&quot;E&quot;</span>, <span class="st">&quot;QUANT_05&quot;</span>, <span class="st">&quot;ebgm&quot;</span>, </span>
 <span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>                           <span class="st">&quot;QUANT_95&quot;</span>)]</span>
 <span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="fu">head</span>(suspicious, <span class="dv">5</span>)</span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt;                                           var1                        var2  N</span></span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt; 13924                            REUMOFAN PLUS            WEIGHT INCREASED 16</span></span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt; 8187  HYDROXYCUT REGULAR RAPID RELEASE CAPLETS          EMOTIONAL DISTRESS 19</span></span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt; 13886                            REUMOFAN PLUS                    IMMOBILE  6</span></span>
-<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co">#&gt; 7793              HYDROXYCUT HARDCORE CAPSULES CARDIO-RESPIRATORY DISTRESS  8</span></span>
-<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt; 8220  HYDROXYCUT REGULAR RAPID RELEASE CAPLETS                      INJURY 11</span></span>
-<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt;                E QUANT_05  ebgm QUANT_95</span></span>
-<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt; 13924 0.40643623    15.68 23.26    33.48</span></span>
-<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt; 8187  0.89690107    11.65 16.78    23.55</span></span>
-<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt; 13886 0.07866508    10.16 18.28    30.83</span></span>
-<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt; 7793  0.30482718     9.00 15.25    24.52</span></span>
-<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt; 8220  0.56317044     8.98 14.28    21.78</span></span>
-<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a></span>
-<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a>tabbed <span class="ot">&lt;-</span> <span class="fu">table</span>(suspicious<span class="sc">$</span>var1)</span>
-<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="fu">head</span>(tabbed[<span class="fu">order</span>(tabbed, <span class="at">decreasing =</span> <span class="cn">TRUE</span>)])</span>
-<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="co">#&gt; HYDROXYCUT REGULAR RAPID RELEASE CAPLETS </span></span>
-<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="co">#&gt;                                       26 </span></span>
-<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="co">#&gt;             HYDROXYCUT HARDCORE CAPSULES </span></span>
-<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a><span class="co">#&gt;                                       13 </span></span>
-<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="co">#&gt;                            REUMOFAN PLUS </span></span>
-<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a><span class="co">#&gt;                                        8 </span></span>
-<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a><span class="co">#&gt;                      HYDROXYCUT CAPSULES </span></span>
-<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a><span class="co">#&gt;                                        5 </span></span>
-<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a><span class="co">#&gt;               HYDROXYCUT MAX LIQUID CAPS </span></span>
-<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a><span class="co">#&gt;                                        5 </span></span>
-<span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a><span class="co">#&gt;         HYDROXYCUT CAFFEINE FREE CAPLETS </span></span>
-<span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a><span class="co">#&gt;                                        4</span></span></code></pre></div>
-<p>The output above suggests some products which may require further
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt;                                                        var1</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt; 3628  EU NATURAL CONCEPTION FOR HER FERTILITY AID AND MULTI</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt; 9503                 PRESERVISION AREDS 2 FORMULA SOFT GELS</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt; 5253                                                 KRATOM</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co">#&gt; 10387  RITUAL SYNBIOTIC PLUS PREBIOTIC PROBIOTIC POSTBIOTIC</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt; 4030                                              FLORASTOR</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt;                                               var2  N          E QUANT_05  ebgm</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt; 3628                          ABORTION SPONTANEOUS  9 0.16858790     7.96 13.95</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt; 9503  NEOVASCULAR AGE-RELATED MACULAR DEGENERATION 13 0.59510086     7.65 12.20</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt; 5253                                    DEPENDENCE 19 1.42615274     6.84 10.06</span></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt; 10387                    GASTROINTESTINAL DISORDER  8 0.17291066     6.80 12.38</span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt; 4030                                     FUNGAEMIA  6 0.02269452     5.81 11.96</span></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt;       QUANT_95</span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt; 3628     23.06</span></span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co">#&gt; 9503     18.67</span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt; 5253     14.39</span></span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="co">#&gt; 10387    21.06</span></span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="co">#&gt; 4030     22.10</span></span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a></span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a>tabbed <span class="ot">&lt;-</span> <span class="fu">table</span>(suspicious<span class="sc">$</span>var1)</span>
+<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="fu">head</span>(tabbed[<span class="fu">order</span>(tabbed, <span class="at">decreasing =</span> <span class="cn">TRUE</span>)])</span>
+<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a><span class="co">#&gt; PRESERVISION AREDS 2 FORMULA SOFT GELS AG1 WHOLE FOOD POUCH 360G NON SPECIFIC </span></span>
+<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a><span class="co">#&gt;                                      7                                      2 </span></span>
+<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a><span class="co">#&gt;                       CITRACAL MAXIMUM             CENTRUM SILVER MEN 50 PLUS </span></span>
+<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a><span class="co">#&gt;                                      2                                      1 </span></span>
+<span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a><span class="co">#&gt;           CENTRUM SILVER WOMEN 50 PLUS                  CITRACAL MAXIMUM PLUS </span></span>
+<span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a><span class="co">#&gt;                                      1                                      1</span></span></code></pre></div>
+<p>The output above suggests some products which may warrant further
 investigation.</p>
 <p>Next, the <em>openEBGM Objects and Class Functions</em> vignette will
 demonstrate the object-oriented features of the <em>openEBGM</em>

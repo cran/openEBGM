@@ -75,13 +75,13 @@ Evans SJW, Waller P, Davis S (2001). "Use of Proportional
   Reaction Reports." \emph{Pharmacoepidemiology and Drug Safety}, 10(6),
   483-486.
 
-FDA (2017). "CFSAN Adverse Event Reporting System (CAERS)."
-  URL \url{https://www.fda.gov/food/compliance-enforcement-food/cfsan-adverse-event-reporting-system-caers}.
+FDA (2026). "Human Foods Complaint System (HFCS)."
+  URL \url{https://www.fda.gov/food/compliance-enforcement-food/human-foods-complaint-system-hfcs}.
 }
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://journal.r-project.org/archive/2017/RJ-2017-063/index.html}
+  \item \url{https://journal.r-project.org/articles/RJ-2017-063/index.html}
 }
 
 }
@@ -90,6 +90,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item John Ihrie \email{John.Ihrie@fda.hhs.gov}
   \item Travis Canida \email{Travis.Canida@fda.hhs.gov}
 }
 

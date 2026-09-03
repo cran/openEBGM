@@ -15,8 +15,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ## Background
 
 DuMouchel used an "Empirical Bayes" (EB) method. That is, the data are a driving
-force behind the choice of the prior distribution (in contrast to typical
-Bayesian methods, where the prior is chosen without regard to the actual data).
+force behind the choice of the prior distribution.
 One outcome of this is a known posterior distribution that relies on a set of
 hyperparameters derived from the prior distribution. These hyperparameters are
 estimated by their most likely value in the context of Empirical Bayesian
@@ -72,10 +71,10 @@ hyperparameters of the prior distribution. A large contingency table will have
 many cells, resulting in computational difficulties for the optimization 
 routines needed for estimation. Data squashing (DuMouchel et al., 2001) 
 transforms a set of 2-dimensional points to a smaller number of 3-dimensional 
-points. The idea is to reduce a large number of points $(N, E)$ to a smaller 
-number of points $(N_k, E_k, W_k)$, where $k = 1,...,M$ and $W_k$ is the weight
-of the $k^{th}$ "superpoint". To minimize information loss, only points close to
-each other should be squashed.
+points (triples). The idea is to reduce a large number of points $(N, E)$ to a 
+smaller number of points $(N_k, E_k, W_k)$, where $k = 1,...,M$ and $W_k$ is the
+weight of the $k^{th}$ "superpoint". To minimize information loss, only points
+close to each other should be squashed.
 
 For a given $N$, `squashData()` combines points with similar $E$s into bins
 using a specified bin size and uses the average $E$ within each bin as the $E$
@@ -132,10 +131,28 @@ The most commonly used likelihood function is `negLLsquash()`, which is used
 when squashing data and not using zero counts. `negLLsquash()` is not called 
 directly, but rather by some optimization function:
 
-```{r negLLsquash example, warning = FALSE}
-theta_init <- c(alpha1 = 0.2, beta1 = 0.1, alpha2 = 2, beta2 = 4, p = 1/3)
-stats::nlm(negLLsquash, p = theta_init,
-           ni = squashed$N, ei = squashed$E, wi = squashed$weight, N_star = 1)
+```{r negLLsquash example}
+theta_init <- c(alpha1 = 1, beta1 = 1, alpha2 = 2, beta2 = 2, p = .2)
+theta_hats <- stats::nlm(negLLsquash, p = theta_init,
+  ni = squashed$N, ei = squashed$E, wi = squashed$weight, N_star = 1
+)$estimate
+theta_hats
+```
+
+For unconstrained optimization, it is often better to work on the log and logit
+scales and then backtransform:
+
+```{r negLLsquash transformed}
+theta_init[1:4] <- log(theta_init[1:4])
+theta_init[5] <- log(theta_init[5] / (1 - theta_init[5]))
+theta_hats_transformed <- stats::nlm(negLLsquash, p = theta_init,
+  ni = squashed$N, ei = squashed$E, wi = squashed$weight, N_star = 1,
+  transformed = TRUE
+)$estimate
+theta_hats <- theta_hats_transformed
+theta_hats[1:4] <- exp(theta_hats[1:4])
+theta_hats[5] <- stats::plogis(theta_hats[5])
+theta_hats
 ```
 
 The `N_star` argument allows the user to choose the smallest value of $N$ used 
@@ -145,34 +162,38 @@ the actual minimum count in `ni`. If the user wishes to use a larger value for
 filtered. Here, we are using all counts except zeroes, so no filtering is 
 needed. In general, `N_star = 1` should be used whenever practical.
 
-Note that you will likely receive warning messages from the optimization 
-function--use your own judgment to determine whether or not they would likely
-indicate real problems.
-
 The other likelihood functions are `negLL()`, `negLLzero()`, and
 `negLLzeroSquash()`. Make sure to use the appropriate function for your choice
 of data squashing and use of zero counts.
+
+Luckily, *openEBGM* offers some wrapper functions to help with this 
+optimization task.
 
 ## Special Wrapper Functions
 
 Hyperparameters can be calculated by exploring the parameter space of the 
 likelihood function using either the full data set of $N$s and $E$s or the 
 squashed set. The methodology implemented by this package essentially maximizes 
-the likelihood function (or more specifically, minimizes the negative 
-log-likelihood function). Starting points must be chosen to begin the 
+the likelihood function (or more specifically and equivalently, minimizes the
+negative log-likelihood function). Starting points must be chosen to begin the 
 exploration. DuMouchel (1999, 2001) provides a "lightly justified" set of 
 initial hyperparameters. However, *openEBGM*'s functions support a large set of
 starting choices to help reach convergence and reduce the chance of false
 convergence. We begin by defining some starting points:
 
 ```{r}
-theta_init <- data.frame(alpha1 = c(0.2, 0.1, 0.3),
-                         beta1  = c(0.1, 0.2, 0.5),
-                         alpha2 = c(2,   10,  6),
-                         beta2  = c(4,   10,  6),
-                         p      = c(1/3, 0.2, 0.5)
+theta_init <- data.frame(
+  alpha1 = c(1, 2, 3),
+  beta1 = c(1, 2, 3),
+  alpha2 = c(2, 4, 5),
+  beta2 = c(2, 4, 5),
+  p = c(.1, 0.2, 0.3)
 )
 ```
+
+The following functions (`autoHyper()`, `exploreHypers()`, and `hyperEM()`)
+automatically perform the transformations and backtransformations mentioned
+above.
 
 ### `autoHyper()`
 
@@ -185,19 +206,20 @@ log-likelihood is chosen as a tentative result. By default, this estimate must
 be similar to at least one other convergent solution. If the algorithm fails to
 consistently converge, an error message is returned.
 
-```{r autoHyper example, warning = FALSE}
+```{r autoHyper example}
 system.time(
-hyper_estimates_full <- autoHyper(data = processed, theta_init = theta_init, 
-                                  squashed = FALSE)
+  hyper_estimates_full <- autoHyper(data = processed, theta_init = theta_init, 
+    squashed = FALSE
+  )
 )
 
-squashed2 <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 50)
+squashed <- squashData(processed, count = 1, bin_size = 25, keep_pts = 10)
+squashed <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 10)
 system.time(
-hyper_estimates_squashed <- autoHyper(data = squashed2, theta_init = theta_init)
+  hyper_estimates_squashed <- autoHyper(data = squashed, theta_init = theta_init)
 )
 
 hyper_estimates_full
-
 hyper_estimates_squashed
 ```
 
@@ -221,25 +243,26 @@ and gradients to build up a picture of the surface to be optimized." (source: R
 documentation for stats::optim) This routine is implemented by the 
 `stats::optim()` function with the `method = BFGS` argument.
 
-`autoHyper()` can now return standard errors and confidence intervals for the
-hyperparameter estimates:
+`autoHyper()` can also return standard errors and confidence intervals for the
+hyperparameter estimates if needed:
 
-```{r autoHyper example with CIs, warning = FALSE}
-autoHyper(squashed2, theta_init = theta_init, conf_ints = TRUE)$conf_int
+```{r autoHyper example with CIs}
+autoHyper(squashed, theta_init = theta_init, conf_ints = TRUE)$conf_int
 ```
 
 ### `exploreHypers()`
 
-`autoHyper()` is a semi-automated (but imperfect) approach to hyperparameter 
-estimation. The user is encouraged to explore various optimization approaches as
-no single approach will always work (the functions in *openEBGM* are not the
-only optimization functions available in R). One way to explore is with
-*openEBGM*'s `exploreHypers()` function, which is actually called by
-`autoHyper()` behind-the-scenes. `exploreHypers()` can now also return standard
-errors for the hyperparameter estimates:
+`autoHyper()` is a semi-automated approach to attempt estimation of the
+hyperparameters. The user is encouraged to explore various optimization
+approaches as no single approach will always work (also, the wrapper functions
+in *openEBGM* are not the only optimization functions available in R).
+One way to explore is with *openEBGM*'s `exploreHypers()` function, which is
+actually called by `autoHyper()` behind-the-scenes.
+`exploreHypers()` can also return standard errors for the hyperparameter
+estimates if needed:
 
-```{r hyperparameter estimation example, warning = FALSE}
-exploreHypers(data = squashed2, theta_init = theta_init, std_errors = TRUE)
+```{r hyperparameter estimation example}
+exploreHypers(data = squashed, theta_init = theta_init, std_errors = TRUE)
 ```
 
 `exploreHypers()` offers three gradient-based optimization methods and is 
@@ -257,63 +280,72 @@ the negative log-likelihood function. The method described by Millar (*3*) is
 used to accelerate the estimate of $\theta$ every 100 iterations of the
 algorithm.
 
-```{r hyperEM example, warning = FALSE}
+```{r hyperEM example}
 data(caers)
-proc <- processRaw(caers)
-squashed <- squashData(proc, bin_size = 100, keep_pts = 0)
-squashed <- squashData(squashed, count = 2, bin_size = 12)
-hyperEM_ests <- hyperEM(squashed, theta_init_vec = c(1, 1, 2, 2, .3),
-                        conf_ints = TRUE, track = TRUE)
+processed <- processRaw(caers)
+squashed <- squashData(processed, count = 1, bin_size = 25, keep_pts = 10)
+squashed <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 10)
+hyperEM_ests <- hyperEM(squashed, theta_init_vec = c(1, 1, 2, 2, .1),
+  conf_ints = TRUE, LL_tol = 1e-6, track = TRUE
+)
 str(hyperEM_ests)
 ```
 
 Setting `track = TRUE` tracks the log-likelihood and hyperparameter estimates at
 each iteration, which we can plot to study the behavior of the algorithm:
 
-```{r hyperEM plotting example, warning = FALSE, fig.width = 7, fig.height = 10}
+```{r hyperEM plotting example, fig.width = 7, fig.height = 10}
 library(ggplot2)
 library(tidyr)
-pdat <- gather(hyperEM_ests$tracking, key = "metric", value = "value", logL:P)
+pdat <- pivot_longer(hyperEM_ests$tracking,
+  cols = -iter, names_to = "metric", values_to = "value"
+)
 pdat$metric <- factor(pdat$metric, levels = unique(pdat$metric), ordered = TRUE)
 ggplot(pdat, aes(x = iter, y = value)) +
-  geom_line(size = 1.1, col = "blue") +
+  geom_line(linewidth = 1.1, col = "blue") +
   facet_grid(metric ~ ., scales = "free") +
   ggtitle("Convergence Assessment",
-          subtitle = "Dashed red line indicates accelerated estimate") +
+    subtitle = "Dashed red line indicates accelerated estimate"
+  ) +
   labs(x = "Iteration Count", y = "Estimate") +
-  geom_vline(xintercept = c(100, 200), size = 1, linetype = 2, col = "red")
+  geom_vline(
+    xintercept = c(100, 200), linewidth = 1, linetype = 2, col = "red"
+  )
 ```
 
 ## Specialized Optimization Packages
 
 Other packages that specialize in optimization, such as
 [DEoptim](<https://cran.r-project.org/package=DEoptim>){target="_blank"},
-can alternatively be used to estimate the hyperparameters:
+can alternatively be used along with the likelihood functions to estimate the
+hyperparameters:
 
-```{r DEoptim example, warning = FALSE, message = FALSE}
+```{r DEoptim example, message = FALSE}
 library(DEoptim)
 set.seed(123456)
 theta_hat <- DEoptim(negLLsquash,
-                     lower = c(rep(1e-05, 4), .001),
-                     upper = c(rep(5, 4), 1 - .001),
-                     control = DEoptim.control(
-                       itermax = 2000,
-                       reltol  = 1e-04,
-                       steptol = 200,
-                       NP      = 100,
-                       CR      = 0.85,
-                       F       = 0.75,
-                       trace   = 25
-                     ),
-                     ni = squashed$N, ei = squashed$E, wi = squashed$weight
+  lower = rep(1e-03, 5),
+  upper = c(rep(5, 4), .999),
+  control = DEoptim.control(
+    itermax = 2000,
+    reltol = 1e-04,
+    steptol = 200,
+    NP = 100,
+    CR = 0.85,
+    F = 0.75,
+    trace = 25
+  ),
+  ni = squashed$N, ei = squashed$E, wi = squashed$weight
 )
 (theta_hat <- as.numeric(theta_hat$optim$bestmem))
 ```
+
+Note that the two components in the mixture distribution switched here, which is
+not a problem.
 
 Although the user is encouraged to explore various approaches for maximum 
 likelihood hyperparameter estimation, `autoHyper()` will often give
 reasonable results with minimal effort. Once the hyperparameters have been
 estimated, they can be used in the calculation of the $EBGM$ and quantile scores
 by applying them to the posterior distribution. This process can be found in the
-*Empirical Bayes Metrics with openEBGM*
-vignette.
+*Empirical Bayes Metrics with openEBGM* vignette.

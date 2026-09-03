@@ -4,7 +4,14 @@
 \alias{ebScores}
 \title{Construct an openEBGM object}
 \usage{
-ebScores(processed, hyper_estimate, quantiles = c(5, 95), digits = 2)
+ebScores(
+  processed,
+  hyper_estimate,
+  quantiles = c(5, 95),
+  digits = 2,
+  min_theta = c(0.25, 0.25, 0.25, 0.25, 1e-05),
+  max_theta = c(10, 10, 10, 10, 0.99999)
+)
 }
 \arguments{
 \item{processed}{A data frame resulting from running \code{\link{processRaw}}.}
@@ -17,14 +24,18 @@ quantiles.}
 
 \item{digits}{A whole number scalar specifying how many decimal places to
 use for rounding \emph{EBGM} and the quantiles scores.}
+
+\item{min_theta}{A numeric vector of minimum values for \code{theta_hat}.}
+
+\item{max_theta}{A numeric vector of maximum values for \code{theta_hat}.}
 }
 \value{
 An openEBGM object (class S3) containing:
   \itemize{
-    \item{\emph{data}: }{A data frame containing the results (scores, etc.).}
-    \item{\emph{hyper_parameters}: }{A list containing the hyperparameter
-                                     estimation results.}
-    \item{\emph{quantiles}: }{The chosen percentiles.}
+    \item \emph{data}: A data frame containing the results (scores, etc.).
+    \item \emph{hyper_parameters}: A list containing the hyperparameter
+                                     estimation results.
+    \item \emph{quantiles}: The chosen percentiles.
   }
 }
 \description{
@@ -53,11 +64,9 @@ theta_init <- data.frame(
 )
 data(caers)
 proc <- processRaw(caers)
-squashed <- squashData(proc, bin_size = 300, keep_pts = 10)
-squashed <- squashData(squashed, count = 2, bin_size = 13, keep_pts = 10)
-suppressWarnings(
-  hypers <- autoHyper(data = squashed, theta_init = theta_init)
-)
+squashed <- squashData(proc, bin_size = 100, keep_pts = 10)
+squashed <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 10)
+hypers <- autoHyper(data = squashed, theta_init = theta_init)
 obj <- ebScores(processed = proc, hyper_estimate = hypers, quantiles = 5)
 print(obj)
 

@@ -11,7 +11,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
 
-<meta name="date" content="2023-09-14" />
+<meta name="date" content="2026-09-03" />
 
 <title>Hyperparameter Estimation with openEBGM</title>
 
@@ -50,7 +50,7 @@ overflow: visible;
 </style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -61,7 +61,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -339,22 +339,21 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Hyperparameter Estimation with
 openEBGM</h1>
-<h4 class="date">2023-09-14</h4>
+<h4 class="date">2026-09-03</h4>
 
 
 
 <div id="background" class="section level2">
 <h2>Background</h2>
 <p>DuMouchel used an “Empirical Bayes” (EB) method. That is, the data
-are a driving force behind the choice of the prior distribution (in
-contrast to typical Bayesian methods, where the prior is chosen without
-regard to the actual data). One outcome of this is a known posterior
-distribution that relies on a set of hyperparameters derived from the
-prior distribution. These hyperparameters are estimated by their most
-likely value in the context of Empirical Bayesian methods. One process
-by which this can occur involves maximizing the likelihood function of
-the marginal distributions of the counts (or in our case, minimizing the
-negative log-likelihood function).</p>
+are a driving force behind the choice of the prior distribution. One
+outcome of this is a known posterior distribution that relies on a set
+of hyperparameters derived from the prior distribution. These
+hyperparameters are estimated by their most likely value in the context
+of Empirical Bayesian methods. One process by which this can occur
+involves maximizing the likelihood function of the marginal
+distributions of the counts (or in our case, minimizing the negative
+log-likelihood function).</p>
 </div>
 <div id="optimization" class="section level2">
 <h2>Optimization</h2>
@@ -406,8 +405,8 @@ estimate the hyperparameters of the prior distribution. A large
 contingency table will have many cells, resulting in computational
 difficulties for the optimization routines needed for estimation. Data
 squashing (DuMouchel et al., 2001) transforms a set of 2-dimensional
-points to a smaller number of 3-dimensional points. The idea is to
-reduce a large number of points <span class="math inline">\((N,
+points to a smaller number of 3-dimensional points (triples). The idea
+is to reduce a large number of points <span class="math inline">\((N,
 E)\)</span> to a smaller number of points <span class="math inline">\((N_k, E_k, W_k)\)</span>, where <span class="math inline">\(k = 1,...,M\)</span> and <span class="math inline">\(W_k\)</span> is the weight of the <span class="math inline">\(k^{th}\)</span> “superpoint”. To minimize
 information loss, only points close to each other should be
 squashed.</p>
@@ -424,27 +423,32 @@ the points (1, 1.1) and (1, 1.3) could be squashed to the superpoint (1,
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>processed <span class="ot">&lt;-</span> <span class="fu">processRaw</span>(caers)</span>
 <span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>processed[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]</span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="co">#&gt;                      var1                  var2 N            E</span></span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt; 1         1-PHENYLALANINE  HEART RATE INCREASED 1 0.0360548272</span></span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt; 2 11 UNSPECIFIED VITAMINS                ASTHMA 1 0.0038736591</span></span>
-<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co">#&gt; 3 11 UNSPECIFIED VITAMINS CARDIAC FUNCTION </span><span class="al">TEST</span><span class="co"> 1 0.0002979738</span></span>
-<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co">#&gt; 4 11 UNSPECIFIED VITAMINS            CHEST PAIN 1 0.0360548272</span></span>
-<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>squashed <span class="ot">&lt;-</span> <span class="fu">squashData</span>(processed) <span class="co">#Using defaults</span></span>
-<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="fu">head</span>(squashed)</span>
-<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="co">#&gt;   N            E weight</span></span>
-<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="co">#&gt; 1 1 0.0002979738     50</span></span>
-<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a><span class="co">#&gt; 2 1 0.0002979738     50</span></span>
-<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a><span class="co">#&gt; 3 1 0.0002979738     50</span></span>
-<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a><span class="co">#&gt; 4 1 0.0002979738     50</span></span>
-<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a><span class="co">#&gt; 5 1 0.0002979738     50</span></span>
-<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a><span class="co">#&gt; 6 1 0.0002979738     50</span></span>
-<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a></span>
-<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a><span class="fu">nrow</span>(processed)</span>
-<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a><span class="co">#&gt; [1] 17189</span></span>
-<span id="cb1-24"><a href="#cb1-24" tabindex="-1"></a><span class="fu">nrow</span>(squashed)</span>
-<span id="cb1-25"><a href="#cb1-25" tabindex="-1"></a><span class="co">#&gt; [1] 1568</span></span></code></pre></div>
-<p>As shown above, the squashed data set has 9.12% of the observations
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="co">#&gt;                                             var1                    var2 N</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt; 1  7 ZEN 7-HYDROXYMITRAGYNINE CHEWABLE TABLETS           ACUTE PSYCHOSIS 1</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt; 2  7 ZEN 7-HYDROXYMITRAGYNINE CHEWABLE TABLETS           HOSPITALISATION 1</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co">#&gt; 3               7-HYDROXYMITRAGYNINE 7-OH KRATOM                   DEATH 1</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co">#&gt; 4                                     ARTRI KING BLOOD PRESSURE ABNORMAL 1</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#&gt;              E</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co">#&gt; 1 0.0003602305</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co">#&gt; 2 0.1253602305</span></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="co">#&gt; 3 0.0407060519</span></span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="co">#&gt; 4 0.0021613833</span></span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a>squashed <span class="ot">&lt;-</span> <span class="fu">squashData</span>(processed) <span class="co">#Using defaults</span></span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a><span class="fu">head</span>(squashed)</span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a><span class="co">#&gt;   N            E weight</span></span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a><span class="co">#&gt; 1 1 0.0003602305     50</span></span>
+<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a><span class="co">#&gt; 2 1 0.0003602305     50</span></span>
+<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a><span class="co">#&gt; 3 1 0.0003602305     50</span></span>
+<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a><span class="co">#&gt; 4 1 0.0003602305     50</span></span>
+<span id="cb1-24"><a href="#cb1-24" tabindex="-1"></a><span class="co">#&gt; 5 1 0.0003602305     50</span></span>
+<span id="cb1-25"><a href="#cb1-25" tabindex="-1"></a><span class="co">#&gt; 6 1 0.0003602305     50</span></span>
+<span id="cb1-26"><a href="#cb1-26" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" tabindex="-1"></a><span class="fu">nrow</span>(processed)</span>
+<span id="cb1-28"><a href="#cb1-28" tabindex="-1"></a><span class="co">#&gt; [1] 13441</span></span>
+<span id="cb1-29"><a href="#cb1-29" tabindex="-1"></a><span class="fu">nrow</span>(squashed)</span>
+<span id="cb1-30"><a href="#cb1-30" tabindex="-1"></a><span class="co">#&gt; [1] 1202</span></span></code></pre></div>
+<p>As shown above, the squashed data set has 8.94% of the observations
 as the full dataset. Using this squashed data, we can then estimate the
 hyperparameters in a far more efficient manner.</p>
 <p><code>squashData()</code> can be used iteratively for each count
@@ -455,35 +459,27 @@ hyperparameters in a far more efficient manner.</p>
 once:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>squash3 <span class="ot">&lt;-</span> <span class="fu">autoSquash</span>(processed)</span>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">ftable</span>(squash3[, <span class="fu">c</span>(<span class="st">&quot;N&quot;</span>, <span class="st">&quot;weight&quot;</span>)])</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co">#&gt;    weight   1   2   3   6   8  31</span></span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt; N                                </span></span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; 1         100   0   0   1   0 514</span></span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; 2          75   0   1   0  79   0</span></span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt; 3          51  71   0   0   0   0</span></span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt; 4          80   0   0   0   0   0</span></span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; 5          41   0   0   0   0   0</span></span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt; 6          31   0   0   0   0   0</span></span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt; 7          17   0   0   0   0   0</span></span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; 8          20   0   0   0   0   0</span></span>
-<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#&gt; 9          14   0   0   0   0   0</span></span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt; 10          6   0   0   0   0   0</span></span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; 11          7   0   0   0   0   0</span></span>
-<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt; 12          3   0   0   0   0   0</span></span>
-<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt; 13          3   0   0   0   0   0</span></span>
-<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt; 14          2   0   0   0   0   0</span></span>
-<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt; 16          4   0   0   0   0   0</span></span>
-<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt; 17          2   0   0   0   0   0</span></span>
-<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt; 18          5   0   0   0   0   0</span></span>
-<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co">#&gt; 19          1   0   0   0   0   0</span></span>
-<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="co">#&gt; 21          2   0   0   0   0   0</span></span>
-<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="co">#&gt; 22          1   0   0   0   0   0</span></span>
-<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="co">#&gt; 23          1   0   0   0   0   0</span></span>
-<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a><span class="co">#&gt; 24          1   0   0   0   0   0</span></span>
-<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a><span class="co">#&gt; 27          1   0   0   0   0   0</span></span>
-<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a><span class="co">#&gt; 28          1   0   0   0   0   0</span></span>
-<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a><span class="co">#&gt; 42          1   0   0   0   0   0</span></span>
-<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a><span class="co">#&gt; 53          1   0   0   0   0   0</span></span>
-<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a><span class="co">#&gt; 54          1   0   0   0   0   0</span></span></code></pre></div>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co">#&gt;    weight   1   2   8   9  24</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt; N                            </span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; 1         100   0   0   1 520</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; 2          76   0  55   0   0</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt; 3          51  58   0   0   0</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt; 4          70   0   0   0   0</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; 5          31   0   0   0   0</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt; 6          22   0   0   0   0</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt; 7          14   0   0   0   0</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; 8           6   0   0   0   0</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#&gt; 9           5   0   0   0   0</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt; 10          6   0   0   0   0</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; 11          5   0   0   0   0</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt; 12          2   0   0   0   0</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt; 13          2   0   0   0   0</span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt; 16          1   0   0   0   0</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt; 17          1   0   0   0   0</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt; 19          1   0   0   0   0</span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt; 20          1   0   0   0   0</span></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co">#&gt; 23          1   0   0   0   0</span></span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="co">#&gt; 24          1   0   0   0   0</span></span></code></pre></div>
 </div>
 <div id="likelihood-functions" class="section level2">
 <h2>Likelihood Functions</h2>
@@ -499,23 +495,53 @@ fraction.</p>
 <code>negLLsquash()</code>, which is used when squashing data and not
 using zero counts. <code>negLLsquash()</code> is not called directly,
 but rather by some optimization function:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>theta_init <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">alpha1 =</span> <span class="fl">0.2</span>, <span class="at">beta1 =</span> <span class="fl">0.1</span>, <span class="at">alpha2 =</span> <span class="dv">2</span>, <span class="at">beta2 =</span> <span class="dv">4</span>, <span class="at">p =</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>)</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>stats<span class="sc">::</span><span class="fu">nlm</span>(negLLsquash, <span class="at">p =</span> theta_init,</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>           <span class="at">ni =</span> squashed<span class="sc">$</span>N, <span class="at">ei =</span> squashed<span class="sc">$</span>E, <span class="at">wi =</span> squashed<span class="sc">$</span>weight, <span class="at">N_star =</span> <span class="dv">1</span>)</span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt; $minimum</span></span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt; [1] 4162.496</span></span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; $estimate</span></span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; [1] 3.25086926 0.39971401 2.02581887 1.90806636 0.06539159</span></span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; $gradient</span></span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; [1]  3.076907e-05 -2.253273e-04 -1.156701e-04  2.452500e-04 -3.937066e-04</span></span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt; $code</span></span>
-<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
-<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt; $iterations</span></span>
-<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt; [1] 71</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>theta_init <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">alpha1 =</span> <span class="dv">1</span>, <span class="at">beta1 =</span> <span class="dv">1</span>, <span class="at">alpha2 =</span> <span class="dv">2</span>, <span class="at">beta2 =</span> <span class="dv">2</span>, <span class="at">p =</span> .<span class="dv">2</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>theta_hats <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">nlm</span>(negLLsquash, <span class="at">p =</span> theta_init,</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="at">ni =</span> squashed<span class="sc">$</span>N, <span class="at">ei =</span> squashed<span class="sc">$</span>E, <span class="at">wi =</span> squashed<span class="sc">$</span>weight, <span class="at">N_star =</span> <span class="dv">1</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>)<span class="sc">$</span>estimate</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt; Warning in log(alpha_beta[2]): NaNs produced</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; Warning in log(alpha_beta[2] + ei): NaNs produced</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; Warning in log(alpha_beta[2]): NaNs produced</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; Warning in log(alpha_beta[2] + ei): NaNs produced</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; Warning in log(1 - theta[5]): NaNs produced</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; Warning in stats::nlm(negLLsquash, p = theta_init, ni = squashed$N, ei =</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; squashed$E, : NA/NaN replaced by maximum positive value</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; Warning in log(alpha_beta[2]): NaNs produced</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt; Warning in log(alpha_beta[2] + ei): NaNs produced</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; Warning in log(alpha_beta[2]): NaNs produced</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt; Warning in log(alpha_beta[2] + ei): NaNs produced</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt; Warning in log(1 - theta[5]): NaNs produced</span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt; Warning in stats::nlm(negLLsquash, p = theta_init, ni = squashed$N, ei =</span></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co">#&gt; squashed$E, : NA/NaN replaced by maximum positive value</span></span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="co">#&gt; Warning in log(alpha_beta[2]): NaNs produced</span></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="co">#&gt; Warning in log(alpha_beta[2] + ei): NaNs produced</span></span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="co">#&gt; Warning in log(theta[5]): NaNs produced</span></span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a><span class="co">#&gt; Warning in stats::nlm(negLLsquash, p = theta_init, ni = squashed$N, ei =</span></span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a><span class="co">#&gt; squashed$E, : NA/NaN replaced by maximum positive value</span></span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a><span class="co">#&gt; Warning in log(theta[5]): NaNs produced</span></span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a><span class="co">#&gt; Warning in stats::nlm(negLLsquash, p = theta_init, ni = squashed$N, ei =</span></span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a><span class="co">#&gt; squashed$E, : NA/NaN replaced by maximum positive value</span></span>
+<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a><span class="co">#&gt; Warning in log(theta[5]): NaNs produced</span></span>
+<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a><span class="co">#&gt; Warning in stats::nlm(negLLsquash, p = theta_init, ni = squashed$N, ei =</span></span>
+<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a><span class="co">#&gt; squashed$E, : NA/NaN replaced by maximum positive value</span></span>
+<span id="cb4-30"><a href="#cb4-30" tabindex="-1"></a><span class="co">#&gt; Warning in log(theta[5]): NaNs produced</span></span>
+<span id="cb4-31"><a href="#cb4-31" tabindex="-1"></a><span class="co">#&gt; Warning in stats::nlm(negLLsquash, p = theta_init, ni = squashed$N, ei =</span></span>
+<span id="cb4-32"><a href="#cb4-32" tabindex="-1"></a><span class="co">#&gt; squashed$E, : NA/NaN replaced by maximum positive value</span></span>
+<span id="cb4-33"><a href="#cb4-33" tabindex="-1"></a>theta_hats</span>
+<span id="cb4-34"><a href="#cb4-34" tabindex="-1"></a><span class="co">#&gt; [1] 3.77387733 0.51353686 3.73731349 3.64827500 0.04818549</span></span></code></pre></div>
+<p>For unconstrained optimization, it is often better to work on the log
+and logit scales and then backtransform:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>theta_init[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>] <span class="ot">&lt;-</span> <span class="fu">log</span>(theta_init[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>])</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>theta_init[<span class="dv">5</span>] <span class="ot">&lt;-</span> <span class="fu">log</span>(theta_init[<span class="dv">5</span>] <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> theta_init[<span class="dv">5</span>]))</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>theta_hats_transformed <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">nlm</span>(negLLsquash, <span class="at">p =</span> theta_init,</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="at">ni =</span> squashed<span class="sc">$</span>N, <span class="at">ei =</span> squashed<span class="sc">$</span>E, <span class="at">wi =</span> squashed<span class="sc">$</span>weight, <span class="at">N_star =</span> <span class="dv">1</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  <span class="at">transformed =</span> <span class="cn">TRUE</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>)<span class="sc">$</span>estimate</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>theta_hats <span class="ot">&lt;-</span> theta_hats_transformed</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>theta_hats[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>] <span class="ot">&lt;-</span> <span class="fu">exp</span>(theta_hats[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>])</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>theta_hats[<span class="dv">5</span>] <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">plogis</span>(theta_hats[<span class="dv">5</span>])</span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>theta_hats</span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt; [1] 3.77418874 0.51358277 3.73737163 3.64834218 0.04818672</span></span></code></pre></div>
 <p>The <code>N_star</code> argument allows the user to choose the
 smallest value of <span class="math inline">\(N\)</span> used for
 hyperparameter estimation. The user must be careful to match
@@ -525,31 +551,35 @@ vectors supplied to arguments <code>ni</code>, <code>ei</code>, and
 <code>wi</code> must be filtered. Here, we are using all counts except
 zeroes, so no filtering is needed. In general, <code>N_star = 1</code>
 should be used whenever practical.</p>
-<p>Note that you will likely receive warning messages from the
-optimization function–use your own judgment to determine whether or not
-they would likely indicate real problems.</p>
 <p>The other likelihood functions are <code>negLL()</code>,
 <code>negLLzero()</code>, and <code>negLLzeroSquash()</code>. Make sure
 to use the appropriate function for your choice of data squashing and
 use of zero counts.</p>
+<p>Luckily, <em>openEBGM</em> offers some wrapper functions to help with
+this optimization task.</p>
 </div>
 <div id="special-wrapper-functions" class="section level2">
 <h2>Special Wrapper Functions</h2>
 <p>Hyperparameters can be calculated by exploring the parameter space of
 the likelihood function using either the full data set of <span class="math inline">\(N\)</span>s and <span class="math inline">\(E\)</span>s or the squashed set. The methodology
 implemented by this package essentially maximizes the likelihood
-function (or more specifically, minimizes the negative log-likelihood
-function). Starting points must be chosen to begin the exploration.
-DuMouchel (1999, 2001) provides a “lightly justified” set of initial
-hyperparameters. However, <em>openEBGM</em>’s functions support a large
-set of starting choices to help reach convergence and reduce the chance
-of false convergence. We begin by defining some starting points:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>theta_init <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">alpha1 =</span> <span class="fu">c</span>(<span class="fl">0.2</span>, <span class="fl">0.1</span>, <span class="fl">0.3</span>),</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>                         <span class="at">beta1  =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.2</span>, <span class="fl">0.5</span>),</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>                         <span class="at">alpha2 =</span> <span class="fu">c</span>(<span class="dv">2</span>,   <span class="dv">10</span>,  <span class="dv">6</span>),</span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>                         <span class="at">beta2  =</span> <span class="fu">c</span>(<span class="dv">4</span>,   <span class="dv">10</span>,  <span class="dv">6</span>),</span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>                         <span class="at">p      =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="fl">0.2</span>, <span class="fl">0.5</span>)</span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>)</span></code></pre></div>
+function (or more specifically and equivalently, minimizes the negative
+log-likelihood function). Starting points must be chosen to begin the
+exploration. DuMouchel (1999, 2001) provides a “lightly justified” set
+of initial hyperparameters. However, <em>openEBGM</em>’s functions
+support a large set of starting choices to help reach convergence and
+reduce the chance of false convergence. We begin by defining some
+starting points:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>theta_init <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  <span class="at">alpha1 =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>),</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  <span class="at">beta1 =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>),</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  <span class="at">alpha2 =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">5</span>),</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="at">beta2 =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">5</span>),</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>  <span class="at">p =</span> <span class="fu">c</span>(.<span class="dv">1</span>, <span class="fl">0.2</span>, <span class="fl">0.3</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>)</span></code></pre></div>
+<p>The following functions (<code>autoHyper()</code>,
+<code>exploreHypers()</code>, and <code>hyperEM()</code>) automatically
+perform the transformations and backtransformations mentioned above.</p>
 <div id="autohyper" class="section level3">
 <h3><code>autoHyper()</code></h3>
 <p>Now that the initial guesses for the hyperparameters have been
@@ -561,67 +591,76 @@ corresponding to the smallest negative log-likelihood is chosen as a
 tentative result. By default, this estimate must be similar to at least
 one other convergent solution. If the algorithm fails to consistently
 converge, an error message is returned.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">system.time</span>(</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>hyper_estimates_full <span class="ot">&lt;-</span> <span class="fu">autoHyper</span>(<span class="at">data =</span> processed, <span class="at">theta_init =</span> theta_init, </span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>                                  <span class="at">squashed =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>)</span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt;    user  system elapsed </span></span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt;   20.43    0.31   20.75</span></span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a></span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>squashed2 <span class="ot">&lt;-</span> <span class="fu">squashData</span>(squashed, <span class="at">count =</span> <span class="dv">2</span>, <span class="at">bin_size =</span> <span class="dv">10</span>, <span class="at">keep_pts =</span> <span class="dv">50</span>)</span>
-<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="fu">system.time</span>(</span>
-<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>hyper_estimates_squashed <span class="ot">&lt;-</span> <span class="fu">autoHyper</span>(<span class="at">data =</span> squashed2, <span class="at">theta_init =</span> theta_init)</span>
-<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>)</span>
-<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt;    user  system elapsed </span></span>
-<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt;    1.03    0.03    1.06</span></span>
-<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a></span>
-<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a>hyper_estimates_full</span>
-<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt; $method</span></span>
-<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt; [1] &quot;nlminb&quot;</span></span>
-<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co">#&gt; $estimates</span></span>
-<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt;     alpha1      beta1     alpha2      beta2          P </span></span>
-<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="co">#&gt; 3.25596685 0.39998994 2.02376139 1.90614108 0.06530755 </span></span>
-<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="co">#&gt; $conf_int</span></span>
-<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a><span class="co">#&gt; NULL</span></span>
-<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a><span class="co">#&gt; $num_close</span></span>
-<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a><span class="co">#&gt; [1] 2</span></span>
-<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a><span class="co">#&gt; $theta_hats</span></span>
-<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a><span class="co">#&gt;   guess_num   a1_hat    b1_hat   a2_hat   b2_hat      p_hat code converge</span></span>
-<span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a><span class="co">#&gt; 1         1 3.255974 0.3999893 2.023751 1.906132 0.06530713    0     TRUE</span></span>
-<span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a><span class="co">#&gt; 2         2 3.256254 0.4000054 2.023724 1.906091 0.06530283    0     TRUE</span></span>
-<span id="cb6-33"><a href="#cb6-33" tabindex="-1"></a><span class="co">#&gt; 3         3 3.255967 0.3999899 2.023761 1.906141 0.06530755    0     TRUE</span></span>
-<span id="cb6-34"><a href="#cb6-34" tabindex="-1"></a><span class="co">#&gt;   in_bounds  minimum</span></span>
-<span id="cb6-35"><a href="#cb6-35" tabindex="-1"></a><span class="co">#&gt; 1      TRUE 4162.456</span></span>
-<span id="cb6-36"><a href="#cb6-36" tabindex="-1"></a><span class="co">#&gt; 2      TRUE 4162.456</span></span>
-<span id="cb6-37"><a href="#cb6-37" tabindex="-1"></a><span class="co">#&gt; 3      TRUE 4162.456</span></span>
-<span id="cb6-38"><a href="#cb6-38" tabindex="-1"></a></span>
-<span id="cb6-39"><a href="#cb6-39" tabindex="-1"></a>hyper_estimates_squashed</span>
-<span id="cb6-40"><a href="#cb6-40" tabindex="-1"></a><span class="co">#&gt; $method</span></span>
-<span id="cb6-41"><a href="#cb6-41" tabindex="-1"></a><span class="co">#&gt; [1] &quot;nlminb&quot;</span></span>
-<span id="cb6-42"><a href="#cb6-42" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb6-43"><a href="#cb6-43" tabindex="-1"></a><span class="co">#&gt; $estimates</span></span>
-<span id="cb6-44"><a href="#cb6-44" tabindex="-1"></a><span class="co">#&gt;     alpha1      beta1     alpha2      beta2          P </span></span>
-<span id="cb6-45"><a href="#cb6-45" tabindex="-1"></a><span class="co">#&gt; 3.25374319 0.39988512 2.02611022 1.90806892 0.06534614 </span></span>
-<span id="cb6-46"><a href="#cb6-46" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb6-47"><a href="#cb6-47" tabindex="-1"></a><span class="co">#&gt; $conf_int</span></span>
-<span id="cb6-48"><a href="#cb6-48" tabindex="-1"></a><span class="co">#&gt; NULL</span></span>
-<span id="cb6-49"><a href="#cb6-49" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb6-50"><a href="#cb6-50" tabindex="-1"></a><span class="co">#&gt; $num_close</span></span>
-<span id="cb6-51"><a href="#cb6-51" tabindex="-1"></a><span class="co">#&gt; [1] 2</span></span>
-<span id="cb6-52"><a href="#cb6-52" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb6-53"><a href="#cb6-53" tabindex="-1"></a><span class="co">#&gt; $theta_hats</span></span>
-<span id="cb6-54"><a href="#cb6-54" tabindex="-1"></a><span class="co">#&gt;   guess_num   a1_hat    b1_hat   a2_hat   b2_hat      p_hat code converge</span></span>
-<span id="cb6-55"><a href="#cb6-55" tabindex="-1"></a><span class="co">#&gt; 1         1 3.251938 0.3997615 2.026192 1.908225 0.06536609    0     TRUE</span></span>
-<span id="cb6-56"><a href="#cb6-56" tabindex="-1"></a><span class="co">#&gt; 2         2 3.237922 0.3989700 2.027493 1.910069 0.06557221    0     TRUE</span></span>
-<span id="cb6-57"><a href="#cb6-57" tabindex="-1"></a><span class="co">#&gt; 3         3 3.253743 0.3998851 2.026110 1.908069 0.06534614    0     TRUE</span></span>
-<span id="cb6-58"><a href="#cb6-58" tabindex="-1"></a><span class="co">#&gt;   in_bounds minimum</span></span>
-<span id="cb6-59"><a href="#cb6-59" tabindex="-1"></a><span class="co">#&gt; 1      TRUE 4161.93</span></span>
-<span id="cb6-60"><a href="#cb6-60" tabindex="-1"></a><span class="co">#&gt; 2      TRUE 4161.93</span></span>
-<span id="cb6-61"><a href="#cb6-61" tabindex="-1"></a><span class="co">#&gt; 3      TRUE 4161.93</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">system.time</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  hyper_estimates_full <span class="ot">&lt;-</span> <span class="fu">autoHyper</span>(<span class="at">data =</span> processed, <span class="at">theta_init =</span> theta_init, </span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>    <span class="at">squashed =</span> <span class="cn">FALSE</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  )</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>)</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co">#&gt; Trying method &#39;nlminb&#39;...</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#&gt;   Working on initial guess number 1 of 3...</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt;   Working on initial guess number 2 of 3...</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#&gt;   Working on initial guess number 3 of 3...</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">#&gt;    user  system elapsed </span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#&gt;    8.02    0.02    8.70</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>squashed <span class="ot">&lt;-</span> <span class="fu">squashData</span>(processed, <span class="at">count =</span> <span class="dv">1</span>, <span class="at">bin_size =</span> <span class="dv">25</span>, <span class="at">keep_pts =</span> <span class="dv">10</span>)</span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>squashed <span class="ot">&lt;-</span> <span class="fu">squashData</span>(squashed, <span class="at">count =</span> <span class="dv">2</span>, <span class="at">bin_size =</span> <span class="dv">10</span>, <span class="at">keep_pts =</span> <span class="dv">10</span>)</span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="fu">system.time</span>(</span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a>  hyper_estimates_squashed <span class="ot">&lt;-</span> <span class="fu">autoHyper</span>(<span class="at">data =</span> squashed, <span class="at">theta_init =</span> theta_init)</span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a>)</span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="co">#&gt; Trying method &#39;nlminb&#39;...</span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="co">#&gt;   Working on initial guess number 1 of 3...</span></span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="co">#&gt;   Working on initial guess number 2 of 3...</span></span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a><span class="co">#&gt;   Working on initial guess number 3 of 3...</span></span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="co">#&gt;    user  system elapsed </span></span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a><span class="co">#&gt;    0.40    0.01    0.52</span></span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a></span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a>hyper_estimates_full</span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="co">#&gt; $method</span></span>
+<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a><span class="co">#&gt; [1] &quot;nlminb&quot;</span></span>
+<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a><span class="co">#&gt; $estimates</span></span>
+<span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a><span class="co">#&gt;     alpha1      beta1     alpha2      beta2          P </span></span>
+<span id="cb7-31"><a href="#cb7-31" tabindex="-1"></a><span class="co">#&gt; 3.77518082 0.51366516 3.73386169 3.64522042 0.04817939 </span></span>
+<span id="cb7-32"><a href="#cb7-32" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-33"><a href="#cb7-33" tabindex="-1"></a><span class="co">#&gt; $conf_int</span></span>
+<span id="cb7-34"><a href="#cb7-34" tabindex="-1"></a><span class="co">#&gt; NULL</span></span>
+<span id="cb7-35"><a href="#cb7-35" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-36"><a href="#cb7-36" tabindex="-1"></a><span class="co">#&gt; $num_close</span></span>
+<span id="cb7-37"><a href="#cb7-37" tabindex="-1"></a><span class="co">#&gt; [1] 2</span></span>
+<span id="cb7-38"><a href="#cb7-38" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-39"><a href="#cb7-39" tabindex="-1"></a><span class="co">#&gt; $theta_hats</span></span>
+<span id="cb7-40"><a href="#cb7-40" tabindex="-1"></a><span class="co">#&gt;   guess_num   a1_hat    b1_hat   a2_hat   b2_hat      p_hat code converge</span></span>
+<span id="cb7-41"><a href="#cb7-41" tabindex="-1"></a><span class="co">#&gt; 1         1 3.775181 0.5136652 3.733862 3.645220 0.04817939    0     TRUE</span></span>
+<span id="cb7-42"><a href="#cb7-42" tabindex="-1"></a><span class="co">#&gt; 2         2 3.775167 0.5136651 3.733887 3.645248 0.04818000    0     TRUE</span></span>
+<span id="cb7-43"><a href="#cb7-43" tabindex="-1"></a><span class="co">#&gt; 3         3 3.775175 0.5136644 3.733860 3.645219 0.04817937    0     TRUE</span></span>
+<span id="cb7-44"><a href="#cb7-44" tabindex="-1"></a><span class="co">#&gt;   in_bounds minimum</span></span>
+<span id="cb7-45"><a href="#cb7-45" tabindex="-1"></a><span class="co">#&gt; 1      TRUE 2995.19</span></span>
+<span id="cb7-46"><a href="#cb7-46" tabindex="-1"></a><span class="co">#&gt; 2      TRUE 2995.19</span></span>
+<span id="cb7-47"><a href="#cb7-47" tabindex="-1"></a><span class="co">#&gt; 3      TRUE 2995.19</span></span>
+<span id="cb7-48"><a href="#cb7-48" tabindex="-1"></a>hyper_estimates_squashed</span>
+<span id="cb7-49"><a href="#cb7-49" tabindex="-1"></a><span class="co">#&gt; $method</span></span>
+<span id="cb7-50"><a href="#cb7-50" tabindex="-1"></a><span class="co">#&gt; [1] &quot;nlminb&quot;</span></span>
+<span id="cb7-51"><a href="#cb7-51" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-52"><a href="#cb7-52" tabindex="-1"></a><span class="co">#&gt; $estimates</span></span>
+<span id="cb7-53"><a href="#cb7-53" tabindex="-1"></a><span class="co">#&gt;     alpha1      beta1     alpha2      beta2          P </span></span>
+<span id="cb7-54"><a href="#cb7-54" tabindex="-1"></a><span class="co">#&gt; 3.77687131 0.51432212 3.75499924 3.66462742 0.04828858 </span></span>
+<span id="cb7-55"><a href="#cb7-55" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-56"><a href="#cb7-56" tabindex="-1"></a><span class="co">#&gt; $conf_int</span></span>
+<span id="cb7-57"><a href="#cb7-57" tabindex="-1"></a><span class="co">#&gt; NULL</span></span>
+<span id="cb7-58"><a href="#cb7-58" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-59"><a href="#cb7-59" tabindex="-1"></a><span class="co">#&gt; $num_close</span></span>
+<span id="cb7-60"><a href="#cb7-60" tabindex="-1"></a><span class="co">#&gt; [1] 2</span></span>
+<span id="cb7-61"><a href="#cb7-61" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-62"><a href="#cb7-62" tabindex="-1"></a><span class="co">#&gt; $theta_hats</span></span>
+<span id="cb7-63"><a href="#cb7-63" tabindex="-1"></a><span class="co">#&gt;   guess_num   a1_hat    b1_hat   a2_hat   b2_hat      p_hat code converge</span></span>
+<span id="cb7-64"><a href="#cb7-64" tabindex="-1"></a><span class="co">#&gt; 1         1 3.776871 0.5143221 3.754999 3.664627 0.04828858    0     TRUE</span></span>
+<span id="cb7-65"><a href="#cb7-65" tabindex="-1"></a><span class="co">#&gt; 2         2 3.776847 0.5143192 3.755000 3.664633 0.04828893    0     TRUE</span></span>
+<span id="cb7-66"><a href="#cb7-66" tabindex="-1"></a><span class="co">#&gt; 3         3 3.777163 0.5143511 3.755022 3.664659 0.04828866    0     TRUE</span></span>
+<span id="cb7-67"><a href="#cb7-67" tabindex="-1"></a><span class="co">#&gt;   in_bounds  minimum</span></span>
+<span id="cb7-68"><a href="#cb7-68" tabindex="-1"></a><span class="co">#&gt; 1      TRUE 2994.068</span></span>
+<span id="cb7-69"><a href="#cb7-69" tabindex="-1"></a><span class="co">#&gt; 2      TRUE 2994.068</span></span>
+<span id="cb7-70"><a href="#cb7-70" tabindex="-1"></a><span class="co">#&gt; 3      TRUE 2994.068</span></span></code></pre></div>
 <p>As seen above, the process is much faster when utilizing the squashed
 data, with estimates that are nearly identical. Of course, the amount of
 efficiency increase depends on the parameter values used in the call to
@@ -643,43 +682,50 @@ which “…uses function values and gradients to build up a picture of the
 surface to be optimized.” (source: R documentation for stats::optim)
 This routine is implemented by the <code>stats::optim()</code> function
 with the <code>method = BFGS</code> argument.</p>
-<p><code>autoHyper()</code> can now return standard errors and
-confidence intervals for the hyperparameter estimates:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">autoHyper</span>(squashed2, <span class="at">theta_init =</span> theta_init, <span class="at">conf_ints =</span> <span class="cn">TRUE</span>)<span class="sc">$</span>conf_int</span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="co">#&gt;        pt_est     SE   LL_95  UL_95</span></span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co">#&gt; a1_hat 3.2537 2.2875 -1.2297 7.7372</span></span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co">#&gt; b1_hat 0.3999 0.1439  0.1179 0.6819</span></span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co">#&gt; a2_hat 2.0261 0.4514  1.1414 2.9108</span></span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co">#&gt; b2_hat 1.9081 0.4327  1.0599 2.7562</span></span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#&gt; p_hat  0.0653 0.0358 -0.0048 0.1355</span></span></code></pre></div>
+<p><code>autoHyper()</code> can also return standard errors and
+confidence intervals for the hyperparameter estimates if needed:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">autoHyper</span>(squashed, <span class="at">theta_init =</span> theta_init, <span class="at">conf_ints =</span> <span class="cn">TRUE</span>)<span class="sc">$</span>conf_int</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="co">#&gt; Trying method &#39;nlminb&#39;...</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co">#&gt;   Working on initial guess number 1 of 3...</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co">#&gt;   Working on initial guess number 2 of 3...</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt;   Working on initial guess number 3 of 3...</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt;        pt_est     SE  LL_95  UL_95</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt; a1_hat 3.7769 2.2950 0.0000 8.2751</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt; b1_hat 0.5143 0.2453 0.0336 0.9950</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co">#&gt; a2_hat 3.7550 1.0022 1.7907 5.7193</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt; b2_hat 3.6646 0.9139 1.8734 5.4559</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co">#&gt; p_hat  0.0483 0.0143 0.0202 0.0764</span></span></code></pre></div>
 </div>
 <div id="explorehypers" class="section level3">
 <h3><code>exploreHypers()</code></h3>
-<p><code>autoHyper()</code> is a semi-automated (but imperfect) approach
-to hyperparameter estimation. The user is encouraged to explore various
-optimization approaches as no single approach will always work (the
-functions in <em>openEBGM</em> are not the only optimization functions
-available in R). One way to explore is with <em>openEBGM</em>’s
-<code>exploreHypers()</code> function, which is actually called by
-<code>autoHyper()</code> behind-the-scenes. <code>exploreHypers()</code>
-can now also return standard errors for the hyperparameter
-estimates:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">exploreHypers</span>(<span class="at">data =</span> squashed2, <span class="at">theta_init =</span> theta_init, <span class="at">std_errors =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="co">#&gt; $estimates</span></span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co">#&gt;   guess_num   a1_hat    b1_hat   a2_hat   b2_hat      p_hat code converge</span></span>
-<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co">#&gt; 1         1 3.251938 0.3997615 2.026192 1.908225 0.06536609    0     TRUE</span></span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt; 2         2 3.237922 0.3989700 2.027493 1.910069 0.06557221    0     TRUE</span></span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt; 3         3 3.253743 0.3998851 2.026110 1.908069 0.06534614    0     TRUE</span></span>
-<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt;   in_bounds minimum</span></span>
-<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt; 1      TRUE 4161.93</span></span>
-<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co">#&gt; 2      TRUE 4161.93</span></span>
-<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt; 3      TRUE 4161.93</span></span>
-<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co">#&gt; $std_errs</span></span>
-<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="co">#&gt;   guess_num    a1_se     b1_se     a2_se     b2_se       p_se</span></span>
-<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="co">#&gt; 1         1 2.280957 0.1435365 0.4512203 0.4323834 0.03573021</span></span>
-<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="co">#&gt; 2         2 2.235704 0.1410427 0.4504548 0.4304327 0.03543024</span></span>
-<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="co">#&gt; 3         3 2.287523 0.1438980 0.4513726 0.4327411 0.03578473</span></span></code></pre></div>
+<p><code>autoHyper()</code> is a semi-automated approach to attempt
+estimation of the hyperparameters. The user is encouraged to explore
+various optimization approaches as no single approach will always work
+(also, the wrapper functions in <em>openEBGM</em> are not the only
+optimization functions available in R). One way to explore is with
+<em>openEBGM</em>’s <code>exploreHypers()</code> function, which is
+actually called by <code>autoHyper()</code> behind-the-scenes.
+<code>exploreHypers()</code> can also return standard errors for the
+hyperparameter estimates if needed:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">exploreHypers</span>(<span class="at">data =</span> squashed, <span class="at">theta_init =</span> theta_init, <span class="at">std_errors =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="co">#&gt;   Working on initial guess number 1 of 3...</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="co">#&gt;   Working on initial guess number 2 of 3...</span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co">#&gt;   Working on initial guess number 3 of 3...</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co">#&gt; $estimates</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co">#&gt;   guess_num   a1_hat    b1_hat   a2_hat   b2_hat      p_hat code converge</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt; 1         1 3.776871 0.5143221 3.754999 3.664627 0.04828858    0     TRUE</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt; 2         2 3.776847 0.5143192 3.755000 3.664633 0.04828893    0     TRUE</span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt; 3         3 3.777163 0.5143511 3.755022 3.664659 0.04828866    0     TRUE</span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt;   in_bounds  minimum</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt; 1      TRUE 2994.068</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co">#&gt; 2      TRUE 2994.068</span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt; 3      TRUE 2994.068</span></span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="co">#&gt; $std_errs</span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="co">#&gt;   guess_num    a1_se     b1_se    a2_se     b2_se       p_se</span></span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="co">#&gt; 1         1 2.295040 0.2452684 1.002227 0.9139328 0.01433702</span></span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="co">#&gt; 2         2 2.295058 0.2452673 1.002229 0.9139369 0.01433744</span></span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a><span class="co">#&gt; 3         3 2.295436 0.2453012 1.002246 0.9139586 0.01433784</span></span></code></pre></div>
 <p><code>exploreHypers()</code> offers three gradient-based optimization
 methods and is basically just a wrapper around commonly used functions
 from the <em>stats</em> package mentioned earlier: <code>nlminb()</code>
@@ -698,111 +744,119 @@ by using <code>stats::nlminb()</code> to directly minimize the negative
 log-likelihood function. The method described by Millar (<em>3</em>) is
 used to accelerate the estimate of <span class="math inline">\(\theta\)</span> every 100 iterations of the
 algorithm.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">data</span>(caers)</span>
-<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>proc <span class="ot">&lt;-</span> <span class="fu">processRaw</span>(caers)</span>
-<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>squashed <span class="ot">&lt;-</span> <span class="fu">squashData</span>(proc, <span class="at">bin_size =</span> <span class="dv">100</span>, <span class="at">keep_pts =</span> <span class="dv">0</span>)</span>
-<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>squashed <span class="ot">&lt;-</span> <span class="fu">squashData</span>(squashed, <span class="at">count =</span> <span class="dv">2</span>, <span class="at">bin_size =</span> <span class="dv">12</span>)</span>
-<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>hyperEM_ests <span class="ot">&lt;-</span> <span class="fu">hyperEM</span>(squashed, <span class="at">theta_init_vec =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>, .<span class="dv">3</span>),</span>
-<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>                        <span class="at">conf_ints =</span> <span class="cn">TRUE</span>, <span class="at">track =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt; change in LL: 1.15e+00 | theta: 3.12  0.63  1.66  2.101 0.159 </span></span>
-<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt; change in LL: 2.88e-01 | theta: 3.364 0.528 2.222 2.281 0.104 </span></span>
-<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt; change in LL: 5.67e-02 | theta: 3.46  0.47  2.387 2.263 0.081 </span></span>
-<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt; change in LL: 2.04e-02 | theta: 3.458 0.44  2.359 2.188 0.072 </span></span>
-<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt; change in LL: 1.27e-02 | theta: 3.41  0.425 2.282 2.113 0.069 </span></span>
-<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co">#&gt;     Current iterations: 50 </span></span>
-<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt; change in LL: 7.42e-03 | theta: 3.357 0.416 2.21  2.055 0.068 </span></span>
-<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="co">#&gt; change in LL: 3.93e-03 | theta: 3.312 0.411 2.155 2.014 0.067 </span></span>
-<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="co">#&gt; change in LL: 1.98e-03 | theta: 3.276 0.407 2.116 1.985 0.067 </span></span>
-<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="co">#&gt; change in LL:  9.7e-04 | theta: 3.248 0.404 2.089 1.966 0.067 </span></span>
-<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="co">#&gt; change in LL: 1.24e-04 | theta: 3.135 0.395 2.032 1.927 0.067 </span></span>
-<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="co">#&gt;     Current iterations: 100 </span></span>
-<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a><span class="co">#&gt; change in LL: 1.75e-05 | theta: 3.143 0.395 2.032 1.928 0.068 </span></span>
-<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a><span class="co">#&gt; change in LL:  1.8e-05 | theta: 3.138 0.395 2.033 1.929 0.068 </span></span>
-<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a><span class="co">#&gt; change in LL: 8.34e-06 | theta: 3.132 0.395 2.034 1.93  0.068 </span></span>
-<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a><span class="co">#&gt; change in LL: 8.36e-06 | theta: 3.128 0.394 2.035 1.931 0.068 </span></span>
-<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a><span class="co">#&gt; change in LL: 7.43e-06 | theta: 3.125 0.394 2.036 1.932 0.068 </span></span>
-<span id="cb9-24"><a href="#cb9-24" tabindex="-1"></a><span class="co">#&gt;     Current iterations: 150 </span></span>
-<span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a><span class="co">#&gt; change in LL: 6.08e-06 | theta: 3.121 0.394 2.036 1.933 0.068 </span></span>
-<span id="cb9-26"><a href="#cb9-26" tabindex="-1"></a><span class="co">#&gt; change in LL: 5.56e-06 | theta: 3.118 0.394 2.037 1.933 0.068 </span></span>
-<span id="cb9-27"><a href="#cb9-27" tabindex="-1"></a><span class="co">#&gt; change in LL: 5.15e-06 | theta: 3.115 0.394 2.038 1.934 0.068 </span></span>
-<span id="cb9-28"><a href="#cb9-28" tabindex="-1"></a><span class="co">#&gt; change in LL: 4.79e-06 | theta: 3.112 0.394 2.038 1.935 0.068 </span></span>
-<span id="cb9-29"><a href="#cb9-29" tabindex="-1"></a><span class="co">#&gt; change in LL: 4.45e-06 | theta: 3.109 0.394 2.039 1.936 0.068 </span></span>
-<span id="cb9-30"><a href="#cb9-30" tabindex="-1"></a><span class="co">#&gt;     Current iterations: 200 </span></span>
-<span id="cb9-31"><a href="#cb9-31" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb9-32"><a href="#cb9-32" tabindex="-1"></a><span class="co">#&gt;    Iterations used: 203 </span></span>
-<span id="cb9-33"><a href="#cb9-33" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb9-34"><a href="#cb9-34" tabindex="-1"></a><span class="co">#&gt;    Timing:  </span></span>
-<span id="cb9-35"><a href="#cb9-35" tabindex="-1"></a><span class="co">#&gt;    user  system elapsed </span></span>
-<span id="cb9-36"><a href="#cb9-36" tabindex="-1"></a><span class="co">#&gt;    2.91    0.00    2.91</span></span>
-<span id="cb9-37"><a href="#cb9-37" tabindex="-1"></a><span class="fu">str</span>(hyperEM_ests)</span>
-<span id="cb9-38"><a href="#cb9-38" tabindex="-1"></a><span class="co">#&gt; List of 9</span></span>
-<span id="cb9-39"><a href="#cb9-39" tabindex="-1"></a><span class="co">#&gt;  $ estimates : num [1:5] 3.1083 0.3935 2.0392 1.9358 0.0683</span></span>
-<span id="cb9-40"><a href="#cb9-40" tabindex="-1"></a><span class="co">#&gt;  $ conf_int  :&#39;data.frame&#39;:  5 obs. of  4 variables:</span></span>
-<span id="cb9-41"><a href="#cb9-41" tabindex="-1"></a><span class="co">#&gt;   ..$ pt_est: num [1:5] 3.1083 0.3935 2.0392 1.9358 0.0683</span></span>
-<span id="cb9-42"><a href="#cb9-42" tabindex="-1"></a><span class="co">#&gt;   ..$ SE    : num [1:5] 1.9646 0.125 0.4645 0.4447 0.0356</span></span>
-<span id="cb9-43"><a href="#cb9-43" tabindex="-1"></a><span class="co">#&gt;   ..$ LL_95 : num [1:5] -0.7422 0.1484 1.1288 1.0642 -0.0014</span></span>
-<span id="cb9-44"><a href="#cb9-44" tabindex="-1"></a><span class="co">#&gt;   ..$ UL_95 : num [1:5] 6.959 0.639 2.95 2.807 0.138</span></span>
-<span id="cb9-45"><a href="#cb9-45" tabindex="-1"></a><span class="co">#&gt;  $ maximum   : num -4164</span></span>
-<span id="cb9-46"><a href="#cb9-46" tabindex="-1"></a><span class="co">#&gt;  $ method    : chr &quot;score&quot;</span></span>
-<span id="cb9-47"><a href="#cb9-47" tabindex="-1"></a><span class="co">#&gt;  $ elapsed   : num 2.91</span></span>
-<span id="cb9-48"><a href="#cb9-48" tabindex="-1"></a><span class="co">#&gt;  $ iters     : num 203</span></span>
-<span id="cb9-49"><a href="#cb9-49" tabindex="-1"></a><span class="co">#&gt;  $ score     : num [1:5] -0.01142 0.03072 0.01033 0.01029 0.00216</span></span>
-<span id="cb9-50"><a href="#cb9-50" tabindex="-1"></a><span class="co">#&gt;  $ score_norm: num 0.0359</span></span>
-<span id="cb9-51"><a href="#cb9-51" tabindex="-1"></a><span class="co">#&gt;  $ tracking  :&#39;data.frame&#39;:  204 obs. of  7 variables:</span></span>
-<span id="cb9-52"><a href="#cb9-52" tabindex="-1"></a><span class="co">#&gt;   ..$ iter  : int [1:204] 0 1 2 3 4 5 6 7 8 9 ...</span></span>
-<span id="cb9-53"><a href="#cb9-53" tabindex="-1"></a><span class="co">#&gt;   ..$ logL  : num [1:204] -4328 -4250 -4221 -4200 -4187 ...</span></span>
-<span id="cb9-54"><a href="#cb9-54" tabindex="-1"></a><span class="co">#&gt;   ..$ alpha1: num [1:204] 1 1.89 2.02 2.25 2.49 ...</span></span>
-<span id="cb9-55"><a href="#cb9-55" tabindex="-1"></a><span class="co">#&gt;   ..$ beta1 : num [1:204] 1 0.894 0.821 0.77 0.735 ...</span></span>
-<span id="cb9-56"><a href="#cb9-56" tabindex="-1"></a><span class="co">#&gt;   ..$ alpha2: num [1:204] 2 2.54 2.06 1.74 1.55 ...</span></span>
-<span id="cb9-57"><a href="#cb9-57" tabindex="-1"></a><span class="co">#&gt;   ..$ beta2 : num [1:204] 2 1.93 1.89 1.88 1.89 ...</span></span>
-<span id="cb9-58"><a href="#cb9-58" tabindex="-1"></a><span class="co">#&gt;   ..$ P     : num [1:204] 0.3 0.313 0.283 0.254 0.232 ...</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">data</span>(caers)</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>processed <span class="ot">&lt;-</span> <span class="fu">processRaw</span>(caers)</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>squashed <span class="ot">&lt;-</span> <span class="fu">squashData</span>(processed, <span class="at">count =</span> <span class="dv">1</span>, <span class="at">bin_size =</span> <span class="dv">25</span>, <span class="at">keep_pts =</span> <span class="dv">10</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>squashed <span class="ot">&lt;-</span> <span class="fu">squashData</span>(squashed, <span class="at">count =</span> <span class="dv">2</span>, <span class="at">bin_size =</span> <span class="dv">10</span>, <span class="at">keep_pts =</span> <span class="dv">10</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>hyperEM_ests <span class="ot">&lt;-</span> <span class="fu">hyperEM</span>(squashed, <span class="at">theta_init_vec =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>, .<span class="dv">1</span>),</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>  <span class="at">conf_ints =</span> <span class="cn">TRUE</span>, <span class="at">LL_tol =</span> <span class="fl">1e-6</span>, <span class="at">track =</span> <span class="cn">TRUE</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>)</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="co">#&gt; change in LL: 1.47e+00 | theta: 3.377 0.597 2.074 2.347 0.065 </span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co">#&gt; change in LL: 9.53e-02 | theta: 4.346 0.557 2.602 2.657 0.042 </span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co">#&gt; change in LL:  2.9e-02 | theta: 4.378 0.548 2.834 2.839 0.041 </span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co">#&gt; change in LL: 1.71e-02 | theta: 4.287 0.543 2.994 2.979 0.042 </span></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="co">#&gt; change in LL: 1.08e-02 | theta: 4.202 0.539 3.123 3.094 0.043 </span></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="co">#&gt;     Current iterations: 50 </span></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="co">#&gt; change in LL: 7.01e-03 | theta: 4.132 0.535 3.229 3.189 0.044 </span></span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="co">#&gt; change in LL: 4.62e-03 | theta: 4.075 0.532 3.316 3.267 0.045 </span></span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="co">#&gt; change in LL: 3.09e-03 | theta: 4.027 0.53  3.388 3.332 0.045 </span></span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="co">#&gt; change in LL: 2.08e-03 | theta: 3.988 0.528 3.449 3.387 0.046 </span></span>
+<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a><span class="co">#&gt; change in LL: 3.88e-02 | theta: 3.786 0.514 3.75  3.661 0.048 </span></span>
+<span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a><span class="co">#&gt;     Current iterations: 100 </span></span>
+<span id="cb10-20"><a href="#cb10-20" tabindex="-1"></a><span class="co">#&gt; change in LL: 4.22e-07 | theta: 3.78  0.514 3.752 3.662 0.048 </span></span>
+<span id="cb10-21"><a href="#cb10-21" tabindex="-1"></a><span class="co">#&gt; change in LL: 1.74e-07 | theta: 3.779 0.514 3.752 3.662 0.048 </span></span>
+<span id="cb10-22"><a href="#cb10-22" tabindex="-1"></a><span class="co">#&gt; change in LL: 1.14e-07 | theta: 3.779 0.514 3.753 3.663 0.048 </span></span>
+<span id="cb10-23"><a href="#cb10-23" tabindex="-1"></a><span class="co">#&gt; change in LL: 7.03e-08 | theta: 3.778 0.514 3.754 3.663 0.048 </span></span>
+<span id="cb10-24"><a href="#cb10-24" tabindex="-1"></a><span class="co">#&gt; change in LL:  4.1e-08 | theta: 3.778 0.514 3.754 3.664 0.048 </span></span>
+<span id="cb10-25"><a href="#cb10-25" tabindex="-1"></a><span class="co">#&gt;     Current iterations: 150 </span></span>
+<span id="cb10-26"><a href="#cb10-26" tabindex="-1"></a><span class="co">#&gt; change in LL: 2.17e-08 | theta: 3.778 0.514 3.754 3.664 0.048 </span></span>
+<span id="cb10-27"><a href="#cb10-27" tabindex="-1"></a><span class="co">#&gt; change in LL: 9.31e-09 | theta: 3.778 0.514 3.755 3.664 0.048 </span></span>
+<span id="cb10-28"><a href="#cb10-28" tabindex="-1"></a><span class="co">#&gt; change in LL: 1.59e-09 | theta: 3.778 0.514 3.755 3.665 0.048 </span></span>
+<span id="cb10-29"><a href="#cb10-29" tabindex="-1"></a><span class="co">#&gt; change in LL: -3.09e-09 | theta: 3.778 0.514 3.755 3.665 0.048 </span></span>
+<span id="cb10-30"><a href="#cb10-30" tabindex="-1"></a><span class="co">#&gt; change in LL: -5.64e-09 | theta: 3.778 0.514 3.755 3.665 0.048 </span></span>
+<span id="cb10-31"><a href="#cb10-31" tabindex="-1"></a><span class="co">#&gt;     Current iterations: 200 </span></span>
+<span id="cb10-32"><a href="#cb10-32" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-33"><a href="#cb10-33" tabindex="-1"></a><span class="co">#&gt;    Iterations used: 208 </span></span>
+<span id="cb10-34"><a href="#cb10-34" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-35"><a href="#cb10-35" tabindex="-1"></a><span class="co">#&gt;    Timing:  </span></span>
+<span id="cb10-36"><a href="#cb10-36" tabindex="-1"></a><span class="co">#&gt;    user  system elapsed </span></span>
+<span id="cb10-37"><a href="#cb10-37" tabindex="-1"></a><span class="co">#&gt;    3.39    0.09    4.11</span></span>
+<span id="cb10-38"><a href="#cb10-38" tabindex="-1"></a><span class="fu">str</span>(hyperEM_ests)</span>
+<span id="cb10-39"><a href="#cb10-39" tabindex="-1"></a><span class="co">#&gt; List of 9</span></span>
+<span id="cb10-40"><a href="#cb10-40" tabindex="-1"></a><span class="co">#&gt;  $ estimates : num [1:5] 3.7775 0.5144 3.7555 3.6651 0.0483</span></span>
+<span id="cb10-41"><a href="#cb10-41" tabindex="-1"></a><span class="co">#&gt;  $ conf_int  :&#39;data.frame&#39;:  5 obs. of  4 variables:</span></span>
+<span id="cb10-42"><a href="#cb10-42" tabindex="-1"></a><span class="co">#&gt;   ..$ pt_est: num [1:5] 3.7775 0.5144 3.7555 3.6651 0.0483</span></span>
+<span id="cb10-43"><a href="#cb10-43" tabindex="-1"></a><span class="co">#&gt;   ..$ SE    : num [1:5] 2.2957 0.2453 1.0025 0.9142 0.0143</span></span>
+<span id="cb10-44"><a href="#cb10-44" tabindex="-1"></a><span class="co">#&gt;   ..$ LL_95 : num [1:5] 0 0.0336 1.7907 1.8733 0.0202</span></span>
+<span id="cb10-45"><a href="#cb10-45" tabindex="-1"></a><span class="co">#&gt;   ..$ UL_95 : num [1:5] 8.2769 0.9953 5.7203 5.4569 0.0764</span></span>
+<span id="cb10-46"><a href="#cb10-46" tabindex="-1"></a><span class="co">#&gt;  $ maximum   : num -2994</span></span>
+<span id="cb10-47"><a href="#cb10-47" tabindex="-1"></a><span class="co">#&gt;  $ method    : chr &quot;score&quot;</span></span>
+<span id="cb10-48"><a href="#cb10-48" tabindex="-1"></a><span class="co">#&gt;  $ elapsed   : num 4.11</span></span>
+<span id="cb10-49"><a href="#cb10-49" tabindex="-1"></a><span class="co">#&gt;  $ iters     : num 208</span></span>
+<span id="cb10-50"><a href="#cb10-50" tabindex="-1"></a><span class="co">#&gt;  $ score     : num [1:5] -4.91e-05 -9.99e-04 9.45e-04 -1.62e-03 1.08e-03</span></span>
+<span id="cb10-51"><a href="#cb10-51" tabindex="-1"></a><span class="co">#&gt;  $ score_norm: num 0.00238</span></span>
+<span id="cb10-52"><a href="#cb10-52" tabindex="-1"></a><span class="co">#&gt;  $ tracking  :&#39;data.frame&#39;:  209 obs. of  7 variables:</span></span>
+<span id="cb10-53"><a href="#cb10-53" tabindex="-1"></a><span class="co">#&gt;   ..$ iter  : int [1:209] 0 1 2 3 4 5 6 7 8 9 ...</span></span>
+<span id="cb10-54"><a href="#cb10-54" tabindex="-1"></a><span class="co">#&gt;   ..$ logL  : num [1:209] -3067 -3042 -3025 -3017 -3013 ...</span></span>
+<span id="cb10-55"><a href="#cb10-55" tabindex="-1"></a><span class="co">#&gt;   ..$ alpha1: num [1:209] 1 1.69 1.86 2.08 2.29 ...</span></span>
+<span id="cb10-56"><a href="#cb10-56" tabindex="-1"></a><span class="co">#&gt;   ..$ beta1 : num [1:209] 1 0.864 0.787 0.737 0.702 ...</span></span>
+<span id="cb10-57"><a href="#cb10-57" tabindex="-1"></a><span class="co">#&gt;   ..$ alpha2: num [1:209] 2 2.22 1.87 1.7 1.65 ...</span></span>
+<span id="cb10-58"><a href="#cb10-58" tabindex="-1"></a><span class="co">#&gt;   ..$ beta2 : num [1:209] 2 1.95 1.95 1.98 2.03 ...</span></span>
+<span id="cb10-59"><a href="#cb10-59" tabindex="-1"></a><span class="co">#&gt;   ..$ P     : num [1:209] 0.1 0.156 0.155 0.142 0.127 ...</span></span></code></pre></div>
 <p>Setting <code>track = TRUE</code> tracks the log-likelihood and
 hyperparameter estimates at each iteration, which we can plot to study
 the behavior of the algorithm:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
-<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>pdat <span class="ot">&lt;-</span> <span class="fu">gather</span>(hyperEM_ests<span class="sc">$</span>tracking, <span class="at">key =</span> <span class="st">&quot;metric&quot;</span>, <span class="at">value =</span> <span class="st">&quot;value&quot;</span>, logL<span class="sc">:</span>P)</span>
-<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>pdat<span class="sc">$</span>metric <span class="ot">&lt;-</span> <span class="fu">factor</span>(pdat<span class="sc">$</span>metric, <span class="at">levels =</span> <span class="fu">unique</span>(pdat<span class="sc">$</span>metric), <span class="at">ordered =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="fu">ggplot</span>(pdat, <span class="fu">aes</span>(<span class="at">x =</span> iter, <span class="at">y =</span> value)) <span class="sc">+</span></span>
-<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">size =</span> <span class="fl">1.1</span>, <span class="at">col =</span> <span class="st">&quot;blue&quot;</span>) <span class="sc">+</span></span>
-<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>  <span class="fu">facet_grid</span>(metric <span class="sc">~</span> ., <span class="at">scales =</span> <span class="st">&quot;free&quot;</span>) <span class="sc">+</span></span>
-<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">&quot;Convergence Assessment&quot;</span>,</span>
-<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>          <span class="at">subtitle =</span> <span class="st">&quot;Dashed red line indicates accelerated estimate&quot;</span>) <span class="sc">+</span></span>
-<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Iteration Count&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Estimate&quot;</span>) <span class="sc">+</span></span>
-<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">200</span>), <span class="at">size =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">&quot;red&quot;</span>)</span></code></pre></div>
-<p><img src="data:image/png;base64,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" /><!-- --></p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>pdat <span class="ot">&lt;-</span> <span class="fu">pivot_longer</span>(hyperEM_ests<span class="sc">$</span>tracking,</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>  <span class="at">cols =</span> <span class="sc">-</span>iter, <span class="at">names_to =</span> <span class="st">&quot;metric&quot;</span>, <span class="at">values_to =</span> <span class="st">&quot;value&quot;</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>)</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>pdat<span class="sc">$</span>metric <span class="ot">&lt;-</span> <span class="fu">factor</span>(pdat<span class="sc">$</span>metric, <span class="at">levels =</span> <span class="fu">unique</span>(pdat<span class="sc">$</span>metric), <span class="at">ordered =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="fu">ggplot</span>(pdat, <span class="fu">aes</span>(<span class="at">x =</span> iter, <span class="at">y =</span> value)) <span class="sc">+</span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="fl">1.1</span>, <span class="at">col =</span> <span class="st">&quot;blue&quot;</span>) <span class="sc">+</span></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>  <span class="fu">facet_grid</span>(metric <span class="sc">~</span> ., <span class="at">scales =</span> <span class="st">&quot;free&quot;</span>) <span class="sc">+</span></span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">&quot;Convergence Assessment&quot;</span>,</span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">&quot;Dashed red line indicates accelerated estimate&quot;</span></span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Iteration Count&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Estimate&quot;</span>) <span class="sc">+</span></span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a>  <span class="fu">geom_vline</span>(</span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a>    <span class="at">xintercept =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">200</span>), <span class="at">linewidth =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">&quot;red&quot;</span></span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a>  )</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
 </div>
 <div id="specialized-optimization-packages" class="section level2">
 <h2>Specialized Optimization Packages</h2>
-<p>Other packages that specialize in optimization, such as <a href="https://cran.r-project.org/package=DEoptim" target="_blank">DEoptim</a>, can alternatively be used to estimate the
-hyperparameters:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">library</span>(DEoptim)</span>
-<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123456</span>)</span>
-<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>theta_hat <span class="ot">&lt;-</span> <span class="fu">DEoptim</span>(negLLsquash,</span>
-<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>                     <span class="at">lower =</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="fl">1e-05</span>, <span class="dv">4</span>), .<span class="dv">001</span>),</span>
-<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>                     <span class="at">upper =</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">5</span>, <span class="dv">4</span>), <span class="dv">1</span> <span class="sc">-</span> .<span class="dv">001</span>),</span>
-<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>                     <span class="at">control =</span> <span class="fu">DEoptim.control</span>(</span>
-<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>                       <span class="at">itermax =</span> <span class="dv">2000</span>,</span>
-<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>                       <span class="at">reltol  =</span> <span class="fl">1e-04</span>,</span>
-<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>                       <span class="at">steptol =</span> <span class="dv">200</span>,</span>
-<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a>                       <span class="at">NP      =</span> <span class="dv">100</span>,</span>
-<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a>                       <span class="at">CR      =</span> <span class="fl">0.85</span>,</span>
-<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a>                       <span class="at">F       =</span> <span class="fl">0.75</span>,</span>
-<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a>                       <span class="at">trace   =</span> <span class="dv">25</span></span>
-<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a>                     ),</span>
-<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a>                     <span class="at">ni =</span> squashed<span class="sc">$</span>N, <span class="at">ei =</span> squashed<span class="sc">$</span>E, <span class="at">wi =</span> squashed<span class="sc">$</span>weight</span>
-<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a>)</span>
-<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a><span class="co">#&gt; Iteration: 25 bestvalit: 4165.801982 bestmemit:    3.422317    0.420197    2.321294    2.046197    0.072780</span></span>
-<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a><span class="co">#&gt; Iteration: 50 bestvalit: 4163.993567 bestmemit:    3.132083    0.401064    2.046266    1.935360    0.069050</span></span>
-<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a><span class="co">#&gt; Iteration: 75 bestvalit: 4163.975114 bestmemit:    3.093758    0.392458    2.051624    1.945084    0.068382</span></span>
-<span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a><span class="co">#&gt; Iteration: 100 bestvalit: 4163.974353 bestmemit:    3.067418    0.391168    2.045820    1.943878    0.069060</span></span>
-<span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a><span class="co">#&gt; Iteration: 125 bestvalit: 4163.974343 bestmemit:    3.063852    0.391105    2.047033    1.945090    0.069152</span></span>
-<span id="cb11-22"><a href="#cb11-22" tabindex="-1"></a><span class="co">#&gt; Iteration: 150 bestvalit: 4163.974343 bestmemit:    3.063464    0.391089    2.047299    1.945344    0.069157</span></span>
-<span id="cb11-23"><a href="#cb11-23" tabindex="-1"></a><span class="co">#&gt; Iteration: 175 bestvalit: 4163.974343 bestmemit:    3.063485    0.391089    2.047268    1.945317    0.069156</span></span>
-<span id="cb11-24"><a href="#cb11-24" tabindex="-1"></a><span class="co">#&gt; Iteration: 200 bestvalit: 4163.974343 bestmemit:    3.063492    0.391090    2.047261    1.945312    0.069156</span></span>
-<span id="cb11-25"><a href="#cb11-25" tabindex="-1"></a><span class="co">#&gt; Iteration: 225 bestvalit: 4163.974343 bestmemit:    3.063488    0.391090    2.047258    1.945309    0.069156</span></span>
-<span id="cb11-26"><a href="#cb11-26" tabindex="-1"></a>(theta_hat <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(theta_hat<span class="sc">$</span>optim<span class="sc">$</span>bestmem))</span>
-<span id="cb11-27"><a href="#cb11-27" tabindex="-1"></a><span class="co">#&gt; [1] 3.06348827 0.39108968 2.04725750 1.94530893 0.06915639</span></span></code></pre></div>
+<p>Other packages that specialize in optimization, such as <a href="https://cran.r-project.org/package=DEoptim" target="_blank">DEoptim</a>, can alternatively be used along with the
+likelihood functions to estimate the hyperparameters:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">library</span>(DEoptim)</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123456</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>theta_hat <span class="ot">&lt;-</span> <span class="fu">DEoptim</span>(negLLsquash,</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>  <span class="at">lower =</span> <span class="fu">rep</span>(<span class="fl">1e-03</span>, <span class="dv">5</span>),</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>  <span class="at">upper =</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">5</span>, <span class="dv">4</span>), .<span class="dv">999</span>),</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>  <span class="at">control =</span> <span class="fu">DEoptim.control</span>(</span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>    <span class="at">itermax =</span> <span class="dv">2000</span>,</span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>    <span class="at">reltol =</span> <span class="fl">1e-04</span>,</span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a>    <span class="at">steptol =</span> <span class="dv">200</span>,</span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a>    <span class="at">NP =</span> <span class="dv">100</span>,</span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a>    <span class="at">CR =</span> <span class="fl">0.85</span>,</span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a>    <span class="at">F =</span> <span class="fl">0.75</span>,</span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a>    <span class="at">trace =</span> <span class="dv">25</span></span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a>  ),</span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a>  <span class="at">ni =</span> squashed<span class="sc">$</span>N, <span class="at">ei =</span> squashed<span class="sc">$</span>E, <span class="at">wi =</span> squashed<span class="sc">$</span>weight</span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a>)</span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a><span class="co">#&gt; Iteration: 25 bestvalit: 2994.539209 bestmemit:    3.957522    3.908413    3.355530    0.512015    0.948343</span></span>
+<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a><span class="co">#&gt; Iteration: 50 bestvalit: 2994.074653 bestmemit:    3.676489    3.603541    3.842106    0.522877    0.951507</span></span>
+<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a><span class="co">#&gt; Iteration: 75 bestvalit: 2994.068495 bestmemit:    3.764289    3.672363    3.757569    0.511906    0.951742</span></span>
+<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a><span class="co">#&gt; Iteration: 100 bestvalit: 2994.068360 bestmemit:    3.752504    3.662191    3.774799    0.513865    0.951743</span></span>
+<span id="cb12-21"><a href="#cb12-21" tabindex="-1"></a><span class="co">#&gt; Iteration: 125 bestvalit: 2994.068352 bestmemit:    3.754901    3.664609    3.777355    0.514387    0.951710</span></span>
+<span id="cb12-22"><a href="#cb12-22" tabindex="-1"></a><span class="co">#&gt; Iteration: 150 bestvalit: 2994.068352 bestmemit:    3.754906    3.664537    3.776929    0.514325    0.951712</span></span>
+<span id="cb12-23"><a href="#cb12-23" tabindex="-1"></a><span class="co">#&gt; Iteration: 175 bestvalit: 2994.068352 bestmemit:    3.754976    3.664606    3.776856    0.514319    0.951712</span></span>
+<span id="cb12-24"><a href="#cb12-24" tabindex="-1"></a><span class="co">#&gt; Iteration: 200 bestvalit: 2994.068352 bestmemit:    3.754972    3.664603    3.776872    0.514320    0.951712</span></span>
+<span id="cb12-25"><a href="#cb12-25" tabindex="-1"></a><span class="co">#&gt; Iteration: 225 bestvalit: 2994.068352 bestmemit:    3.754973    3.664604    3.776869    0.514320    0.951712</span></span>
+<span id="cb12-26"><a href="#cb12-26" tabindex="-1"></a>(theta_hat <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(theta_hat<span class="sc">$</span>optim<span class="sc">$</span>bestmem))</span>
+<span id="cb12-27"><a href="#cb12-27" tabindex="-1"></a><span class="co">#&gt; [1] 3.7549733 3.6646042 3.7768695 0.5143198 0.9517117</span></span></code></pre></div>
+<p>Note that the two components in the mixture distribution switched
+here, which is not a problem.</p>
 <p>Although the user is encouraged to explore various approaches for
 maximum likelihood hyperparameter estimation, <code>autoHyper()</code>
 will often give reasonable results with minimal effort. Once the

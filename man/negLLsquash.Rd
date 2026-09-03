@@ -4,7 +4,7 @@
 \alias{negLLsquash}
 \title{Likelihood with data squashing and no zero counts}
 \usage{
-negLLsquash(theta, ni, ei, wi, N_star = 1)
+negLLsquash(theta, ni, ei, wi, N_star = 1, transformed = FALSE)
 }
 \arguments{
 \item{theta}{A numeric vector of hyperparameters ordered as:
@@ -19,6 +19,11 @@ negLLsquash(theta, ni, ei, wi, N_star = 1)
 \item{wi}{A whole number vector of bin weights from \code{\link{squashData}}.}
 
 \item{N_star}{A scalar whole number for the minimum count size used.}
+
+\item{transformed}{A logical scalar indicating whether or not \eqn{theta}
+is being optimized on the transformed scale (natural log for \eqn{\alpha})s
+and \eqn{\beta}s; logit scale for the mixture fraction). The transformed
+scale can be especially useful if using unconstrained optimization.}
 }
 \value{
 A scalar negative log-likelihood value
@@ -42,11 +47,11 @@ The conditional marginal distribution for the counts, \emph{N},
 
 The hyperparameters are:
   \itemize{
-    \item{\eqn{\alpha_1, \beta_1}: }{Parameters of the first component of the
-      marginal distribution of the counts (also the prior distribution)}
-    \item{\eqn{\alpha_2, \beta_2}: }{Parameters of the second component}
-    \item{\eqn{P}: }{Mixture fraction}
-}
+    \item \eqn{\alpha_1, \beta_1}: Parameters of the first component of the
+      marginal distribution of the counts (also the prior distribution)
+    \item \eqn{\alpha_2, \beta_2}: Parameters of the second component
+    \item \eqn{P}: Mixture fraction
+  }
 
 This function will not need to be called directly if using
   \code{\link{exploreHypers}} or \code{\link{autoHyper}}.
@@ -60,6 +65,10 @@ This function will not need to be called directly if using
 
   Make sure the data were actually squashed (see \code{\link{squashData}})
   before using this function.
+
+
+  Make sure there are no missing or infinite counts (actual or expected)
+  before using this function.
 }
 
 \examples{
@@ -67,13 +76,26 @@ data.table::setDTthreads(2)  #only needed for CRAN checks
 theta_init <- c(1, 1, 3, 3, .2)  #initial guess
 data(caers)
 proc <- processRaw(caers)
-squashed <- squashData(proc, bin_size = 300, keep_pts = 10)
-squashed <- squashData(squashed, count = 2, bin_size = 13, keep_pts = 10)
+squashed <- squashData(proc, bin_size = 100, keep_pts = 10)
+squashed <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 10)
 negLLsquash(theta = theta_init, ni = squashed$N, ei = squashed$E,
-            wi = squashed$weight)
-#For hyperparameter estimation...
-stats::nlminb(start = theta_init, objective = negLLsquash, ni = squashed$N,
-              ei = squashed$E, wi = squashed$weight)
+  wi = squashed$weight
+)
+# For hyperparameter estimation...
+# Log & logit transformations can help with unconstrained optimization techniques
+theta_init_transf <- theta_init
+theta_init_transf[1:4] <- log(theta_init_transf[1:4])
+theta_init_transf[5] <- log(theta_init_transf[5] / (1 - theta_init_transf[5]))
+theta_transf <- stats::nlminb(start = theta_init_transf, objective = negLLsquash,
+  ni = squashed$N, ei = squashed$E, wi = squashed$weight,
+  transformed = TRUE
+)
+theta_transf
+theta <- theta_transf$par
+# Backtransform
+theta[1:4] <- exp(theta[1:4])
+theta[5] <- stats::plogis(theta[5])
+theta
 
 }
 \references{
@@ -87,10 +109,10 @@ DuMouchel W, Pregibon D (2001). "Empirical Bayes Screening for
   \code{\link[stats]{optim}} for optimization and \code{\link{squashData}}
   for data squashing
 
-Other negative log-likelihood functions: 
-\code{\link{negLLzeroSquash}()},
-\code{\link{negLLzero}()},
-\code{\link{negLL}()}
+Other negative log-likelihood functions:
+\code{\link[=negLL]{negLL()}},
+\code{\link[=negLLzero]{negLLzero()}},
+\code{\link[=negLLzeroSquash]{negLLzeroSquash()}}
 }
 \concept{negative log-likelihood functions}
 \keyword{openEBGM}

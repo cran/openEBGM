@@ -12,7 +12,11 @@
 #' @param N A whole number vector of actual counts from
 #'   \code{\link{processRaw}}.
 #' @param E A numeric vector of expected counts from \code{\link{processRaw}}.
-#' @return A scalar negative log-likelihood value.
+#' @param transformed A logical scalar indicating whether or not \eqn{theta}
+#'   is being optimized on the transformed scale (natural log for \eqn{\alpha})s
+#'   and \eqn{\beta}s; logit scale for the mixture fraction). The transformed
+#'   scale can be especially useful if using unconstrained optimization.
+#' @returns A scalar negative log-likelihood value.
 #'
 #' @details The marginal distribution of the counts, \emph{N}, is a mixture of
 #'   two negative binomial distributions. The hyperparameters for the prior
@@ -20,11 +24,11 @@
 #'   equation from this marginal distribution.
 #' @details The hyperparameters are:
 #'   \itemize{
-#'     \item{\eqn{\alpha_1, \beta_1}: }{Parameters of the first component of the
-#'       marginal distribution of the counts (also the prior distribution)}
-#'     \item{\eqn{\alpha_2, \beta_2}: }{Parameters of the second component}
-#'     \item{\eqn{P}: }{Mixture fraction}
-#' }
+#'     \item \eqn{\alpha_1, \beta_1}: Parameters of the first component of the
+#'       marginal distribution of the counts (also the prior distribution)
+#'     \item \eqn{\alpha_2, \beta_2}: Parameters of the second component
+#'     \item \eqn{P}: Mixture fraction
+#'   }
 #' @details This function will not need to be called directly if using
 #'   \code{\link{exploreHypers}} or \code{\link{autoHyper}}.
 #' @section Warnings:
@@ -33,6 +37,9 @@
 #'   \code{\link{processRaw}} function.
 #' @section Warnings:
 #'   Make sure the data were not squashed before using this function.
+#' @section Warnings:
+#'   Make sure there are no missing or infinite counts (actual or expected)
+#'   before using this function.
 #'
 #' @references DuMouchel W (1999). "Bayesian Data Mining in Large Frequency
 #'   Tables, With an Application to the FDA Spontaneous Reporting System."
@@ -42,20 +49,50 @@
 #' @seealso \code{\link[stats]{nlm}}, \code{\link[stats]{nlminb}}, and
 #'   \code{\link[stats]{optim}} for optimization
 #' @importFrom stats dnbinom
+#' @importFrom stats plogis
 #' @export
-negLLzero <- function(theta, N, E) {
+negLLzero <- function(theta, N, E, transformed = FALSE) {
   .checkInputs_negLLzero(theta, N, E)
-  size_f1 <- theta[1]  #alpha1
-  prob_f1 <- theta[2] / (theta[2] + E)  #beta1 / (beta1 + E)
-  size_f2 <- theta[3]  #alpha2
-  prob_f2 <- theta[4] / (theta[4] + E)  #beta2 / (beta2 + E)
-  f1 <- dnbinom(N, size = size_f1, prob = prob_f1)
-  f2 <- dnbinom(N, size = size_f2, prob = prob_f2)
-  P <- theta[5]
-  L <- (P * f1) + ((1 - P) * f2)
-  sum(-log(L))
+  if (transformed) {
+    theta[1:4] <- exp(theta[1:4])
+    theta[5] <- plogis(theta[5])  #inverse logit
+  } else {
+    if (any(theta == 0) || theta[5] == 1) {
+      return(NA)
+    }
+  }
+  L <- .negLLzero_Lvec(theta, N, E)
+  L_is_infinite <- is.infinite(L)
+  if (all(L_is_infinite)) {
+    neg_LL <- 1e+10
+    neg_LL <- neg_LL + 100 * stats::rbinom(1, size = 1, prob = 0.5)  #prevent false convergence
+    return(neg_LL)
+  }
+  L[L < 1e-100] <- 1e-100
+  L[L_is_infinite & L > 0] <- 1e+100
+  return(sum(-log(L)))
 }
 
+.negLLzero_Lvec <- function(theta, N, E) {
+  # Returns a vector for L calculations
+  log_f1 <- .negLLzero_logfstar(theta[1:2], N, E)
+  log_f2 <- .negLLzero_logfstar(theta[3:4], N, E)
+  log_P <- log(theta[5])
+  log_1_minus_P <- log(1 - theta[5])
+  # (P * f1) + ((1 - P) * f2)
+  exp(log_P + log_f1) + exp(log_1_minus_P + log_f2)
+}
+
+.negLLzero_logfstar <- function(alpha_beta, N, E) {
+  # Returns log(f) for one of the mixture components
+  # alpha_beta: A vector of length 2
+  size_f <- alpha_beta[1]  #alpha
+  prob_f <- exp(log(alpha_beta[2]) - log(alpha_beta[2] + E))  #beta / (beta + E)
+  prob_f[prob_f < 1e-10] <- 1e-10
+  max_prob <- 1 - 1e-10
+  prob_f[prob_f > max_prob] <- max_prob
+  dnbinom(N, size = size_f, prob = prob_f, log = TRUE)
+}
 
 #' Likelihood with data squashing & zero counts
 #'
@@ -73,7 +110,7 @@ negLLzero <- function(theta, N, E) {
 #' @param ei A numeric vector of squashed expected counts from
 #'   \code{\link{squashData}}.
 #' @param wi A whole number vector of bin weights from \code{\link{squashData}}.
-#' @return A scalar negative log-likelihood value.
+#' @returns A scalar negative log-likelihood value.
 #'
 #' @details The marginal distribution of the counts, \emph{N}, is a mixture of
 #'   two negative binomial distributions. The hyperparameters for the prior
@@ -81,11 +118,11 @@ negLLzero <- function(theta, N, E) {
 #'   equation from this marginal distribution.
 #' @details The hyperparameters are:
 #'   \itemize{
-#'     \item{\eqn{\alpha_1, \beta_1}: }{Parameters of the first component of the
-#'       marginal distribution of the counts (also the prior distribution)}
-#'     \item{\eqn{\alpha_2, \beta_2}: }{Parameters of the second component}
-#'     \item{\eqn{P}: }{Mixture fraction}
-#' }
+#'     \item \eqn{\alpha_1, \beta_1}: Parameters of the first component of the
+#'       marginal distribution of the counts (also the prior distribution)
+#'     \item \eqn{\alpha_2, \beta_2}: Parameters of the second component
+#'     \item \eqn{P}: Mixture fraction
+#'   }
 #' @details This function will not need to be called directly if using
 #'   \code{\link{exploreHypers}} or \code{\link{autoHyper}}.
 #' @section Warnings:
@@ -94,6 +131,9 @@ negLLzero <- function(theta, N, E) {
 #'   \code{processRaw} function.
 #' @section Warnings:
 #'   Make sure the data were actually squashed (see \code{\link{squashData}})
+#'   before using this function.
+#' @section Warnings:
+#'   Make sure there are no missing or infinite counts (actual or expected)
 #'   before using this function.
 #'
 #' @references DuMouchel W, Pregibon D (2001). "Empirical Bayes Screening for
@@ -106,20 +146,50 @@ negLLzero <- function(theta, N, E) {
 #'   \code{\link[stats]{optim}} for optimization and \code{\link{squashData}}
 #'   for data squashing
 #' @importFrom stats dnbinom
+#' @importFrom stats plogis
 #' @export
-negLLzeroSquash <- function(theta, ni, ei, wi) {
+negLLzeroSquash <- function(theta, ni, ei, wi, transformed = FALSE) {
   .checkInputs_negLLzeroSquash(theta, ni, ei, wi)
-  size_f1 <- theta[1]  #alpha1
-  prob_f1 <- theta[2] / (theta[2] + ei)  #beta1 / (beta1 + E)
-  size_f2 <- theta[3]  #alpha2
-  prob_f2 <- theta[4] / (theta[4] + ei)  #beta2 / (beta2 + E)
-  f1 <- dnbinom(ni, size = size_f1, prob = prob_f1)
-  f2 <- dnbinom(ni, size = size_f2, prob = prob_f2)
-  P <- theta[5]
-  logL <- wi * (log((P * f1) + ((1 - P) * f2)))
-  sum(-logL)
+  if (transformed) {
+    theta[1:4] <- exp(theta[1:4])
+    theta[5] <- plogis(theta[5])  #inverse logit
+  } else {
+    if (any(theta == 0) || theta[5] == 1) {
+      return(NA)
+    }
+  }
+  logL <- .negLLzeroSquash_logLvec(theta, ni, ei, wi) 
+  logL_is_infinite <- is.infinite(logL)
+  if (all(logL_is_infinite)) {
+    neg_LL <- 1e+10
+    neg_LL <- neg_LL + 100 * stats::rbinom(1, size = 1, prob = 0.5)  #prevent false convergence
+    return(neg_LL)
+  }
+  logL[logL_is_infinite & logL < 0] <- -230  #log(1e-100)
+  logL[logL_is_infinite & logL > 0] <- 230  #log(1e+100)
+  return(sum(-logL))
 }
 
+.negLLzeroSquash_logLvec <- function(theta, ni, ei, wi) {
+  # Returns a vector for logL calculations
+  log_f1 <- .negLLzeroSquash_logfstar(theta[1:2], ni, ei)
+  log_f2 <- .negLLzeroSquash_logfstar(theta[3:4], ni, ei)
+  log_P <- log(theta[5])
+  log_1_minus_P <- log(1 - theta[5])
+  # wi * log[(P * f1) + ((1 - P) * f2)]
+  wi * log(exp(log_P + log_f1) + exp(log_1_minus_P + log_f2))
+}
+
+.negLLzeroSquash_logfstar <- function(alpha_beta, ni, ei) {
+  # Returns log(f) for one of the mixture components
+  # alpha_beta: A vector of length 2
+  size_f <- alpha_beta[1]  #alpha
+  prob_f <- exp(log(alpha_beta[2]) - log(alpha_beta[2] + ei))  #beta / (beta + E)
+  prob_f[prob_f < 1e-10] <- 1e-10
+  max_prob <- 1 - 1e-10
+  prob_f[prob_f > max_prob] <- max_prob
+  dnbinom(ni, size = size_f, prob = prob_f, log = TRUE)
+}
 
 #' Likelihood without zero counts
 #'
@@ -135,7 +205,7 @@ negLLzeroSquash <- function(theta, ni, ei, wi) {
 #'
 #' @inheritParams negLLzero
 #' @param N_star A scalar whole number for the minimum count size used.
-#' @return A scalar negative log-likelihood value
+#' @returns A scalar negative log-likelihood value
 #'
 #' @details The conditional marginal distribution for the counts, \emph{N},
 #'   given that \emph{N >= N*}, is based on a mixture of two negative binomial
@@ -145,11 +215,11 @@ negLLzeroSquash <- function(theta, ni, ei, wi) {
 #'   1} when practical.
 #' @details The hyperparameters are:
 #'   \itemize{
-#'     \item{\eqn{\alpha_1, \beta_1}: }{Parameters of the first component of the
-#'       marginal distribution of the counts (also the prior distribution)}
-#'     \item{\eqn{\alpha_2, \beta_2}: }{Parameters of the second component}
-#'     \item{\eqn{P}: }{Mixture fraction}
-#' }
+#'     \item \eqn{\alpha_1, \beta_1}: Parameters of the first component of the
+#'       marginal distribution of the counts (also the prior distribution)
+#'     \item \eqn{\alpha_2, \beta_2}: Parameters of the second component
+#'     \item \eqn{P}: Mixture fraction
+#'   }
 #' @details This function will not need to be called directly if using
 #'   \code{\link{exploreHypers}} or \code{\link{autoHyper}}.
 #' @section Warnings:
@@ -157,6 +227,9 @@ negLLzeroSquash <- function(theta, ni, ei, wi) {
 #'   before using this function. Filter \emph{N} and \emph{E} if needed.
 #' @section Warnings:
 #'   Make sure the data were not squashed before using this function.
+#' @section Warnings:
+#'   Make sure there are no missing or infinite counts (actual or expected)
+#'   before using this function.
 #'
 #' @references DuMouchel W, Pregibon D (2001). "Empirical Bayes Screening for
 #'   Multi-item Associations." In \emph{Proceedings of the Seventh ACM SIGKDD
@@ -167,25 +240,55 @@ negLLzeroSquash <- function(theta, ni, ei, wi) {
 #' @seealso \code{\link[stats]{nlm}}, \code{\link[stats]{nlminb}}, and
 #'   \code{\link[stats]{optim}} for optimization
 #' @importFrom stats pnbinom
+#' @importFrom stats plogis
 #' @export
-negLL <- function(theta, N, E, N_star = 1) {
+negLL <- function(theta, N, E, N_star = 1, transformed = FALSE) {
   .checkInputs_negLL(theta, N, E, N_star)
-  size_f1 <- theta[1]  #alpha1
-  prob_f1 <- theta[2] / (theta[2] + E)  #beta1 / (beta1 + E)
-  size_f2 <- theta[3]  #alpha2
-  prob_f2 <- theta[4] / (theta[4] + E)  #beta2 / (beta2 + E)
-  f1 <- dnbinom(N, size = size_f1, prob = prob_f1)
-  f2 <- dnbinom(N, size = size_f2, prob = prob_f2)
-  sum_limit <- N_star - 1
-  f1_cumul  <- pnbinom(sum_limit, size = size_f1, prob = prob_f1)
-  f2_cumul  <- pnbinom(sum_limit, size = size_f2, prob = prob_f2)
-  f_star1   <- f1 / (1 - f1_cumul)
-  f_star2   <- f2 / (1 - f2_cumul)
-  P <- theta[5]
-  L <- (P * f_star1) + ((1 - P) * f_star2)
-  sum(-log(L))
+  if (transformed) {
+    theta[1:4] <- exp(theta[1:4])
+    theta[5] <- plogis(theta[5])  #inverse logit
+  } else {
+    if (any(theta == 0) || theta[5] == 1) {
+      return(NA)
+    }
+  }
+  L <- .negLL_Lvec(theta, N, E, N_star)
+  L_is_infinite <- is.infinite(L)
+  if (all(L_is_infinite)) {
+    neg_LL <- 1e+10
+    neg_LL <- neg_LL + 100 * stats::rbinom(1, size = 1, prob = 0.5)  #prevent false convergence
+    return(neg_LL)
+  }
+  L[L < 1e-100] <- 1e-100
+  L[L_is_infinite & L > 0] <- 1e+100
+  return(sum(-log(L)))
 }
 
+.negLL_Lvec <- function(theta, N, E, N_star) {
+  # Returns a vector for L calculations
+  sum_limit <- N_star - 1
+  log_f_star1 <- .negLL_logfstar(theta[1:2], N, E, sum_limit)
+  log_f_star2 <- .negLL_logfstar(theta[3:4], N, E, sum_limit)
+  log_P <- log(theta[5])
+  log_1_minus_P <- log(1 - theta[5])
+  # (P * f_star1) + ((1 - P) * f_star2)
+  exp(log_P + log_f_star1) + exp(log_1_minus_P + log_f_star2)
+}
+
+.negLL_logfstar <- function(alpha_beta, N, E, sum_limit) {
+  # Returns log(f_star) for one of the mixture components
+  # alpha_beta: A vector of length 2
+  size_f <- alpha_beta[1]  #alpha
+  prob_f <- exp(log(alpha_beta[2]) - log(alpha_beta[2] + E))  #beta / (beta + E)
+  prob_f[prob_f < 1e-10] <- 1e-10
+  max_prob <- 1 - 1e-10
+  prob_f[prob_f > max_prob] <- max_prob
+  log_f <- dnbinom(N, size = size_f, prob = prob_f, log = TRUE)
+  log_comp_f_cumul <- pnbinom(sum_limit, size = size_f, prob = prob_f,
+    lower.tail = FALSE, log.p = TRUE
+  )
+  log_f - log_comp_f_cumul  #log(f / (1-f_cumul))
+}
 
 #' Likelihood with data squashing and no zero counts
 #'
@@ -199,7 +302,7 @@ negLL <- function(theta, N, E, N_star = 1) {
 #'
 #' @inheritParams negLLzeroSquash
 #' @inheritParams negLL
-#' @return A scalar negative log-likelihood value
+#' @returns A scalar negative log-likelihood value
 #'
 #' @details The conditional marginal distribution for the counts, \emph{N},
 #'   given that \emph{N >= N*}, is based on a mixture of two negative binomial
@@ -209,11 +312,11 @@ negLL <- function(theta, N, E, N_star = 1) {
 #'   1} when practical.
 #' @details The hyperparameters are:
 #'   \itemize{
-#'     \item{\eqn{\alpha_1, \beta_1}: }{Parameters of the first component of the
-#'       marginal distribution of the counts (also the prior distribution)}
-#'     \item{\eqn{\alpha_2, \beta_2}: }{Parameters of the second component}
-#'     \item{\eqn{P}: }{Mixture fraction}
-#' }
+#'     \item \eqn{\alpha_1, \beta_1}: Parameters of the first component of the
+#'       marginal distribution of the counts (also the prior distribution)
+#'     \item \eqn{\alpha_2, \beta_2}: Parameters of the second component
+#'     \item \eqn{P}: Mixture fraction
+#'   }
 #' @details This function will not need to be called directly if using
 #'   \code{\link{exploreHypers}} or \code{\link{autoHyper}}.
 #' @section Warnings:
@@ -223,19 +326,35 @@ negLL <- function(theta, N, E, N_star = 1) {
 #' @section Warnings:
 #'   Make sure the data were actually squashed (see \code{\link{squashData}})
 #'   before using this function.
+#' @section Warnings:
+#'   Make sure there are no missing or infinite counts (actual or expected)
+#'   before using this function.
 #'
 #' @examples
 #' data.table::setDTthreads(2)  #only needed for CRAN checks
 #' theta_init <- c(1, 1, 3, 3, .2)  #initial guess
 #' data(caers)
 #' proc <- processRaw(caers)
-#' squashed <- squashData(proc, bin_size = 300, keep_pts = 10)
-#' squashed <- squashData(squashed, count = 2, bin_size = 13, keep_pts = 10)
+#' squashed <- squashData(proc, bin_size = 100, keep_pts = 10)
+#' squashed <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 10)
 #' negLLsquash(theta = theta_init, ni = squashed$N, ei = squashed$E,
-#'             wi = squashed$weight)
-#' #For hyperparameter estimation...
-#' stats::nlminb(start = theta_init, objective = negLLsquash, ni = squashed$N,
-#'               ei = squashed$E, wi = squashed$weight)
+#'   wi = squashed$weight
+#' )
+#' # For hyperparameter estimation...
+#' # Log & logit transformations can help with unconstrained optimization techniques
+#' theta_init_transf <- theta_init
+#' theta_init_transf[1:4] <- log(theta_init_transf[1:4])
+#' theta_init_transf[5] <- log(theta_init_transf[5] / (1 - theta_init_transf[5]))
+#' theta_transf <- stats::nlminb(start = theta_init_transf, objective = negLLsquash,
+#'   ni = squashed$N, ei = squashed$E, wi = squashed$weight,
+#'   transformed = TRUE
+#' )
+#' theta_transf
+#' theta <- theta_transf$par
+#' # Backtransform
+#' theta[1:4] <- exp(theta[1:4])
+#' theta[5] <- stats::plogis(theta[5])
+#' theta
 #'
 #' @references DuMouchel W, Pregibon D (2001). "Empirical Bayes Screening for
 #'   Multi-item Associations." In \emph{Proceedings of the Seventh ACM SIGKDD
@@ -248,21 +367,52 @@ negLL <- function(theta, N, E, N_star = 1) {
 #'   for data squashing
 #' @importFrom stats dnbinom
 #' @importFrom stats pnbinom
+#' @importFrom stats plogis
 #' @export
-negLLsquash <- function(theta, ni, ei, wi, N_star = 1) {
+negLLsquash <- function(theta, ni, ei, wi, N_star = 1, transformed = FALSE) {
   .checkInputs_negLLsquash(theta, ni, ei, wi, N_star)
-  size_f1 <- theta[1]  #alpha1
-  prob_f1 <- theta[2] / (theta[2] + ei)  #beta1 / (beta1 + E)
-  size_f2 <- theta[3]  #alpha2
-  prob_f2 <- theta[4] / (theta[4] + ei)  #beta2 / (beta2 + E)
-  f1 <- dnbinom(ni, size = size_f1, prob = prob_f1)
-  f2 <- dnbinom(ni, size = size_f2, prob = prob_f2)
+  if (transformed) {
+    theta[1:4] <- exp(theta[1:4])
+    theta[5] <- plogis(theta[5])  #inverse logit
+  } else {
+    if (any(theta == 0) || theta[5] == 1) {
+      return(NA)
+    }
+  }
+  logL <- .negLLsquash_logLvec(theta, ni, ei, wi, N_star)
+  logL_is_infinite <- is.infinite(logL)
+  if (all(logL_is_infinite)) {
+    neg_LL <- 1e+10
+    neg_LL <- neg_LL + 100 * stats::rbinom(1, size = 1, prob = 0.5)  #prevent false convergence
+    return(neg_LL)
+  }
+  logL[logL_is_infinite & logL < 0] <- -230  #log(1e-100)
+  logL[logL_is_infinite & logL > 0] <- 230  #log(1e+100)
+  return(sum(-logL))
+}
+
+.negLLsquash_logLvec <- function(theta, ni, ei, wi, N_star) {
+  # Return a vector for logL calculations
   sum_limit <- N_star - 1
-  f1_cumul  <- pnbinom(sum_limit, size = size_f1, prob = prob_f1)
-  f2_cumul  <- pnbinom(sum_limit, size = size_f2, prob = prob_f2)
-  f_star1   <- f1 / (1 - f1_cumul)
-  f_star2   <- f2 / (1 - f2_cumul)
-  P <- theta[5]
-  logL <- wi * log((P * f_star1) + ((1 - P) * f_star2))
-  sum(-logL)
+  log_f_star1 <- .negLLsquash_logfstar(theta[1:2], ni, ei, sum_limit)
+  log_f_star2 <- .negLLsquash_logfstar(theta[3:4], ni, ei, sum_limit)
+  log_P <- log(theta[5])
+  log_1_minus_P <- log(1 - theta[5])
+  # wi * log((P * f_star1) + ((1 - P) * f_star2))
+  wi * log(exp(log_P + log_f_star1) + exp(log_1_minus_P + log_f_star2))
+}
+
+.negLLsquash_logfstar <- function(alpha_beta, ni, ei, sum_limit) {
+  # Returns log(f_star) for one of the mixture components
+  # alpha_beta: A vector of length 2
+  size_f <- alpha_beta[1]  #alpha
+  prob_f <- exp(log(alpha_beta[2]) - log(alpha_beta[2] + ei))  #beta / (beta + E)
+  prob_f[prob_f < 1e-10] <- 1e-10
+  max_prob <- 1 - 1e-10
+  prob_f[prob_f > max_prob] <- max_prob
+  log_f <- dnbinom(ni, size = size_f, prob = prob_f, log = TRUE)
+  log_comp_f_cumul <- pnbinom(sum_limit, size = size_f, prob = prob_f,
+    lower.tail = FALSE, log.p = TRUE
+  )
+  log_f - log_comp_f_cumul  #log(f / (1-f_cumul))
 }

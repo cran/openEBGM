@@ -14,10 +14,8 @@ hyperEM(
   profile = c("parameter", "distribution"),
   LL_tol = 1e-04,
   consecutive = 100,
-  param_lower = 1e-05,
-  param_upper = 20,
   print_level = 2,
-  max_iter = 5000,
+  max_iter = 10000,
   conf_ints = FALSE,
   conf_level = c("95", "80", "90", "99"),
   track = FALSE
@@ -60,12 +58,6 @@ consecutive iterations the change in log-likelihood must be below
 \code{LL_tol} in order to reach convergence. Larger values reduce the
 chance of getting stuck in a flat region of the curve.}
 
-\item{param_lower}{A scalar numeric value for the smallest acceptable value
-for each \eqn{\alpha} and \eqn{\beta} estimate.}
-
-\item{param_upper}{A scalar numeric value for the largest acceptable value
-for each \eqn{\alpha} and \eqn{\beta} estimate.}
-
 \item{print_level}{A value that determines how much information is printed
 during execution. Possible value are \code{0} for no printing, \code{1} for
 minimal information, and \code{2} for maximal information.}
@@ -86,23 +78,23 @@ used for plotting to better understand the algorithm's behavior.}
 \value{
 A list including the following:
   \itemize{
-    \item{\emph{estimates}: }{The maximum likelihood estimate (MLE) of the
-      hyperparameter, \eqn{\theta}.}
-    \item{\emph{conf_int}: }{A data frame including the standard errors and
+    \item \emph{estimates}: The maximum likelihood estimate (MLE) of the
+      hyperparameter, \eqn{\theta}.
+    \item \emph{conf_int}: A data frame including the standard errors and
       confidence limits for \code{estimates}. Only included if
-      \code{conf_ints = TRUE}.}
-    \item{\emph{maximum}: }{The log-likelihood function evaluated at
-      \code{estimates}.}
-    \item{\emph{method}: }{The method used in the maximization step.}
-    \item{\emph{elapsed}: }{The elapsed function execution time in seconds.}
-    \item{\emph{iters}: }{The number of iterations used.}
-    \item{\emph{score}: }{The score functions (i.e. score vector) evaluated
-      at \code{estimates}. All elements should be close to zero.}
-    \item{\emph{score_norm}: }{The Euclidean norm of the score vector
-      evaluated at \code{estimates}. Should be close to zero.}
-    \item{\emph{tracking}: }{The estimates of \eqn{\theta} at each iteration
+      \code{conf_ints = TRUE}.
+    \item \emph{maximum}: The log-likelihood function evaluated at
+      \code{estimates}.
+    \item \emph{method}: The method used in the maximization step.
+    \item \emph{elapsed}: The elapsed function execution time in seconds.
+    \item \emph{iters}: The number of iterations used.
+    \item \emph{score}: The score functions (i.e. score vector) evaluated
+      at \code{estimates}. All elements should be close to zero.
+    \item \emph{score_norm}: The Euclidean norm of the score vector
+      evaluated at \code{estimates}. Should be close to zero.
+    \item \emph{tracking}: The estimates of \eqn{\theta} at each iteration
       and the log-likelihood function evaluated at those estimates. Unless
-      \code{track = TRUE}, only shows the starting point of the algorithm.}
+      \code{track = TRUE}, only shows the starting point of the algorithm.
   }
 }
 \description{
@@ -123,13 +115,11 @@ If \code{method = "score"}, the maximization step finds a root
 If \code{method = "score"} and \code{zeroes = FALSE}, then
   \code{'N_star'} must equal \code{1}.
 
-If \code{method = "score"}, the model is reparameterized. The
-  parameters are transformed to force the parameter space to include all real
-  numbers. This approach addresses numerical issues at the edge of the
-  parameter space. The reparameterization follows:
-  \eqn{\alpha_{prime} = log(\alpha)}, \eqn{\beta_{prime} = log(\beta)}, and
-  \eqn{P_{prime} = tan(pi * P - pi / 2)}. However, the values returned in
-  \code{estimates} are on the original scale (back-transformed).
+The hyperparameters (theta) for the model are reparameterized. The
+  transformations force the search space to include all real numbers.
+  This approach addresses numerical issues at the edge of the parameter
+  space. However, the values returned in \code{estimates} are on the original
+  scale (back-transformed).
 
 On every 100th iteration, the procedure described in Millar (2011)
   is used to accelerate the estimate of \eqn{\theta}.
@@ -146,10 +136,10 @@ Asymptotic normal confidence intervals, if requested, use standard
 data.table::setDTthreads(2)  #only needed for CRAN checks
 data(caers)
 proc <- processRaw(caers)
-squashed <- squashData(proc, bin_size = 300, keep_pts = 10)
-squashed <- squashData(squashed, count = 2, bin_size = 13, keep_pts = 10)
-hypers <- hyperEM(squashed, theta_init_vec = c(1, 1, 2, 2, .3),
-                  consecutive = 10, LL_tol = 1e-03)
+squashed <- squashData(proc, bin_size = 100, keep_pts = 10)
+squashed <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 10)
+hyperEM(squashed, theta_init_vec = c(1, 1, 2, 2, .3), consecutive = 10,
+        LL_tol = 1e-03)
 
 }
 \references{
@@ -168,9 +158,9 @@ Millar, Russell B (2011). "Maximum Likelihood Estimation and
   function and \code{\link[stats]{nlminb}} for minimizing the negative
   log-likelihood function
 
-Other hyperparameter estimation functions: 
-\code{\link{autoHyper}()},
-\code{\link{exploreHypers}()}
+Other hyperparameter estimation functions:
+\code{\link[=autoHyper]{autoHyper()}},
+\code{\link[=exploreHypers]{exploreHypers()}}
 }
 \concept{hyperparameter estimation functions}
 \keyword{openEBGM}

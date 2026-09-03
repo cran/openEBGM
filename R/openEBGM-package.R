@@ -58,10 +58,9 @@
 #'   Reaction Reports." \emph{Pharmacoepidemiology and Drug Safety}, 10(6),
 #'   483-486.
 #'
-#' @references FDA (2017). "CFSAN Adverse Event Reporting System (CAERS)."
-#'   URL \url{https://www.fda.gov/food/compliance-enforcement-food/cfsan-adverse-event-reporting-system-caers}.
+#' @references FDA (2026). "Human Foods Complaint System (HFCS)."
+#'   URL \url{https://www.fda.gov/food/compliance-enforcement-food/human-foods-complaint-system-hfcs}.
+
 "_PACKAGE"
 
-## usethis namespace: start
-## usethis namespace: end
 NULL

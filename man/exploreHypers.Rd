@@ -51,17 +51,17 @@ A list including the data frame \code{estimates} of hyperparameter
   estimates corresponding to the initial guesses from \code{theta_init} (plus
   convergence results):
   \itemize{
-    \item{\emph{code}: }{The convergence code returned by the chosen
+    \item \emph{code}: The convergence code returned by the chosen
       optimization function (see \code{\link[stats]{nlminb}},
-      \code{\link[stats]{nlm}}, and \code{\link[stats]{optim}} for details).}
-    \item{\emph{converge}: }{A logical indicating whether or not convergence
-      was reached. See "Details" section for more information.}
-    \item{\emph{in_bounds}: }{A logical indicating whether or not the
-      estimates were within the bounds of the parameter space (upper bound
-      for \eqn{\alpha_1, \beta_1, \alpha_2, and \beta_2} was determined by
-      the \code{param_limit} argument).}
-    \item{\emph{minimum}: }{The negative log-likelihood value corresponding
-      to the estimated optimal value of the hyperparameter.}
+      \code{\link[stats]{nlm}}, and \code{\link[stats]{optim}} for details).
+    \item \emph{converge}: A logical indicating whether or not convergence
+      was reached. See "Details" section for more information.
+    \item \emph{in_bounds}: A logical indicating whether or not the
+      estimates were within the bounds (upper bound for
+      \eqn{\alpha_1, \beta_1, \alpha_2, and \beta_2} as determined by the
+      \code{param_limit} argument).
+    \item \emph{minimum}: The negative log-likelihood value corresponding
+      to the estimated optimal value of the hyperparameter.
   }
   Also returns the data frame \code{std_errs} if standard errors are
   requested.
@@ -75,9 +75,9 @@ The \code{method} argument determines which optimization procedure
   is used. All the options use functions from the \code{\link{stats}}
   package:
   \itemize{
-    \item{\code{"nlminb":}} \code{\link[stats]{nlminb}}
-    \item{\code{"nlm":}} \code{\link[stats]{nlm}}
-    \item{\code{"bfgs":}} \code{\link[stats]{optim}} (\emph{method = "BFGS"})
+    \item \code{"nlminb":} \code{\link[stats]{nlminb}}
+    \item \code{"nlm":} \code{\link[stats]{nlm}}
+    \item \code{"bfgs":} \code{\link[stats]{optim}} (\emph{method = "BFGS"})
   }
 
 Since this function runs multiple optimization procedures, it is
@@ -124,11 +124,9 @@ theta_init <- data.frame(
 )
 data(caers)
 proc <- processRaw(caers)
-squashed <- squashData(proc, bin_size = 300, keep_pts = 10)
-squashed <- squashData(squashed, count = 2, bin_size = 13, keep_pts = 10)
-suppressWarnings(
-  exploreHypers(squashed, theta_init = theta_init)
-)
+squashed <- squashData(proc, bin_size = 100, keep_pts = 10)
+squashed <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 10)
+exploreHypers(squashed, theta_init = theta_init)
 
 }
 \references{
@@ -142,9 +140,9 @@ DuMouchel W (1999). "Bayesian Data Mining in Large Frequency
 
 \code{\link{squashData}} for data preparation
 
-Other hyperparameter estimation functions: 
-\code{\link{autoHyper}()},
-\code{\link{hyperEM}()}
+Other hyperparameter estimation functions:
+\code{\link[=autoHyper]{autoHyper()}},
+\code{\link[=hyperEM]{hyperEM()}}
 }
 \concept{hyperparameter estimation functions}
 \keyword{openEBGM}

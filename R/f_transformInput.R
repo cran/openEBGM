@@ -24,7 +24,7 @@
 #'   variable, such as age.
 #' @param list_ids A logical scalar specifying if a column for pipe-concatenated
 #'   IDs should be returned.
-#' @return A data frame with actual counts (\emph{N}), expected counts
+#' @returns A data frame with actual counts (\emph{N}), expected counts
 #'   (\emph{E}), relative reporting ratio (\emph{RR}), and proportional
 #'   reporting ratio (\emph{PRR}) for \emph{var1-var2} pairs. Also includes a
 #'   column for IDs (\emph{ids}) if \code{list_ids = TRUE}.
@@ -131,12 +131,19 @@ processRaw <- function(data, stratify = FALSE, zeroes = FALSE, digits = 2,
     counts <- merge(counts, v2_marg, by = "var2", all.x = zeroes, sort = FALSE)
     counts[, N_tot := .countUnique(data$id)]
   }
+  counts[E < 1e-10, E := 1e-10]  #for Es close to zero
+  if (.isMissing_num(counts[, E])) {
+    warning("Missing or infinite expected counts (E) found.")
+  }
+  if (.isMissing_num(counts[, N])) {
+    warning("Missing or infinite actual counts (N) found.")
+  }
   # Add disproportionality measures
   counts[, RR := round(N / E, digits)]
   counts[is.nan(RR), RR := 0]
   counts[, PRR_num := N / N_v1]
   counts[, PRR_den := (N_v2 - N) / (N_tot - N_v1)]
-  counts[, PRR := round(PRR_num / PRR_den, digits)]
+  counts[, PRR := round(exp(log(PRR_num) - log(PRR_den)), digits)]
   if (list_ids) {
     counts <- counts[, .(var1, var2, N, E, RR, PRR, ids)]
   } else {

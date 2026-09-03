@@ -11,30 +11,43 @@
   )
 }
 
+.hessian2 <- function(func, x, ...) {
+  numDeriv::hessian(
+    func = func, x = x, method = "Richardson", method.args = list(r = 6), ...
+  )
+}
+
 .hessianMatrix <- function(data, theta_hat, zeroes, squashed, N_star) {
-  # Hessian matrix used to find hyperparameter standard errors (also covariances)
+  # Hessian matrix used to find hyperparameter standard errors
   N <- data$N
   E <- data$E
   if (zeroes) {
     if (squashed) {
       W <- data$weight
-      return(optimHess(theta_hat, fn = negLLzeroSquash, ni = N, ei = E, wi = W))
+      return(.hessian2(negLLzeroSquash, x = theta_hat, ni = N, ei = E, wi = W))
     } else {
-      return(optimHess(theta_hat, fn = negLLzero, N = N, E = E))
+      return(.hessian2(negLLzero, x = theta_hat, N = N, E = E))
     }
   } else {
     if (squashed) {
       W <- data$weight
-      return(optimHess(theta_hat, fn = negLLsquash, ni = N, ei = E, wi = W,
-                       N_star = N_star))
+      return(
+        .hessian2(negLLsquash, x = theta_hat, ni = N, ei = E, wi = W, N_star = N_star)
+      )
     } else {
-      return(optimHess(theta_hat, fn = negLL, N = N, E = E, N_star = N_star))
+      return(.hessian2(negLL, x = theta_hat, N = N, E = E, N_star = N_star))
     }
   }
 }
 
 .hyperStdErrs <- function(hessian_matrix) {
   # Hyperparameter standard errors
+  if (any(eigen(hessian_matrix, only.values = TRUE)$values <= 0)) {
+    warning(
+      "Hessian matrix is not positive definite. ",
+      "Some variances may be negative (i.e., missing standard errors)."
+    )
+  }
   hessian_inverse <- solve(hessian_matrix)
   variances <- diag(hessian_inverse)
   sqrt(variances)
@@ -54,7 +67,8 @@
   conf_int$pt_est <- theta_hat
   conf_int$SE <- std_errs
   ME <- crit_val * std_errs
-  conf_int[LL_name] <- theta_hat - ME
+  conf_int[LL_name] <- pmax(0, theta_hat - ME)
   conf_int[UL_name] <- theta_hat + ME
+  conf_int["p_hat", UL_name] <- min(1, conf_int["p_hat", UL_name])
   round(conf_int, 4)
 }

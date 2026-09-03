@@ -4,7 +4,15 @@
 \alias{ebgm}
 \title{Calculate EBGM scores}
 \usage{
-ebgm(theta_hat, N, E, qn, digits = 2)
+ebgm(
+  theta_hat,
+  N,
+  E,
+  qn,
+  digits = 2,
+  min_theta = c(0.25, 0.25, 0.25, 0.25, 1e-05),
+  max_theta = c(10, 10, 10, 10, 0.99999)
+)
 }
 \arguments{
 \item{theta_hat}{A numeric vector of hyperparameter estimates (likely from
@@ -23,6 +31,10 @@ mixture fraction). See function \code{\link{Qn}}.}
 
 \item{digits}{A scalar whole number that determines the number of decimal
 places used when rounding the results.}
+
+\item{min_theta}{A numeric vector of minimum values for \code{theta_hat}.}
+
+\item{max_theta}{A numeric vector of maximum values for \code{theta_hat}.}
 }
 \value{
 A numeric vector of EBGM scores.
@@ -37,12 +49,12 @@ distribution of the \dQuote{true} \emph{RR}} (DuMouchel 1999, see Eq.11). The
 \details{
 The hyperparameter estimates (\code{theta_hat}) are:
   \itemize{
-    \item{\eqn{\alpha_1, \beta_1}: }{Parameter estimates of the first
-      component of the prior distribution}
-    \item{\eqn{\alpha_2, \beta_2}: }{Parameter estimates of the second
-      component}
-    \item{\eqn{P}: }{Mixture fraction estimate of the prior distribution}
-}
+    \item \eqn{\alpha_1, \beta_1}: Parameter estimates of the first
+      component of the prior distribution
+    \item \eqn{\alpha_2, \beta_2}: Parameter estimates of the second
+      component
+    \item \eqn{P}: Mixture fraction estimate of the prior distribution
+  }
 }
 \examples{
 data.table::setDTthreads(2)  #only needed for CRAN checks
@@ -55,8 +67,8 @@ theta_init <- data.frame(
 )
 data(caers)
 proc <- processRaw(caers)
-squashed <- squashData(proc, bin_size = 300, keep_pts = 10)
-squashed <- squashData(squashed, count = 2, bin_size = 13, keep_pts = 10)
+squashed <- squashData(proc, bin_size = 100, keep_pts = 10)
+squashed <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 10)
 theta_hat <- autoHyper(data = squashed, theta_init = theta_init)$estimates
 qn <- Qn(theta_hat, N = proc$N, E = proc$E)
 proc$EBGM <- ebgm(theta_hat, N = proc$N, E = proc$E, qn = qn)
@@ -78,9 +90,9 @@ DuMouchel W (1999). "Bayesian Data Mining in Large Frequency
 
 \code{\link{Qn}} for finding mixture fractions.
 
-Other posterior distribution functions: 
-\code{\link{Qn}()},
-\code{\link{quantBisect}()}
+Other posterior distribution functions:
+\code{\link[=Qn]{Qn()}},
+\code{\link[=quantBisect]{quantBisect()}}
 }
 \concept{posterior distribution functions}
 \keyword{openEBGM}

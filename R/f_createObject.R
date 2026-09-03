@@ -10,12 +10,14 @@
 #'   quantiles.
 #' @param digits A whole number scalar specifying how many decimal places to
 #'   use for rounding \emph{EBGM} and the quantiles scores.
-#' @return An openEBGM object (class S3) containing:
+#' @param min_theta A numeric vector of minimum values for \code{theta_hat}.
+#' @param max_theta A numeric vector of maximum values for \code{theta_hat}.
+#' @returns An openEBGM object (class S3) containing:
 #'   \itemize{
-#'     \item{\emph{data}: }{A data frame containing the results (scores, etc.).}
-#'     \item{\emph{hyper_parameters}: }{A list containing the hyperparameter
-#'                                      estimation results.}
-#'     \item{\emph{quantiles}: }{The chosen percentiles.}
+#'     \item \emph{data}: A data frame containing the results (scores, etc.).
+#'     \item \emph{hyper_parameters}: A list containing the hyperparameter
+#'                                      estimation results.
+#'     \item \emph{quantiles}: The chosen percentiles.
 #'   }
 #'
 #' @details This function takes the processed data as well as the hyperparameter
@@ -39,20 +41,19 @@
 #' )
 #' data(caers)
 #' proc <- processRaw(caers)
-#' squashed <- squashData(proc, bin_size = 300, keep_pts = 10)
-#' squashed <- squashData(squashed, count = 2, bin_size = 13, keep_pts = 10)
-#' suppressWarnings(
-#'   hypers <- autoHyper(data = squashed, theta_init = theta_init)
-#' )
+#' squashed <- squashData(proc, bin_size = 100, keep_pts = 10)
+#' squashed <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 10)
+#' hypers <- autoHyper(data = squashed, theta_init = theta_init)
 #' obj <- ebScores(processed = proc, hyper_estimate = hypers, quantiles = 5)
 #' print(obj)
 #'
 #' @keywords openEBGM
 #' @export
-
-ebScores <- function(processed, hyper_estimate, quantiles = c(5, 95), digits = 2) {
+ebScores <- function(processed, hyper_estimate, quantiles = c(5, 95), digits = 2,
+    min_theta = c(.25, .25, .25, .25, .00001), max_theta = c(10, 10, 10, 10, .99999)) {
   .checkInputs_ebScores(processed, hyper_estimate, quantiles, digits)
   theta <- hyper_estimate$estimates
+  theta <- .reinInTheta(theta, min_theta, max_theta)
   N <- processed$N
   E <- processed$E
   q_n <- Qn(theta_hat = theta, N = N, E = E)

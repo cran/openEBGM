@@ -3,21 +3,27 @@
 \docType{data}
 \name{caers}
 \alias{caers}
-\title{Dietary supplement reports and products}
+\title{Dietary supplement reports}
 \format{
-A data frame with 20156 rows and 4 variables:
+A data frame with 15,204 rows and 4 columns:
 \describe{
-  \item{\code{id}}{Identification number}
-  \item{\code{var1}}{Name of the product}
-  \item{\code{var2}}{Name of the symptom/event category}
-  \item{\code{strat1}}{Gender of the patient associated with report}
+  \item{\code{id}}{The unique number that identifies each case.}
+  \item{\code{strat1}}{The sex of the individual reported to have experienced
+    the adverse event.}
+  \item{\code{var1}}{The verbatim brands and/or product names indicated to
+    have been used by the consumer reported to have experienced the adverse
+    event. An adverse event report may specify consumption of a single
+    product or multiple products.}
+  \item{\code{var2}}{The symptom(s) experienced by the injured consumer as
+    specified by the reporter and coded by FDA according to the Medical Data
+    Dictionary for Regulatory Activities (MedDRA).
+    Each adverse event report may indicate one or more symptoms.}
 }
 }
 \source{
-CFSAN Adverse Event Reporting System (FDA Center for Food Safety and
-  Nutrition)
+Human Foods Complaint System (HFCS)
 
-\url{https://www.fda.gov/food/compliance-enforcement-food}
+\url{https://www.fda.gov/food/compliance-enforcement-food/human-foods-complaint-system-hfcs}
 
 \url{https://www.fda.gov/media/97035/download}
 }
@@ -25,13 +31,9 @@ CFSAN Adverse Event Reporting System (FDA Center for Food Safety and
 caers
 }
 \description{
-A dataset for dietary supplement adverse event reports from 2012 containing
-CAERS product and adverse event reports as reported to the FDA. This
-particular dataset contains only products which were reported to be dietary
-supplements (industry code 54) reported in the year 2012. and includes 2874
-unique product names and 1328 unique adverse events. There are a total of
-3356 unique reports. In addition, there is also one stratification variable,
-indicating whether the patient is male or female
+A small subset of data from the Human Foods Complaint System (HFCS) database
+(formerly CAERS). This dataset contains only reports received in 2025 for
+dietary supplement products (industry/product code 54).
 }
 \details{
 Further details about the data can be found using the links below.

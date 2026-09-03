@@ -1,35 +1,29 @@
-#' Raw CAERS data
+#' Raw Human Foods Complaint System (HFCS) data (formerly CAERS)
 #'
-#' A small subset of raw, publicly available CAERS data used to demonstrate how
-#' to prepare data for use by \pkg{openEBGM}'s functions.
+#' A small subset of raw, publicly available HFCS (formerly CAERS) data used to
+#' demonstrate how to prepare data for use by \pkg{openEBGM}'s functions.
 #'
-#' @format A data frame with 117 rows and 6 variables:
+#' @format A data frame with 100 rows and 5 columns:
 #' \describe{
-#'   \item{\code{RA_Report..}}{CAERS report identification number.}
-#'   \item{\code{PRI_Reported.Brand.Product.Name}}{The verbatim brands and/or
-#'     product names indicated to have been used by the consumer reported
-#'     to have experienced the adverse event.}
-#'   \item{\code{CI_Age.at.Adverse.Event}}{The age of the consumer reported to
-#'     have experienced the adverse event, in units specified by
-#'     \code{CI_Age.Unit}.}
-#'   \item{\code{CI_Age.Unit}}{The time unit (day, week, month, year) of the
-#'     age provided in the \code{CI_Age.at.Adverse.Event} data field for the
-#'     consumer reported to have experienced the adverse event.}
-#'   \item{\code{CI_Gender}}{The sex of the individual reported to have
-#'     experienced the adverse event.}
-#'   \item{\code{SYM_One.Row.Coded.Symptoms}}{The symptom(s) experienced by the
+#'   \item{\code{REPORT_ID}}{The unique number that identifies each case.}
+#'   \item{\code{PRODUCT}}{The verbatim brands and/or product names indicated to
+#'     have been used by the consumer reported to have experienced the adverse
+#'     event. An adverse event report may specify consumption of a single
+#'     product or multiple products.}
+#'   \item{\code{PRODUCT_CODE}}{The FDA industry code associated with the type
+#'     of product reported.}
+#'   \item{\code{SEX}}{The sex of the individual reported to have experienced
+#'     the adverse event.}
+#'   \item{\code{CASE_MEDDRA_PREFERRED_TERMS}}{The symptom(s) experienced by the
 #'     injured consumer as specified by the reporter and coded by FDA according
-#'     to the Medical Data Dictionary for Regulatory Activities (MedDRA).}
+#'     to the Medical Data Dictionary for Regulatory Activities (MedDRA).
+#'     Each adverse event report may indicate one or more symptoms.}
 #' }
-#'
-#' @details The column names appear exactly as they would if you had used
-#'   \code{read.csv()} to pull the data directly from the website below.
 #'
 #' @details Further details about the data can be found using the links below.
 #'
-#' @source CFSAN Adverse Event Reporting System (FDA Center for Food Safety and
-#'   Nutrition)
-#' @source \url{https://www.fda.gov/food/compliance-enforcement-food}
+#' @source Human Foods Complaint System (HFCS)
+#' @source \url{https://www.fda.gov/food/compliance-enforcement-food/human-foods-complaint-system-hfcs}
 #' @source
 #'   \url{https://www.fda.gov/media/97035/download}
 "caers_raw"

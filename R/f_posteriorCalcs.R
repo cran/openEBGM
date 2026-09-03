@@ -12,16 +12,18 @@
 #' @param N A whole number vector of actual counts from
 #'   \code{\link{processRaw}}.
 #' @param E A numeric vector of expected counts from \code{\link{processRaw}}.
-#' @return A numeric vector of probabilities.
+#' @param min_theta A numeric vector of minimum values for \code{theta_hat}.
+#' @param max_theta A numeric vector of maximum values for \code{theta_hat}.
+#' @returns A numeric vector of probabilities.
 #'
 #' @details The hyperparameter estimates (\code{theta_hat}) are:
 #'   \itemize{
-#'     \item{\eqn{\alpha_1, \beta_1}: }{Parameter estimates of the first
-#'       component of the prior distribution}
-#'     \item{\eqn{\alpha_2, \beta_2}: }{Parameter estimates of the second
-#'       component}
-#'     \item{\eqn{P}: }{Mixture fraction estimate of the prior distribution}
-#' }
+#'     \item \eqn{\alpha_1, \beta_1}: Parameter estimates of the first
+#'       component of the prior distribution
+#'     \item \eqn{\alpha_2, \beta_2}: Parameter estimates of the second
+#'       component
+#'     \item \eqn{P}: Mixture fraction estimate of the prior distribution
+#'   }
 #'
 #' @examples
 #' data.table::setDTthreads(2)  #only needed for CRAN checks
@@ -34,8 +36,8 @@
 #' )
 #' data(caers)
 #' proc <- processRaw(caers)
-#' squashed <- squashData(proc, bin_size = 300, keep_pts = 10)
-#' squashed <- squashData(squashed, count = 2, bin_size = 13, keep_pts = 10)
+#' squashed <- squashData(proc, bin_size = 100, keep_pts = 10)
+#' squashed <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 10)
 #' theta_hat <- autoHyper(data = squashed, theta_init = theta_init)$estimates
 #' qn <- Qn(theta_hat, N = proc$N, E = proc$E)
 #' head(qn)
@@ -52,18 +54,25 @@
 #' @seealso \code{\link{processRaw}} for finding counts.
 #' @importFrom stats dnbinom
 #' @export
-Qn <- function(theta_hat, N, E) {
+Qn <- function(theta_hat, N, E, min_theta = c(.25, .25, .25, .25, .00001),
+    max_theta = c(10, 10, 10, 10, .99999)) {
   .checkInputs_Qn(theta_hat, N, E)
-  prob_f1 <- theta_hat[2] / (theta_hat[2] + E)  #beta1 / (beta1 + E)
-  prob_f2 <- theta_hat[4] / (theta_hat[4] + E)  #beta2 / (beta2 + E)
-  f1_NB <- dnbinom(N, size = theta_hat[1], prob = prob_f1)  #Eq.5 (1999)
-  f2_NB <- dnbinom(N, size = theta_hat[3], prob = prob_f2)
+  theta_hat <- .reinInTheta(theta_hat, min_theta, max_theta)
+  prob_f1 <- exp(log(theta_hat[2]) - log(theta_hat[2] + E))  #beta1 / (beta1 + E)
+  prob_f2 <- exp(log(theta_hat[4]) - log(theta_hat[4] + E))  #beta2 / (beta2 + E)
+  prob_f1[prob_f1 < 1e-10] <- 1e-10
+  prob_f2[prob_f2 < 1e-10] <- 1e-10
+  max_prob <- 1 - 1e-10
+  prob_f1[prob_f1 > max_prob] <- max_prob
+  prob_f2[prob_f2 > max_prob] <- max_prob
+  log_f1_NB <- dnbinom(N, size = theta_hat[1], prob = prob_f1, log = TRUE)  #Eq.5 (1999)
+  log_f2_NB <- dnbinom(N, size = theta_hat[3], prob = prob_f2, log = TRUE)
   P_hat <- theta_hat[5]
-  Qn_num <- P_hat * f1_NB
-  Qn_den <- (P_hat * f1_NB) + ((1 - P_hat) * f2_NB)
-  Qn_num / Qn_den  #Eq. 6 (1999)
+  log_P_hat <- log(P_hat)
+  log_Qn_num <- log_P_hat + log_f1_NB  #Qn_num = P_hat * f1_NB
+  Qn_den <- exp(log_Qn_num) + exp(log(1 - P_hat) + log_f2_NB)  #(P_hat*f1_NB)+((1-P_hat)*f2_NB)
+  exp(log_Qn_num - log(Qn_den))  #Qn_num / Qn_den; Eq. 6 (1999)
 }
-
 
 #' Calculate EBGM scores
 #'
@@ -79,16 +88,16 @@ Qn <- function(theta_hat, N, E) {
 #'   mixture fraction). See function \code{\link{Qn}}.
 #' @param digits A scalar whole number that determines the number of decimal
 #'   places used when rounding the results.
-#' @return A numeric vector of EBGM scores.
+#' @returns A numeric vector of EBGM scores.
 #'
 #' @details The hyperparameter estimates (\code{theta_hat}) are:
 #'   \itemize{
-#'     \item{\eqn{\alpha_1, \beta_1}: }{Parameter estimates of the first
-#'       component of the prior distribution}
-#'     \item{\eqn{\alpha_2, \beta_2}: }{Parameter estimates of the second
-#'       component}
-#'     \item{\eqn{P}: }{Mixture fraction estimate of the prior distribution}
-#' }
+#'     \item \eqn{\alpha_1, \beta_1}: Parameter estimates of the first
+#'       component of the prior distribution
+#'     \item \eqn{\alpha_2, \beta_2}: Parameter estimates of the second
+#'       component
+#'     \item \eqn{P}: Mixture fraction estimate of the prior distribution
+#'   }
 #'
 #' @examples
 #' data.table::setDTthreads(2)  #only needed for CRAN checks
@@ -101,8 +110,8 @@ Qn <- function(theta_hat, N, E) {
 #' )
 #' data(caers)
 #' proc <- processRaw(caers)
-#' squashed <- squashData(proc, bin_size = 300, keep_pts = 10)
-#' squashed <- squashData(squashed, count = 2, bin_size = 13, keep_pts = 10)
+#' squashed <- squashData(proc, bin_size = 100, keep_pts = 10)
+#' squashed <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 10)
 #' theta_hat <- autoHyper(data = squashed, theta_init = theta_init)$estimates
 #' qn <- Qn(theta_hat, N = proc$N, E = proc$E)
 #' proc$EBGM <- ebgm(theta_hat, N = proc$N, E = proc$E, qn = qn)
@@ -120,18 +129,20 @@ Qn <- function(theta_hat, N, E) {
 #' @seealso \code{\link{processRaw}} for finding counts.
 #' @seealso \code{\link{Qn}} for finding mixture fractions.
 #' @export
-ebgm <- function(theta_hat, N, E, qn, digits = 2) {
+ebgm <- function(theta_hat, N, E, qn, digits = 2, min_theta = c(.25, .25, .25, .25, .00001),
+    max_theta = c(10, 10, 10, 10, .99999)) {
   .checkInputs_ebgm(theta_hat, N, E, qn, digits)
+  theta_hat <- .reinInTheta(theta_hat, min_theta, max_theta)
   # If X ~ gamma(alpha, beta), then E[X] = alpha / beta
   # Also, E[ln(X)] = digamma(alpha) - ln(beta)
   expectation1 <- digamma(theta_hat[1] + N) - log(theta_hat[2] + E)  #Eq.9
   expectation2 <- digamma(theta_hat[3] + N) - log(theta_hat[4] + E)
   exp_log_lamda <- (qn * expectation1) + ((1 - qn) * expectation2)  #Eq.9 (1999)
-  EBlog2        <- exp_log_lamda / log(2)  #Eq.10 (1999)
-  EBGM <- 2 ^ EBlog2  #Eq.11 (1999)
+  log_2 <- log(2)
+  EBlog2 <- exp_log_lamda / log_2  #Eq.10 (1999)
+  EBGM <- exp(EBlog2 * log_2)  #2 ^ EBlog2; Eq.11 (1999)
   round(EBGM, digits)
 }
-
 
 #' Find quantiles of the posterior distribution
 #'
@@ -146,16 +157,16 @@ ebgm <- function(theta_hat, N, E, qn, digits = 2) {
 #'   bounds of the search space.
 #' @param max_iter A whole number scalar for the maximum number of iterations.
 #'   Used to prevent infinite loops.
-#' @return A numeric vector of quantile estimates.
+#' @returns A numeric vector of quantile estimates.
 #'
 #' @details The hyperparameter estimates (\code{theta_hat}) are:
 #'   \itemize{
-#'     \item{\eqn{\alpha_1, \beta_1}: }{Parameter estimates of the first
-#'       component of the prior distribution}
-#'     \item{\eqn{\alpha_2, \beta_2}: }{Parameter estimates of the second
-#'       component}
-#'     \item{\eqn{P}: }{Mixture fraction estimate of the prior distribution}
-#' }
+#'     \item \eqn{\alpha_1, \beta_1}: Parameter estimates of the first
+#'       component of the prior distribution
+#'     \item \eqn{\alpha_2, \beta_2}: Parameter estimates of the second
+#'       component
+#'     \item \eqn{P}: Mixture fraction estimate of the prior distribution
+#'   }
 #' @details Although this function can find any quantile of the posterior
 #'   distribution, it will often be used to calculate the 5th and 95th
 #'   percentiles to create a 90\% credibility interval.
@@ -180,8 +191,8 @@ ebgm <- function(theta_hat, N, E, qn, digits = 2) {
 #' )
 #' data(caers)
 #' proc <- processRaw(caers)
-#' squashed <- squashData(proc, bin_size = 300, keep_pts = 10)
-#' squashed <- squashData(squashed, count = 2, bin_size = 13, keep_pts = 10)
+#' squashed <- squashData(proc, bin_size = 100, keep_pts = 10)
+#' squashed <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 10)
 #' theta_hat <- autoHyper(data = squashed, theta_init = theta_init)$estimates
 #' qn <- Qn(theta_hat, N = proc$N, E = proc$E)
 #' proc$QUANT_05 <- quantBisect(percent = 5, theta = theta_hat, N = proc$N,
@@ -202,41 +213,43 @@ ebgm <- function(theta_hat, N, E, qn, digits = 2) {
 #' @importFrom stats pgamma
 #' @export
 quantBisect <- function(percent, theta_hat, N, E, qn, digits = 2,
-                        limits = c(-100000, 100000), max_iter = 2000) {
+    limits = c(-100000, 100000), max_iter = 2000,
+    min_theta = c(.25, .25, .25, .25, .00001), max_theta = c(10, 10, 10, 10, .99999)) {
   .checkInputs_quantBisect(percent, theta_hat, N, E, qn, digits, limits, max_iter)
+  theta_hat <- .reinInTheta(theta_hat, min_theta, max_theta)
   cdf_error <- function(guess, cut_point, qn, theta_hat, N, E) {
     # Difference between F(x) & the "cut point" (e.g. 0.05 for 5th percentile)
-    cdf1 <- pgamma(guess, shape = theta_hat[1] + N, rate = theta_hat[2] + E)
-    cdf2 <- pgamma(guess, shape = theta_hat[3] + N, rate = theta_hat[4] + E)
-    post_cdf  <- (qn * cdf1) + ((1 - qn) * cdf2)
+    log_cdf1 <- pgamma(guess, shape = theta_hat[1] + N, rate = theta_hat[2] + E, log.p = TRUE)
+    log_cdf2 <- pgamma(guess, shape = theta_hat[3] + N, rate = theta_hat[4] + E, log.p = TRUE)
+    post_cdf  <- exp(log(qn) + log_cdf1) + exp(log(1 - qn) + log_cdf2)  #(qn*cdf1)+((1-qn)*cdf2)
     post_cdf - cut_point
   }
-  tol        <- 0.5 * (10 ^ (-digits))
-  cut_point  <- percent / 100
-  num_pts    <- length(N)
-  guess_init <- rep(1, num_pts)  #null hypothesis: RR = 1
+  tol <- 0.5 * exp(-digits * log(10))  #0.5*(10^(-digits))
+  cut_point <- percent / 100
+  num_pts <- length(N)
+  guess_init <- rep(1, num_pts)  #"null hypothesis": RR = 1
   error_init <- cdf_error(guess_init, cut_point, qn, theta_hat, N, E)
   is_too_big <- error_init > 0
-  left       <- rep(limits[1], num_pts)
-  right      <- rep(limits[2], num_pts)
-  left       <- ifelse(is_too_big, left, guess_init)
-  right      <- ifelse(is_too_big, guess_init, right)
+  left <- rep(limits[1], num_pts)
+  right <- rep(limits[2], num_pts)
+  left <- ifelse(is_too_big, left, guess_init)
+  right <- ifelse(is_too_big, guess_init, right)
   iter_count <- 1L
   while (iter_count <= max_iter) {
-      mid_pt <- (left + right) / 2
-      error  <- cdf_error(mid_pt, cut_point, qn, theta_hat, N, E)
-      if (max((right - left) / 2) < tol) {
-          quantiles <- round(mid_pt, digits)
-          if (max(quantiles) == limits[2]) {
-            stop("increase maximum for 'limits'")
-          }
-          return(quantiles)
-      } else {
-          iter_count <- iter_count + 1
-          error_left <- cdf_error(left, cut_point, qn, theta_hat, N, E)
-          left  <- ifelse(sign(error_left) == sign(error), mid_pt, left)
-          right <- ifelse(sign(error_left) == sign(error), right, mid_pt)
+    mid_pt <- 0.5 * (left + right)
+    error <- cdf_error(mid_pt, cut_point, qn, theta_hat, N, E)
+    if (max(0.5 * (right - left)) < tol) {
+      quantiles <- round(mid_pt, digits)
+      if (max(quantiles) == limits[2]) {
+        stop("increase maximum for 'limits'")
       }
+      return(quantiles)
+    } else {
+      iter_count <- iter_count + 1
+      error_left <- cdf_error(left, cut_point, qn, theta_hat, N, E)
+      left <- ifelse(sign(error_left) == sign(error), mid_pt, left)
+      right <- ifelse(sign(error_left) == sign(error), right, mid_pt)
+    }
   }
   stop("failed to converge -- try adjusting 'limits' or 'max_iter'")
 }

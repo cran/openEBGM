@@ -80,16 +80,16 @@ print.openEBGM <- function(x, threshold = 2, ...) {
 #' @export
 plot.openEBGM <- function(x, y = NULL, event = NULL, plot.type = "bar", ...) {
   tmp <- x$data
-  if(plot.type == "bar") {
-    if(!is.null(event)) {
-      if(!any(grepl(event, tmp$var2, ignore.case = TRUE))) {
+  if (plot.type == "bar") {
+    if (!is.null(event)) {
+      if (!any(grepl(event, tmp$var2, ignore.case = TRUE))) {
         stop("'event' does not match any events in var2. Are you sure this is an
              event in the data?")
       }
-      tmp <- tmp[grep(event, tmp$var2, ignore.case = TRUE),]
-      if(length(unique(tmp$var2)) > 1)
+      tmp <- tmp[grep(event, tmp$var2, ignore.case = TRUE), ]
+      if (length(unique(tmp$var2)) > 1)
         warning("2 or more matches found for event specified")
-      }
+    }
     tmp$EBGM_fuzzy <- ifelse(tmp$EBGM > 8, "8+",
                       ifelse(tmp$EBGM <=8 & tmp$EBGM > 4, "4-8",
                       ifelse(tmp$EBGM <= 4 & tmp$EBGM > 2, "2-4",
@@ -101,15 +101,15 @@ plot.openEBGM <- function(x, y = NULL, event = NULL, plot.type = "bar", ...) {
     tmp <- head(tmp[order(tmp$EBGM, decreasing = TRUE),], 15)
     tmp$var1var2 <- paste(tmp$var1, tmp$var2, sep = "_")
     g <- ggplot(aes(x = var1var2, y = EBGM, fill = EBGM_fuzzy), data = tmp)
-    if(sum(grepl("QUANT", names(tmp))) >= 2) {
+    if (sum(grepl("QUANT", names(tmp))) >= 2) {
       quant_nums <- grep("QUANT", names(tmp), value = TRUE)
       quant_nums <- substring(quant_nums, first = 7, last = 100000000L)
       quant_min <- min(as.numeric(quant_nums))
-      if(nchar(quant_min) == 1) {
+      if (nchar(quant_min) == 1) {
         quant_min <- paste("0", quant_min, sep = "")
       }
       quant_max <- max(as.numeric(quant_nums))
-      if(nchar(quant_max) == 1) {
+      if (nchar(quant_max) == 1) {
         quant_max <- paste("0", quant_max, sep = "")
       }
       quant_min_name <- paste("QUANT", quant_min, sep = "_")
@@ -121,16 +121,16 @@ plot.openEBGM <- function(x, y = NULL, event = NULL, plot.type = "bar", ...) {
         scale_y_continuous(limits = c(0, max(tmp[, grep(quant_max,
                                                         names(tmp))]) + 5),
                            expand = c(0, 0)) +
-        geom_errorbar(aes(ymin = tmp[order(tmp$EBGM, decreasing = TRUE),
+        geom_errorbar(aes(ymin = tmp[order(EBGM, decreasing = TRUE),
                                      grep(quant_min, names(tmp))],
-                          ymax = tmp[order(tmp$EBGM, decreasing = TRUE),
+                            ymax = tmp[order(EBGM, decreasing = TRUE),
                                      grep(quant_max, names(tmp))]),
                       position = "dodge",
                       width = 0.25) +
-        geom_text(aes(label = paste("N = ", tmp[order(tmp$EBGM, decreasing = TRUE), "N"],
-                                    sep  = ""),
-                      y = tmp[order(tmp$EBGM, decreasing = TRUE),
-                              grep(quant_max, names(tmp))]),
+        geom_text(aes(label = paste("N = ", tmp[order(EBGM, decreasing = TRUE), "N"],
+                            sep  = ""),
+                  y = tmp[order(EBGM, decreasing = TRUE),
+                      grep(quant_max, names(tmp))]),
                   hjust = -0.25) +
         scale_fill_manual(values = c("8+" = "red4", "4-8" = "orangered1",
                                      "2-4" = "orange", "1-2" = "gold",
@@ -156,8 +156,8 @@ plot.openEBGM <- function(x, y = NULL, event = NULL, plot.type = "bar", ...) {
         scale_x_discrete(limits = tmp[order(tmp$EBGM, decreasing = FALSE),"var1var2"],
                          labels = strtrim(as.character(tmp[order(tmp$EBGM, decreasing = FALSE), "var1"]), 30)) +
         scale_y_continuous(limits = c(0, max(tmp$EBGM) + 5), expand = c(0, 0)) +
-        geom_text(aes(label = paste("N = ", tmp[order(tmp$EBGM, decreasing = TRUE), "N"], sep  = ""),
-                      y = tmp[order(tmp$EBGM, decreasing = TRUE), "EBGM"]), hjust = -0.25) +
+        geom_text(aes(label = paste("N = ", tmp[order(EBGM, decreasing = TRUE), "N"], sep  = ""),
+                      y = tmp[order(EBGM, decreasing = TRUE), "EBGM"]), hjust = -0.25) +
         scale_fill_manual(values = c("8+" = "red4", "4-8" = "orangered1",
                                      "2-4" = "orange", "1-2" = "gold",
                                      "<1"= "yellow"),
@@ -176,8 +176,8 @@ plot.openEBGM <- function(x, y = NULL, event = NULL, plot.type = "bar", ...) {
               legend.position = "bottom",
               legend.box = "horizontal")
     }
-  } else if(plot.type == "shrinkage") {
-    if(!is.null(event)) {
+  } else if (plot.type == "shrinkage") {
+    if (!is.null(event)) {
       tmp <- tmp[tmp$var2 == event,]
     }
     # Need to get the N column into colors
@@ -186,7 +186,7 @@ plot.openEBGM <- function(x, y = NULL, event = NULL, plot.type = "bar", ...) {
                  ifelse(tmp$N == 3, 3,
                  ifelse(tmp$N == 4, 4,
                  ifelse(tmp$N == 5, 5, "6+")))))
-    g <- ggplot(aes(x = log(tmp$RR), y = tmp$EBGM, color = as.factor(N_col)),
+    g <- ggplot(aes(x = log(RR), y = EBGM, color = as.factor(N_col)),
                 data = tmp)
     g + geom_point() +
       ggtitle("Chirtel Squid Shrinkage Plot") +
@@ -200,8 +200,8 @@ plot.openEBGM <- function(x, y = NULL, event = NULL, plot.type = "bar", ...) {
             axis.line = element_line(color = "black"),
             panel.spacing = unit(0, units = "cm"),
             plot.title = element_text(face = "bold"))
-  } else if(plot.type == "histogram") {
-    if(!is.null(event)) {
+  } else if (plot.type == "histogram") {
+    if (!is.null(event)) {
       tmp <- tmp[tmp$var2 == event,]
     }
     g <- ggplot(aes(x = EBGM), data = tmp)
@@ -250,11 +250,9 @@ plot.openEBGM <- function(x, y = NULL, event = NULL, plot.type = "bar", ...) {
 #' )
 #' data(caers)
 #' proc <- processRaw(caers)
-#' squashed <- squashData(proc, bin_size = 300, keep_pts = 10)
-#' squashed <- squashData(squashed, count = 2, bin_size = 13, keep_pts = 10)
-#' suppressWarnings(
-#'   hypers <- autoHyper(data = squashed, theta_init = theta_init)
-#' )
+#' squashed <- squashData(proc, bin_size = 100, keep_pts = 10)
+#' squashed <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 10)
+#' hypers <- autoHyper(data = squashed, theta_init = theta_init)
 #' ebout <- ebScores(processed = proc, hyper_estimate = hypers, quantiles = 5)
 #' summary(ebout)
 #' \dontrun{summary(ebout, plot.out = FALSE)}

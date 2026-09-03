@@ -50,7 +50,7 @@
   if (zeroes) {
     if (squashed) {
       old_LL <- -negLLzeroSquash(old_theta, N, E, W)
-      LL     <- -negLLzeroSquash(theta, N, E, W)
+      LL <- -negLLzeroSquash(theta, N, E, W)
     } else {
       old_LL <- -negLLzero(old_theta, N, E)
       LL <- -negLLzero(theta, N, E)
@@ -58,13 +58,20 @@
   } else {
     if (squashed) {
       old_LL <- -negLLsquash(old_theta, N, E, W, N_star = N_star)
-      LL     <- -negLLsquash(theta, N, E, W, N_star = N_star)
+      LL <- -negLLsquash(theta, N, E, W, N_star = N_star)
     } else {
       old_LL <- -negLL(old_theta, N, E, N_star = N_star)
-      LL     <- -negLL(theta, N, E, N_star = N_star)
+      LL <- -negLL(theta, N, E, N_star = N_star)
     }
   }
-  delta <- abs(LL - old_LL)
+  if (.isMissing_num(LL) || .isMissing_num(old_LL)) {
+    paste2 <- function(vec) paste(vec, collapse = ", ")
+    stop(
+      "Previous theta was ", paste2(old_theta), ". Current theta is ", paste2(theta), ".\n",
+      "Previous value was ", paste2(old_LL), ". Current value is ", paste2(LL), "."
+    )
+  }
+  delta <- LL - old_LL
   list(delta = delta, LL = LL)
 }
 
@@ -77,7 +84,7 @@
   # Check if ratios are "good"
   theta_eb_df <- theta_eb_df[, 2:6]
   max_ratio <- function(estimate) {
-    max(estimate, na.rm = TRUE) / min(estimate, na.rm = TRUE)
+    exp(log(max(estimate, na.rm = TRUE)) - log(min(estimate, na.rm = TRUE)))
   }
   theta_eb_ratio <- apply(theta_eb_df, 2, max_ratio)
   if (max(theta_eb_ratio) > ratio_limit) {

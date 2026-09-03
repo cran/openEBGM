@@ -43,11 +43,9 @@ theta_init <- data.frame(
 )
 data(caers)
 proc <- processRaw(caers)
-squashed <- squashData(proc, bin_size = 300, keep_pts = 10)
-squashed <- squashData(squashed, count = 2, bin_size = 13, keep_pts = 10)
-suppressWarnings(
-  hypers <- autoHyper(data = squashed, theta_init = theta_init)
-)
+squashed <- squashData(proc, bin_size = 100, keep_pts = 10)
+squashed <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 10)
+hypers <- autoHyper(data = squashed, theta_init = theta_init)
 ebout <- ebScores(processed = proc, hyper_estimate = hypers, quantiles = 5)
 summary(ebout)
 \dontrun{summary(ebout, plot.out = FALSE)}

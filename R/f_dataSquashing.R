@@ -21,7 +21,7 @@
 #' @param min_pts A positive scalar whole number for the minimum number of
 #'   original (unsquashed) points needed for squashing. Used to help prevent
 #'   \dQuote{oversquashing}.
-#' @return A data frame with column names \emph{N}, \emph{E}, and
+#' @returns A data frame with column names \emph{N}, \emph{E}, and
 #'   \emph{weight} containing the reduced data set.
 #'
 #' @details Can be used iteratively (count = 1, then 2, etc.).
@@ -145,7 +145,7 @@ if (getRversion() >= "2.15.1") {
 #' @param num_super_pts A vector of whole numbers for the number of
 #'   "super points" to end up with after squashing each count (\emph{N}). Length
 #'   must be 1 more than length of \code{cut_offs}. See the 'Details' section.
-#' @return A data frame with column names \emph{N}, \emph{E}, and
+#' @returns A data frame with column names \emph{N}, \emph{E}, and
 #'   \emph{weight} containing the reduced data set.
 #'
 #' @details See \code{\link{squashData}} for details on squashing a given

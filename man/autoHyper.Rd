@@ -10,7 +10,7 @@ autoHyper(
   squashed = TRUE,
   zeroes = FALSE,
   N_star = 1,
-  tol = c(0.05, 0.05, 0.2, 0.2, 0.025),
+  tol = c(0.2, 0.2, 0.2, 0.2, 0.05),
   min_conv = 1,
   param_limit = 100,
   max_pts = 20000,
@@ -38,7 +38,7 @@ size to be used for hyperparameter estimation. If zeroes are used, set
 \item{tol}{A numeric vector of tolerances for determining how close the
 chosen estimate must be to at least \code{min_conv} convergent solutions.
 Order is \eqn{\alpha_1}, \eqn{\beta_1}, \eqn{\alpha_2}, \eqn{\beta_2},
-\eqn{P}.}
+\eqn{P}. Ignored if within 10 percent.}
 
 \item{min_conv}{A scalar positive whole number for defining the minimum
 number of convergent solutions that must be close to the convergent
@@ -61,25 +61,25 @@ intervals are requested.}
 \value{
 A list containing the following elements:
   \itemize{
-    \item{\emph{method}: }{A scalar character string for the method used to
+    \item \emph{method}: A scalar character string for the method used to
       find the hyperparameter estimate (possibilities are
       \dQuote{\code{nlminb}}, \dQuote{\code{nlm}}, and
-      \dQuote{\code{bfgs}}).}
-    \item{\emph{estimates}: }{A named numeric vector of length 5 for the
-      hyperparameter estimate corresponding to the smallest log-likelihood.}
-    \item{\emph{conf_int}: }{A data frame including the standard errors and
-      confidence limits. Only included if \code{conf_ints = TRUE}.}
-    \item{\emph{num_close}: }{A scalar integer for the number of other
+      \dQuote{\code{bfgs}}).
+    \item \emph{estimates}: A named numeric vector of length 5 for the
+      hyperparameter estimate corresponding to the smallest log-likelihood.
+    \item \emph{conf_int}: A data frame including the standard errors and
+      confidence limits. Only included if \code{conf_ints = TRUE}.
+    \item \emph{num_close}: A scalar integer for the number of other
       convergent solutions that were close (within tolerance) to the chosen
-      estimate.}
-    \item{\emph{theta_hats}: }{A data frame for the estimates corresponding
+      estimate.
+    \item \emph{theta_hats}: A data frame for the estimates corresponding
       to the initial starting points defined by \code{theta_init}. See
-      \code{\link{exploreHypers}}}.
+      \code{\link{exploreHypers}}.
   }
 }
 \description{
-\code{autoHyper} finds a single hyperparameter estimate using an algorithm
-that evaluates results from multiple starting points (see
+\code{autoHyper} attempts to find a single hyperparameter estimate using an
+algorithm that evaluates results from multiple starting points (see
 \code{\link{exploreHypers}}). The algorithm verifies that the optimization
 converges within the bounds of the parameter space and that the chosen
 estimate (smallest negative log-likelihood) is similar to at least
@@ -121,11 +121,9 @@ theta_init <- data.frame(
 )
 data(caers)
 proc <- processRaw(caers)
-squashed <- squashData(proc, bin_size = 300, keep_pts = 10)
-squashed <- squashData(squashed, count = 2, bin_size = 13, keep_pts = 10)
-suppressWarnings(
-  hypers <- autoHyper(squashed, theta_init = theta_init)
-)
+squashed <- squashData(proc, bin_size = 100, keep_pts = 10)
+squashed <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 10)
+hypers <- autoHyper(squashed, theta_init = theta_init)
 print(hypers)
 
 }
@@ -140,9 +138,9 @@ DuMouchel W (1999). "Bayesian Data Mining in Large Frequency
 
 \code{\link{squashData}} for data preparation
 
-Other hyperparameter estimation functions: 
-\code{\link{exploreHypers}()},
-\code{\link{hyperEM}()}
+Other hyperparameter estimation functions:
+\code{\link[=exploreHypers]{exploreHypers()}},
+\code{\link[=hyperEM]{hyperEM()}}
 }
 \concept{hyperparameter estimation functions}
 \keyword{openEBGM}

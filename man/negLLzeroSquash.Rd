@@ -4,7 +4,7 @@
 \alias{negLLzeroSquash}
 \title{Likelihood with data squashing & zero counts}
 \usage{
-negLLzeroSquash(theta, ni, ei, wi)
+negLLzeroSquash(theta, ni, ei, wi, transformed = FALSE)
 }
 \arguments{
 \item{theta}{A numeric vector of hyperparameters ordered as:
@@ -17,6 +17,11 @@ negLLzeroSquash(theta, ni, ei, wi)
 \code{\link{squashData}}.}
 
 \item{wi}{A whole number vector of bin weights from \code{\link{squashData}}.}
+
+\item{transformed}{A logical scalar indicating whether or not \eqn{theta}
+is being optimized on the transformed scale (natural log for \eqn{\alpha})s
+and \eqn{\beta}s; logit scale for the mixture fraction). The transformed
+scale can be especially useful if using unconstrained optimization.}
 }
 \value{
 A scalar negative log-likelihood value.
@@ -38,11 +43,11 @@ The marginal distribution of the counts, \emph{N}, is a mixture of
 
 The hyperparameters are:
   \itemize{
-    \item{\eqn{\alpha_1, \beta_1}: }{Parameters of the first component of the
-      marginal distribution of the counts (also the prior distribution)}
-    \item{\eqn{\alpha_2, \beta_2}: }{Parameters of the second component}
-    \item{\eqn{P}: }{Mixture fraction}
-}
+    \item \eqn{\alpha_1, \beta_1}: Parameters of the first component of the
+      marginal distribution of the counts (also the prior distribution)
+    \item \eqn{\alpha_2, \beta_2}: Parameters of the second component
+    \item \eqn{P}: Mixture fraction
+  }
 
 This function will not need to be called directly if using
   \code{\link{exploreHypers}} or \code{\link{autoHyper}}.
@@ -55,6 +60,10 @@ This function will not need to be called directly if using
 
 
   Make sure the data were actually squashed (see \code{\link{squashData}})
+  before using this function.
+
+
+  Make sure there are no missing or infinite counts (actual or expected)
   before using this function.
 }
 
@@ -69,10 +78,10 @@ DuMouchel W, Pregibon D (2001). "Empirical Bayes Screening for
   \code{\link[stats]{optim}} for optimization and \code{\link{squashData}}
   for data squashing
 
-Other negative log-likelihood functions: 
-\code{\link{negLLsquash}()},
-\code{\link{negLLzero}()},
-\code{\link{negLL}()}
+Other negative log-likelihood functions:
+\code{\link[=negLL]{negLL()}},
+\code{\link[=negLLsquash]{negLLsquash()}},
+\code{\link[=negLLzero]{negLLzero()}}
 }
 \concept{negative log-likelihood functions}
 \keyword{openEBGM}

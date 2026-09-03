@@ -12,7 +12,9 @@ quantBisect(
   qn,
   digits = 2,
   limits = c(-1e+05, 1e+05),
-  max_iter = 2000
+  max_iter = 2000,
+  min_theta = c(0.25, 0.25, 0.25, 0.25, 1e-05),
+  max_theta = c(10, 10, 10, 10, 0.99999)
 )
 }
 \arguments{
@@ -41,6 +43,10 @@ bounds of the search space.}
 
 \item{max_iter}{A whole number scalar for the maximum number of iterations.
 Used to prevent infinite loops.}
+
+\item{min_theta}{A numeric vector of minimum values for \code{theta_hat}.}
+
+\item{max_theta}{A numeric vector of maximum values for \code{theta_hat}.}
 }
 \value{
 A numeric vector of quantile estimates.
@@ -52,12 +58,12 @@ using the bisection method. Used to create credibility limits.
 \details{
 The hyperparameter estimates (\code{theta_hat}) are:
   \itemize{
-    \item{\eqn{\alpha_1, \beta_1}: }{Parameter estimates of the first
-      component of the prior distribution}
-    \item{\eqn{\alpha_2, \beta_2}: }{Parameter estimates of the second
-      component}
-    \item{\eqn{P}: }{Mixture fraction estimate of the prior distribution}
-}
+    \item \eqn{\alpha_1, \beta_1}: Parameter estimates of the first
+      component of the prior distribution
+    \item \eqn{\alpha_2, \beta_2}: Parameter estimates of the second
+      component
+    \item \eqn{P}: Mixture fraction estimate of the prior distribution
+  }
 
 Although this function can find any quantile of the posterior
   distribution, it will often be used to calculate the 5th and 95th
@@ -87,8 +93,8 @@ theta_init <- data.frame(
 )
 data(caers)
 proc <- processRaw(caers)
-squashed <- squashData(proc, bin_size = 300, keep_pts = 10)
-squashed <- squashData(squashed, count = 2, bin_size = 13, keep_pts = 10)
+squashed <- squashData(proc, bin_size = 100, keep_pts = 10)
+squashed <- squashData(squashed, count = 2, bin_size = 10, keep_pts = 10)
 theta_hat <- autoHyper(data = squashed, theta_init = theta_init)$estimates
 qn <- Qn(theta_hat, N = proc$N, E = proc$E)
 proc$QUANT_05 <- quantBisect(percent = 5, theta = theta_hat, N = proc$N,
@@ -110,9 +116,9 @@ head(proc)
 
 \code{\link{Qn}} for finding mixture fractions.
 
-Other posterior distribution functions: 
-\code{\link{Qn}()},
-\code{\link{ebgm}()}
+Other posterior distribution functions:
+\code{\link[=Qn]{Qn()}},
+\code{\link[=ebgm]{ebgm()}}
 }
 \concept{posterior distribution functions}
 \keyword{openEBGM}

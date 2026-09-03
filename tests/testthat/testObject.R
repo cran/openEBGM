@@ -1,5 +1,3 @@
-context("Object-oriented Features")
-
 data.table::setDTthreads(2)  #only needed for CRAN checks
 
 data(caers)
@@ -21,31 +19,50 @@ testthat::test_that("Checking the object's size", {
 })
 
 testthat::test_that("Checking 'data' column names", {
-  expect_identical(colnames(obj1$data), c("var1", "var2", "N", "E", "RR", "PRR", "EBGM"))
-
-  expect_identical(colnames(obj2$data), c("var1", "var2", "N", "E", "RR", "PRR", "EBGM",
-                                          "QUANT_05", "QUANT_95"))
+  expect_identical(
+    colnames(obj1$data),
+    c("var1", "var2", "N", "E", "RR", "PRR", "EBGM")
+  )
+  expect_identical(
+    colnames(obj2$data),
+    c("var1", "var2", "N", "E", "RR", "PRR", "EBGM", "QUANT_05", "QUANT_95")
+  )
 })
 
 proc2 <- proc
 names(proc2) <- c("N", "E")
 
 testthat::test_that("do errors for ebScores() get correctly printed?", {
-  expect_error(ebScores(proc, hyper_estimate = theta_list, quantiles = c("5", "95")),
-               "'quantiles' must be NULL or a numeric vector of quantiles",
-               fixed = TRUE)
-  expect_error(ebScores(proc, hyper_estimate = theta),
-               "'hyper_estimate' must be the list output by autoHyper()",
-               fixed = TRUE)
-  expect_error(ebScores(proc, hyper_estimate = list(estimate = theta)),
-               "'hyper_estimate' must be a list containing an element of hyperparameter
-         estimates. Was it actually calculated by autoHyper()?",
-               fixed = TRUE)
-  expect_error(ebScores(theta, hyper_estimate = theta_list),
-               "'processed' must be a data frame from processRaw()",
-               fixed = TRUE)
-  expect_error(ebScores(proc2, hyper_estimate = theta_list),
-               "'processed' dataframe does not have 'var' variables. Was this dataframe
-         actually created by processRaw()?",
-               fixed = TRUE)
+  expect_error(
+    ebScores(proc, hyper_estimate = theta_list, quantiles = c("5", "95")),
+    "'quantiles' must be NULL or a numeric vector of quantiles",
+    fixed = TRUE
+  )
+  expect_error(
+    ebScores(proc, hyper_estimate = theta),
+    "'hyper_estimate' must be the list output by autoHyper()",
+    fixed = TRUE
+  )
+  expect_error(
+    ebScores(proc, hyper_estimate = list(estimate = theta)),
+    paste0(
+      "'hyper_estimate' must be a list containing an element of ",
+      "hyperparameter estimates.\n",
+      "Was it actually calculated by autoHyper()?"
+    ),
+    fixed = TRUE
+  )
+  expect_error(
+    ebScores(theta, hyper_estimate = theta_list),
+    "'processed' must be a data frame from processRaw()",
+    fixed = TRUE
+  )
+  expect_error(
+    ebScores(proc2, hyper_estimate = theta_list),
+    paste0(
+      "'processed' dataframe does not have 'var' variables.\n",
+      "Was this dataframe actually created by processRaw()?"
+    ),
+    fixed = TRUE
+  )
 })

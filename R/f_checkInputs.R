@@ -112,18 +112,6 @@
   }
 }
 
-.checkInputs_param_lower_upper <- function(param_lower, param_upper) {
-  if (!is.numeric(param_lower) || param_lower <= 0) {
-    stop("'param_lower' must be a positive numeric value")
-  }
-  if (!is.numeric(param_upper) || param_upper <= 0) {
-    stop("'param_upper' must be a positive numeric value")
-  }
-  if (param_lower >= param_upper) {
-    stop("'param_lower' must be less than 'param_upper'")
-  }
-}
-
 .checkInputs_print_level <- function(print_level) {
   if (!print_level %in% 0:2) {
     stop("'print_level' must be 0, 1, or 2")
@@ -315,7 +303,7 @@
 
 #exploreHypers() ---------------------------------------------------------------
 .checkInputs_exploreHypers <- function(data, theta_init, squashed, zeroes,
-                                       N_star, method, param_limit, max_pts,
+                                       N_star, method, max_pts,
                                        std_errors) {
   .checkInputs_processed_data(data)
   .checkInputs_theta_init(theta_init)
@@ -352,7 +340,8 @@
 #hyperEM() ---------------------------------------------------------------------
 .checkInputs_hyperEM <-
   function(data, theta_init_vec, squashed, zeroes, N_star, method, LL_tol,
-           consecutive, param_lower, param_upper, print_level, max_iter,
+
+           consecutive, print_level, max_iter,
            conf_ints, track) {
     .checkInputs_processed_data(data)
     .checkInputs_theta_init_vec(theta_init_vec)
@@ -360,7 +349,6 @@
     if (method == "score") .checkInputs_score(N_star)
     .checkInputs_Nstar(data, zeroes, N_star)
     .checkInputs_LL_converge(LL_tol, consecutive, max_iter)
-    .checkInputs_param_lower_upper(param_lower, param_upper)
     .checkInputs_print_level(print_level)
     if (!is.logical(conf_ints)) {
       stop("'conf_ints' must be a logical value")
@@ -392,6 +380,9 @@
   if (percent < 1 || percent > 99) {
     stop("'percent' must be a value between 1 and 99 (inclusive)")
   }
+  if (digits > 10) {
+    stop("'digits' must be no greater than 10")
+  }
   .checkInputs_theta_hat(theta_hat = theta_hat)
   .checkInputs_N_E_qn(N, E, qn)
 }
@@ -406,15 +397,20 @@
     stop("'hyper_estimate' must be the list output by autoHyper()")
   }
   if(!any(grepl("estimates", names(hyper_estimate)))) {
-    stop("'hyper_estimate' must be a list containing an element of hyperparameter
-         estimates. Was it actually calculated by autoHyper()?")
+    stop(
+      "'hyper_estimate' must be a list containing an element of ",
+      "hyperparameter estimates.\n",
+      "Was it actually calculated by autoHyper()?"
+    )
   }
   if(!is.data.frame(processed)) {
     stop("'processed' must be a data frame from processRaw()")
   }
   if(!any(grepl("var", names(processed)))) {
-    stop("'processed' dataframe does not have 'var' variables. Was this dataframe
-         actually created by processRaw()?")
+    stop(
+      "'processed' dataframe does not have 'var' variables.\n",
+      "Was this dataframe actually created by processRaw()?"
+    )
   }
   .checkInputs_processed_data(processed)
 }

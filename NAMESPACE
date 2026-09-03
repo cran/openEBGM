@@ -19,12 +19,14 @@ export(quantBisect)
 export(squashData)
 import(data.table)
 import(ggplot2)
-importFrom(stats,dnbinom)
-importFrom(stats,nlm)
-importFrom(stats,nlminb)
-importFrom(stats,optim)
-importFrom(stats,optimHess)
-importFrom(stats,pgamma)
-importFrom(stats,pnbinom)
-importFrom(stats,qnorm)
-importFrom(stats,uniroot)
+importFrom(stats,
+  dnbinom,
+  nlm,
+  nlminb,
+  optim,
+  pgamma,
+  plogis,
+  pnbinom,
+  qnorm,
+  uniroot
+)

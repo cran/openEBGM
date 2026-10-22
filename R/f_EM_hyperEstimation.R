@@ -29,8 +29,8 @@
 #'   a time.  \code{profile = "distribution"} optimizes one distribution from
 #'   the mixture at a time (\eqn{\alpha} and \eqn{\beta} simultaneously).
 #' @param LL_tol A scalar numeric value for the tolerance used for determining
-#'   when the change in log-likelihood at each iteration is sufficiently small.
-#'   Used for convergence assessment.
+#'   when the proportion change in log-likelihood at each iteration is
+#'   sufficiently small. Used for convergence assessment.
 #' @param consecutive A positive scalar whole number value for the number of
 #'   consecutive iterations the change in log-likelihood must be below
 #'   \code{LL_tol} in order to reach convergence. Larger values reduce the
@@ -47,6 +47,8 @@
 #' @param track A scalar logical indicating whether or not to retain the
 #'   hyperparameter estimates and log-likelihood value at each iteration. Can be
 #'   used for plotting to better understand the algorithm's behavior.
+#' @param seed A scalar whole number used to set the seed for random number
+#'   generation.
 #'
 #' @returns A list including the following:
 #'   \itemize{
@@ -117,10 +119,12 @@ hyperEM <-
   function(data, theta_init_vec, squashed = TRUE, zeroes = FALSE, N_star = 1,
            method = c("score", "nlminb"), profile = c("parameter", "distribution"),
            LL_tol = 1e-04, consecutive = 100, print_level = 2, max_iter = 10000,
-           conf_ints = FALSE, conf_level = c("95", "80", "90", "99"), track = FALSE) {
-  method  <- match.arg(method)
+           conf_ints = FALSE, conf_level = c("95", "80", "90", "99"), track = FALSE,
+           seed = 1234) {
+  method <- match.arg(method)
   profile <- match.arg(profile)
   conf_level <- match.arg(conf_level)
+  set.seed(seed)
   .checkInputs_hyperEM(
     data, theta_init_vec, squashed, zeroes, N_star, method, LL_tol, consecutive,
     print_level, max_iter, conf_ints, track
@@ -190,8 +194,8 @@ hyperEM <-
     }
     # Convergence check
     delta_LL <- .deltaLL(theta, old_theta, N, E, W, squashed, zeroes, N_star)
-    .hyperEMmessage("A", print_level, count_iter, delta_LL$delta, theta)
-    if (abs(delta_LL$delta) < LL_tol) {
+    .hyperEMmessage("A", print_level, count_iter, delta_LL$delta_prop, theta)
+    if (abs(delta_LL$delta_prop) < LL_tol) {
       count_converge <- count_converge + 1
     } else {
       count_converge <- 0L
@@ -216,9 +220,7 @@ hyperEM <-
   # Finish up
   elapsed <- proc.time() - start_time
   if (conf_ints) {
-    conf_int <- .hyperConfInts(
-      data, theta, zeroes, squashed, N_star, conf_level
-    )
+    conf_int <- .hyperConfInts(data, theta, zeroes, squashed, N_star, conf_level)
   }
   score <- .checkScore(theta, N, E, W, squashed, zeroes)
   .hyperEMmessage("B", print_level, count_iter, elapsed = elapsed)

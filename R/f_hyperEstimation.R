@@ -119,7 +119,6 @@ exploreHypers <-
     minimum = NA
   )
   std_errs <- NULL
-  hessian_contains_zero <- FALSE
   if (std_errors) {
     std_errs <- data.frame(
       guess_num = 1:nrow(theta_init), a1_se = NA, b1_se = NA, a2_se = NA,
@@ -187,7 +186,7 @@ exploreHypers <-
         argum <- paste0(
           "par = ", arg_theta, "fn = ", lik_fun, arg_pts,
           ', method = "BFGS", transformed = TRUE',
-          ", control = list(fnscale = 1e+03, parscale = rep(1, 5),",
+          ", control = list(fnscale = 1e+03, parscale = rep(0.5, 5),",
           "ndeps = rep(1e-5, 5), maxit = 1000)"
         )
         guess_i <- eval(parse(text = paste0("optim(", argum, ")")))
@@ -209,18 +208,9 @@ exploreHypers <-
       if (std_errors) {
         theta_hat_i <- as.numeric(results[i, 2:6])
         hess_i <- .hessianMatrix(data, theta_hat_i, zeroes, squashed, N_star)
-        if (any(abs(hess_i) < 1e-100)) {
-          hessian_contains_zero <- TRUE
-        }
         std_errs[i, 2:6] <- .hyperStdErrs(hess_i)
       }
     }, silent = TRUE)
-  }
-  if (hessian_contains_zero) {
-    warning(
-      "Some (or all) Hessian matrices contain zero & will result in missing ",
-      "standard errors."
-    )
   }
   list(estimates = results, std_errs = std_errs)
 }

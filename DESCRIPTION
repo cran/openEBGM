@@ -1,6 +1,6 @@
 Package: openEBGM
 Title: EBGM Disproportionality Scores for Adverse Event Data Mining
-Version: 0.10.0
+Version: 0.11.0
 Authors@R: c(
 	person("John", "Ihrie", email = "John.Ihrie@fda.hhs.gov",
 	       role = c("cre", "aut")),
@@ -40,7 +40,7 @@ Encoding: UTF-8
 NeedsCompilation: no
 Config/roxygen2/version: 8.1.0
 Config/testthat/edition: 3
-Packaged: 2026-09-03 20:00:39 UTC; John.Ihrie
+Packaged: 2026-10-21 20:28:18 UTC; John.Ihrie
 Author: John Ihrie [cre, aut],
   Travis Canida [aut],
   Ismaïl Ahmed [ctb] (author of 'PhViD' package (derived code)),
@@ -48,4 +48,4 @@ Author: John Ihrie [cre, aut],
   Sergio Venturini [ctb] (author of 'mederrRank' package (derived code)),
   Jessica Myers [ctb] (author of 'mederrRank')
 Repository: CRAN
-Date/Publication: 2026-09-03 21:00:02 UTC
+Date/Publication: 2026-10-22 23:40:02 UTC

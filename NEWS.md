@@ -1,6 +1,11 @@
 **openEBGM** version history
 ============================
 
+## v0.11.0
+* More improvements to numerical stability of hyperparameter calculations.
+* hyperEM() now uses proportion change in log-likelihood in the convergence
+  criterion instead of raw change.
+
 ## v0.10.0
 * Improved numerical stability of hyperparameter calculations.
 * Now requires 'numDeriv' package for calculating Hessian matrices.

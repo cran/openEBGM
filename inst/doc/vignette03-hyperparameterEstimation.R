@@ -26,7 +26,7 @@ ftable(squash3[, c("N", "weight")])
 theta_init <- c(alpha1 = 1, beta1 = 1, alpha2 = 2, beta2 = 2, p = .2)
 theta_hats <- stats::nlm(negLLsquash, p = theta_init,
   ni = squashed$N, ei = squashed$E, wi = squashed$weight, N_star = 1
-)$estimate
+)
 theta_hats
 
 ## ----negLLsquash transformed--------------------------------------------------

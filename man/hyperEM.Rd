@@ -18,7 +18,8 @@ hyperEM(
   max_iter = 10000,
   conf_ints = FALSE,
   conf_level = c("95", "80", "90", "99"),
-  track = FALSE
+  track = FALSE,
+  seed = 1234
 )
 }
 \arguments{
@@ -50,8 +51,8 @@ a time.  \code{profile = "distribution"} optimizes one distribution from
 the mixture at a time (\eqn{\alpha} and \eqn{\beta} simultaneously).}
 
 \item{LL_tol}{A scalar numeric value for the tolerance used for determining
-when the change in log-likelihood at each iteration is sufficiently small.
-Used for convergence assessment.}
+when the proportion change in log-likelihood at each iteration is
+sufficiently small. Used for convergence assessment.}
 
 \item{consecutive}{A positive scalar whole number value for the number of
 consecutive iterations the change in log-likelihood must be below
@@ -74,6 +75,9 @@ intervals are requested.}
 \item{track}{A scalar logical indicating whether or not to retain the
 hyperparameter estimates and log-likelihood value at each iteration. Can be
 used for plotting to better understand the algorithm's behavior.}
+
+\item{seed}{A scalar whole number used to set the seed for random number
+generation.}
 }
 \value{
 A list including the following:

@@ -24,33 +24,67 @@
   if (zeroes) {
     if (squashed) {
       W <- data$weight
-      return(.hessian2(negLLzeroSquash, x = theta_hat, ni = N, ei = E, wi = W))
+      hess <- .hessian2(negLLzeroSquash, x = theta_hat, ni = N, ei = E, wi = W)
     } else {
-      return(.hessian2(negLLzero, x = theta_hat, N = N, E = E))
+      hess <- .hessian2(negLLzero, x = theta_hat, N = N, E = E)
     }
   } else {
     if (squashed) {
       W <- data$weight
-      return(
-        .hessian2(negLLsquash, x = theta_hat, ni = N, ei = E, wi = W, N_star = N_star)
-      )
+      hess <- .hessian2(negLLsquash, x = theta_hat, ni = N, ei = E, wi = W, N_star = N_star)
     } else {
-      return(.hessian2(negLL, x = theta_hat, N = N, E = E, N_star = N_star))
+      hess <- .hessian2(negLL, x = theta_hat, N = N, E = E, N_star = N_star)
     }
   }
+  hessian_contains_NA_Inf <- .isMissing_num(hess)
+  hess_vec <- as.numeric(hess)
+  hess_vec <- hess_vec[!is.na(hess_vec) & !is.nan(hess_vec) & !is.infinite(hess_vec)]
+  hessian_contains_zero <- any(abs(hess_vec) < 1e-100)
+  if (hessian_contains_NA_Inf || hessian_contains_zero) {
+    warning(
+      "Hessian matrix contains missing, zero, or infinite values & will\n",
+      "  result in missing standard errors.\n",
+      "This could be a result of one or more hyperparameter estimates being\n",
+      "  close to the edge of the parameter space, possibly resulting in the\n",
+      "  log-likelihood function not being well-behaved at the estimated values.\n",
+      "This could also possibly result from the estimate being a saddle point."
+    )
+  }
+  hess
 }
 
 .hyperStdErrs <- function(hessian_matrix) {
   # Hyperparameter standard errors
-  if (any(eigen(hessian_matrix, only.values = TRUE)$values <= 0)) {
-    warning(
-      "Hessian matrix is not positive definite. ",
-      "Some variances may be negative (i.e., missing standard errors)."
-    )
+  if (!any(.isMissing_num(hessian_matrix))) {
+    if (any(eigen(hessian_matrix, only.values = TRUE)$values <= 0)) {
+      warning(
+        "Hessian matrix is not positive definite.\n",
+        "Some variances may be negative (i.e., standard errors will be missing).\n",
+        "This could be a result of one or more hyperparameter estimates being\n",
+        "  close to the edge of the parameter space, possibly resulting in the\n",
+        "  log-likelihood function not being well-behaved at the estimated values.\n",
+        "This could also possibly result from the estimate being a saddle point."
+      )
+    }
   }
-  hessian_inverse <- solve(hessian_matrix)
-  variances <- diag(hessian_inverse)
-  sqrt(variances)
+  tryCatch(
+    expr = {
+      hessian_inverse <- solve(hessian_matrix)
+      variances <- diag(hessian_inverse)
+      sqrt(variances)
+    },
+    error = function(e) {
+      warning(
+        e$message,"\nStandard errors will be missing.\n",
+        "This could be a result of one or more hyperparameter estimates being\n",
+        "  close to the edge of the parameter space, possibly resulting in the\n",
+        "  log-likelihood function not being well-behaved at the estimated values.\n",
+        "This could also possibly result from the estimate being a saddle point.",
+        call. = FALSE
+      )
+      c(NA, NA, NA, NA, NA)
+    }
+  )
 }
 
 .hyperConfInts <- function(data, theta_hat, zeroes, squashed, N_star, conf_level) {
@@ -70,5 +104,5 @@
   conf_int[LL_name] <- pmax(0, theta_hat - ME)
   conf_int[UL_name] <- theta_hat + ME
   conf_int["p_hat", UL_name] <- min(1, conf_int["p_hat", UL_name])
-  round(conf_int, 4)
+  conf_int
 }

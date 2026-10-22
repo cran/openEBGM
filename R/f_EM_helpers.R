@@ -12,9 +12,9 @@
     if (print_level == 2) {
       if (iter %% 10 == 0) {
         delta_LL <- format(delta_LL, digits = 3, scientific = TRUE, width = 8)
-        theta    <- as.character(round(theta, 3))
-        theta    <- format(theta, digits = 2, scientific = FALSE, width = 5)
-        cat("change in LL:", delta_LL, "| ")
+        theta <- as.character(round(theta, 3))
+        theta <- format(theta, digits = 2, scientific = FALSE, width = 5)
+        cat("proportion change in LL:", delta_LL, "| ")
         cat("theta:", theta, "\n")
         if (iter %% 50 == 0) {
           cat("    Current iterations:", iter, "\n")
@@ -72,7 +72,7 @@
     )
   }
   delta <- LL - old_LL
-  list(delta = delta, LL = LL)
+  list(delta = delta, delta_prop = delta / abs(old_LL), LL = LL)
 }
 
 # ------------------------  Check results  -------------------------------------

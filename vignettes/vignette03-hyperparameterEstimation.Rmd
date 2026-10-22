@@ -135,7 +135,7 @@ directly, but rather by some optimization function:
 theta_init <- c(alpha1 = 1, beta1 = 1, alpha2 = 2, beta2 = 2, p = .2)
 theta_hats <- stats::nlm(negLLsquash, p = theta_init,
   ni = squashed$N, ei = squashed$E, wi = squashed$weight, N_star = 1
-)$estimate
+)
 theta_hats
 ```
 
@@ -164,7 +164,8 @@ needed. In general, `N_star = 1` should be used whenever practical.
 
 The other likelihood functions are `negLL()`, `negLLzero()`, and
 `negLLzeroSquash()`. Make sure to use the appropriate function for your choice
-of data squashing and use of zero counts.
+of data squashing and use of zero counts. Of course, it is also a good idea to
+check for convergence for whatever optimization algorithm you choose.
 
 Luckily, *openEBGM* offers some wrapper functions to help with this 
 optimization task.

@@ -57,16 +57,17 @@ negLLzero <- function(theta, N, E, transformed = FALSE) {
     theta[1:4] <- exp(theta[1:4])
     theta[5] <- plogis(theta[5])  #inverse logit
   } else {
-    if (any(theta == 0) || theta[5] == 1) {
-      return(NA)
+    if (any(theta <= 0) || theta[5] >= 1) {
+      return(1e+12)
     }
   }
+  theta[1:4][theta[1:4] < 1e-100] <- 1e-100
+  theta[5] <- max(theta[5], 1e-10)
+  theta[5] <- min(theta[5], 1 - 1e-10)
   L <- .negLLzero_Lvec(theta, N, E)
   L_is_infinite <- is.infinite(L)
   if (all(L_is_infinite)) {
-    neg_LL <- 1e+10
-    neg_LL <- neg_LL + 100 * stats::rbinom(1, size = 1, prob = 0.5)  #prevent false convergence
-    return(neg_LL)
+    return(1e+12)
   }
   L[L < 1e-100] <- 1e-100
   L[L_is_infinite & L > 0] <- 1e+100
@@ -154,16 +155,17 @@ negLLzeroSquash <- function(theta, ni, ei, wi, transformed = FALSE) {
     theta[1:4] <- exp(theta[1:4])
     theta[5] <- plogis(theta[5])  #inverse logit
   } else {
-    if (any(theta == 0) || theta[5] == 1) {
-      return(NA)
+    if (any(theta <= 0) || theta[5] >= 1) {
+      return(1e+12)
     }
   }
+  theta[1:4][theta[1:4] < 1e-100] <- 1e-100
+  theta[5] <- max(theta[5], 1e-10)
+  theta[5] <- min(theta[5], 1 - 1e-10)
   logL <- .negLLzeroSquash_logLvec(theta, ni, ei, wi) 
   logL_is_infinite <- is.infinite(logL)
   if (all(logL_is_infinite)) {
-    neg_LL <- 1e+10
-    neg_LL <- neg_LL + 100 * stats::rbinom(1, size = 1, prob = 0.5)  #prevent false convergence
-    return(neg_LL)
+    return(1e+12)
   }
   logL[logL_is_infinite & logL < 0] <- -230  #log(1e-100)
   logL[logL_is_infinite & logL > 0] <- 230  #log(1e+100)
@@ -248,16 +250,17 @@ negLL <- function(theta, N, E, N_star = 1, transformed = FALSE) {
     theta[1:4] <- exp(theta[1:4])
     theta[5] <- plogis(theta[5])  #inverse logit
   } else {
-    if (any(theta == 0) || theta[5] == 1) {
-      return(NA)
+    if (any(theta <= 0) || theta[5] >= 1) {
+      return(1e+12)
     }
   }
+  theta[1:4][theta[1:4] < 1e-100] <- 1e-100
+  theta[5] <- max(theta[5], 1e-10)
+  theta[5] <- min(theta[5], 1 - 1e-10)
   L <- .negLL_Lvec(theta, N, E, N_star)
   L_is_infinite <- is.infinite(L)
   if (all(L_is_infinite)) {
-    neg_LL <- 1e+10
-    neg_LL <- neg_LL + 100 * stats::rbinom(1, size = 1, prob = 0.5)  #prevent false convergence
-    return(neg_LL)
+    return(1e+12)
   }
   L[L < 1e-100] <- 1e-100
   L[L_is_infinite & L > 0] <- 1e+100
@@ -375,16 +378,17 @@ negLLsquash <- function(theta, ni, ei, wi, N_star = 1, transformed = FALSE) {
     theta[1:4] <- exp(theta[1:4])
     theta[5] <- plogis(theta[5])  #inverse logit
   } else {
-    if (any(theta == 0) || theta[5] == 1) {
-      return(NA)
+    if (any(theta <= 0) || theta[5] >= 1) {
+      return(1e+12)
     }
   }
+  theta[1:4][theta[1:4] < 1e-100] <- 1e-100
+  theta[5] <- max(theta[5], 1e-10)
+  theta[5] <- min(theta[5], 1 - 1e-10)
   logL <- .negLLsquash_logLvec(theta, ni, ei, wi, N_star)
   logL_is_infinite <- is.infinite(logL)
   if (all(logL_is_infinite)) {
-    neg_LL <- 1e+10
-    neg_LL <- neg_LL + 100 * stats::rbinom(1, size = 1, prob = 0.5)  #prevent false convergence
-    return(neg_LL)
+    return(1e+12)
   }
   logL[logL_is_infinite & logL < 0] <- -230  #log(1e-100)
   logL[logL_is_infinite & logL > 0] <- 230  #log(1e+100)

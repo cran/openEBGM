@@ -14,7 +14,7 @@
     root <- tryCatch({
       uniroot(f, interval = searchSpace(last_est, search_dist),
         fixed, probs, N = N, E = E, W = W, squashed = squashed, zeroes = zeroes,
-        extendInt = "yes", maxiter = 50, tol = .0001
+        extendInt = "yes", maxiter = 100, tol = 1e-6
       )$root
     }, error = function(e) {
       return(last_est)
@@ -250,12 +250,17 @@
   P <- theta[5]
   P_vec <- exp(log(P) + log_marg_dens_f1)
   Q_vec <- exp(log(1 - P) + log_marg_dens_f2)
+  min_prob <- 1e-10
+  max_prob <- 1 - 1e-10
+  P_vec[P_vec < min_prob] <- min_prob
+  Q_vec[Q_vec < min_prob] <- min_prob
+  P_vec[P_vec > max_prob] <- max_prob
+  Q_vec[Q_vec > max_prob] <- max_prob
   PQ_sum <- P_vec + Q_vec
   P_vec <- exp(log(P_vec) - log(PQ_sum))
-  Q_vec  <- exp(log(Q_vec) - log(PQ_sum))
-  P_vec[P_vec < 1e-10] <- 1e-10
-  Q_vec[Q_vec < 1e-10] <- 1e-10
-  max_prob <- 1 - 1e-10
+  Q_vec <- exp(log(Q_vec) - log(PQ_sum))
+  P_vec[P_vec < min_prob] <- min_prob
+  Q_vec[Q_vec < min_prob] <- min_prob
   P_vec[P_vec > max_prob] <- max_prob
   Q_vec[Q_vec > max_prob] <- max_prob
   list(P_vec = P_vec, Q_vec = Q_vec)

@@ -56,8 +56,12 @@ ebScores <- function(processed, hyper_estimate, quantiles = c(5, 95), digits = 2
   theta <- .reinInTheta(theta, min_theta, max_theta)
   N <- processed$N
   E <- processed$E
-  q_n <- Qn(theta_hat = theta, N = N, E = E)
-  EBGM <- ebgm(theta_hat = theta, N = N, E = E, qn = q_n, digits = digits)
+  q_n <- Qn(theta_hat = theta, N = N, E = E,
+    min_theta = min_theta, max_theta = max_theta
+  )
+  EBGM <- ebgm(theta_hat = theta, N = N, E = E, qn = q_n, digits = digits,
+    min_theta = min_theta, max_theta = max_theta
+  )
   # Check to see if EBGM is already in the data, if so, don't duplicate column
   EBGM_sort <- EBGM[order(EBGM, decreasing = TRUE)]
   compare_func <- function(num_vec, EBGM_sort) {
@@ -78,7 +82,8 @@ ebScores <- function(processed, hyper_estimate, quantiles = c(5, 95), digits = 2
   }
   if(!is.null(quantiles)) {
     quant_calcs <- lapply(quantiles, quantBisect, theta_hat = theta,
-                          N = N, E = E, qn = q_n, digits = digits)
+                          N = N, E = E, qn = q_n, digits = digits,
+                          min_theta = min_theta, max_theta = max_theta)
     quant_df <- do.call(cbind, quant_calcs)
     quant_df <- as.data.frame(quant_df)
     quantiles <- ifelse(nchar(quantiles) == 1, paste("0", quantiles, sep = ""), quantiles)
